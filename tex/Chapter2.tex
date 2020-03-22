@@ -5,45 +5,28 @@
 
 谱聚类方法是一类在基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}. 上述提到的谱聚类算法有三点不足之处。第一，这些谱聚类算法只提供了训练数据的嵌入映射，对样本外数据（out-of-sample）的计算比较困难。第二，这些算法的复杂度依赖于数据点数量，相对比较耗时，可扩展性不强。第三，谱聚类算法的稳定性高度依赖于相似性图（affinity graph）的鲁棒性。
 
-为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。
+为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$近邻（$k$ nearest neighborhood，$k$-NN）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
 \begin{figure}[!hbtp]
-	%\centering
-	\subfigure[Ideal affinity matrix]{
-			\begin{minipage}[t]{0.14\textwidth}
-				\centering
-				\includegraphics[width=1\columnwidth]{k1.jpg}
-			\end{minipage}
-		}
-		\subfigure[Heat kernel with $k=100$]{
-			\begin{minipage}[t]{0.14\textwidth}
-				\centering
-				\includegraphics[width=1\columnwidth]{k100.jpg}
-			\end{minipage}
-		}
-		\subfigure[Heat kernel with $k=1000$]{
-			\begin{minipage}[t]{0.14\textwidth}
-				\centering
-				\includegraphics[width=1\columnwidth]{k1000.jpg}
-			\end{minipage}
-		}
-	
-	
-	\caption{Affinity matrices of a subset of MNIST}
-	\label{affMat1}
-\end{figure} 
-
-
-\begin{figure}[!hbtp]
-  \centering
-  \bisubcaptionbox{$R_3 = 1.5\text{mm}$ 时轴承的压力分布云图}%
-                  {Pressure contour of bearing when $R_3 = 1.5\text{mm}$}%
-                  [6.4cm]{\includegraphics[height=2.5cm]{pressure15.jpg}}
-  \hspace{1cm}
-  \bisubcaptionbox{$R_3 = 2.5\text{mm}$ 时轴承的压力分布云图}%
-                  {Pressure contour of bearing when $R_3 = 2.5\text{mm}$}%
-                  [6.4cm]{\includegraphics[height=2.5cm]{/pressure25.jpg}}
-  \bicaption{包含子图题的范例（使用 subcaptionbox）}
-            {Example with subcaptionbox}
-  \label{fig:bisubcaptionbox}
+	\centering
+	\bisubcaptionbox{理想的相似性矩阵}%
+					{Ideal affinity matrix}%
+					[0.28\textwidth]{\includegraphics{k1.jpg}}					
+	\bisubcaptionbox{$k=100$下的热力核相似性矩阵}%
+					{Affinity matrix of heat kernel with $k=100$}%
+					[0.28\textwidth]{\includegraphics{k100.jpg}}
+	\bisubcaptionbox{$k=1000$下的热力核相似性矩阵}%
+					{Affinity matrix of heat kernel with $k=1000$}%
+					[0.28\textwidth]{\includegraphics{k1000.jpg}}
+	\bicaption{MNIST子集在理想情况及不同近邻数量$k$下的相似性矩阵。}
+			  {Ideal affinity matrix and affinity matrices with different neighborhood size $k$ on a subset of MNIST}
+  	\label{fig2:affMat}
 \end{figure}
+
+本章所提出的方法的目标在于，针对谱聚类的线性近似，在最小的时间消耗下，提取更具有自适应性的相似性信息。这类信息将会更多的考虑局部性保持（locality preserving）这个优化目标，而不仅仅是图像间的距离。受到可扩展谱聚类和数据相似性学习方向上的研究成果\cite{chen2011large,nie2014clustering}的启发，本章提出了一个新颖的自适应相似性矩阵（Adaptive Affinity Matrix，AdaAM）方法。该方法的相似性矩阵相对稠密并可以同时捕捉到全局及局部信息。特别地，AdaAM将相似性矩阵分解成两个相同的低秩矩阵的乘积。作为文献\parencite{ng2002spectral}中描述的理想情况，如果我们假设同一个类内的点对相似性极为相似，则相似性矩阵可能会形成一个低秩矩阵。本算法采用与谱聚类方法相似的优化方法对分解后的矩阵进行优化求解。优化得到的相似性图作为最终结果前的中间态相似性矩阵。通过合并基于热力核获得的$k$-NN相似性图和中间态相似性矩阵，AdaAM采用朴素的谱聚类求解方法计算出一个最终的自适应相似性矩阵。我们将LPP方法作用于此特定的相似性矩阵上进行数据投影，以获得一个用于聚类的距离度量。
+
+在本章中，我们将通过在图像数据集上的聚类实验展示所提出方法的有效性和高效性。第 \ref{sec2:Exp}节通过对本章提出的算法和基于$k$-NN的拉普拉斯特征映\cite{belkin2001laplacian}以及其他最先进方法进行对比展现了AdaAM方法在具有挑战性的数据集上的聚类效果具有明显优势。
+
+
+\section{实验结果}
+\label{sec2:Exp}
