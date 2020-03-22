@@ -40,7 +40,48 @@
 \end{equation}
 此处，$\mathcal{N}_k(x)$表示数据点$x$的 $k$ 个最近邻的集合。相应的拉普拉斯矩阵表示为$L=D-W$，其中$D$为对角权重矩阵：$d_{ii} = \sum_j w_{ij}$。我们对中间态增量矩阵及最终自适应相似性矩阵都采用$\Delta$表示，相应的对角权重矩阵和拉普拉斯矩阵分别表示为$D_\Delta$和$L_\Delta = D_\Delta-\Delta$。
 
+\section{中间态相似性矩阵}
+我们将提出的AdaAM算法分为两个部分，分别是中间态相似性矩阵和最终自适应相似性矩阵。本节将对其中的中间态相似性矩阵部分的生成进行介绍。对于第$i$个数据点$x_i$，我们使用相似度$\delta_{ij}$对任意的数据点$x_i$和数据点$x_j$进行连接。由于希望任意两个数据点之间较近的欧氏距离能导致较大的数据点相似度，我们的目标为通过选择最优的相似度$\delta_{ij}$在特定合适的约束下最小化下述的目标函数，
+\begin{equation}
+	\mathop{\mathrm{min}} \sum_{i,j}^{n} \|x_i-x_j\|_2^2\;\delta_{ij},
+\end{equation}
+在这里，$\delta_{ij}$表示中间态相似性矩阵$\Delta$中第$ij$个元素。
 
+不同于PCAN算法\cite{nie2014clustering}，我们基于图拉普拉斯对该目标函数公式在其约束条件下进行变形，
+\begin{equation}
+	\mathop{\mathrm{min}}\; tr(X^TL_\Delta X).
+	\label{eq2:Delta}
+\end{equation}
+
+由于在通常情况下图拉普拉斯为半正定矩阵，因此一个直接又看似可行的思路是将拉普拉斯矩阵分解为两个相同矩阵的乘积。在下文中我们将论述该思路不适用于我们的计算框架。
+
+我们采用$U\in \mathbb{R}^{n\times s}$ 表示一个列正交矩阵，以满足$U^TU = I$，则我们可以假设
+\begin{equation}
+	L_\Delta = UU^T.
+\end{equation}
+在对原优化问题进行约束松弛的情况下，我们最终需要求解问题为：
+\begin{equation}
+	\begin{split}
+		&U = \mathop{\mathrm{arg\;min}}_{U^TU=I}\; tr(X^TUU^TX) \\
+		&\Rightarrow U = \mathop{\mathrm{arg\;min}}_{U^TU=I} \;tr(U^TXX^TU)
+	\end{split}
+	\label{eq2:simpEigmap}
+\end{equation}
+
+如果我们假设矩阵$X$的乘积为矩阵$K$，即$K = XX^T$，则公式（\ref{eq2:simpEigmap}）所得为一个简单形式的拉普拉斯特征映射\cite{belkin2001laplacian}。
+由此，该优化问题可以通过选择矩阵$K$的多个最小特征值所对应的特征向量形成矩阵进行求解。但是，由于$K$为一个低秩矩阵，一般情况下满足条件$d\ll n$，$K$可以最小化公式（\ref{eq2:simpEigmap}）中目标函数的特征向量都存在于数据矩阵$X$的零空间中。
+因此，上述问题的最优解不唯一。受LSC（Landmark-based Spectral Clustering）算法\cite{chen2011large}启发，我们将相似性矩阵假设为一个半正定矩阵。不同于对拉普拉斯矩阵进行分解，我们将半正定的相似性矩阵分解为列正交矩阵 $P\in \mathbb{R}^{n\times t}$及其转置矩阵$P^T$的乘积，其中 $t$ 为预期下的矩阵$\Delta$的秩。
+
+由此，我们可以将公式（\ref{eq2:Delta}）改写为
+\begin{equation}
+	% 	\begin{split}
+	% 		&\mathop{\mathrm{min}}_{P^TP=I} tr(X^T(D_\Delta-PP^T)X) \\
+	% 		&\Rightarrow 
+	\mathop{\mathrm{min}}_{P^TP=I} tr(X^TD_\Delta X)+tr(X^T(-PP^T)X),
+	% 	\end{split}
+	\label{eq2:XLX}
+\end{equation}
+此处，
 
 \section{实验结果}
 \label{sec2:Exp}
