@@ -40,7 +40,7 @@
 \end{equation}
 此处，$\mathcal{N}_k(x)$表示数据点$x$的 $k$ 个最近邻的集合。相应的拉普拉斯矩阵表示为$L=D-W$，其中$D$为对角权重矩阵：$d_{ii} = \sum_j w_{ij}$。我们对中间态增量矩阵及最终自适应相似性矩阵都采用$\Delta$表示，相应的对角权重矩阵和拉普拉斯矩阵分别表示为$D_\Delta$和$L_\Delta = D_\Delta-\Delta$。
 
-\section{中间态相似性矩阵}
+\subsection{中间态相似性矩阵}
 我们将提出的AdaAM算法分为两个部分，分别是中间态相似性矩阵和最终自适应相似性矩阵。本节将对其中的中间态相似性矩阵部分的生成进行介绍。对于第$i$个数据点$x_i$，我们使用相似度$\delta_{ij}$对任意的数据点$x_i$和数据点$x_j$进行连接。由于希望任意两个数据点之间较近的欧氏距离能导致较大的数据点相似度，我们的目标为通过选择最优的相似度$\delta_{ij}$在特定合适的约束下最小化下述的目标函数，
 \begin{equation}
 	\mathop{\mathrm{min}} \sum_{i,j}^{n} \|x_i-x_j\|_2^2\;\delta_{ij},
@@ -167,19 +167,17 @@
 在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
 
 \begin{algorithm}[!htbp]
-	\renewcommand{\algorithmicrequire}{\textbf{输入:}}  
-	\renewcommand\algorithmicensure {\textbf{输出:} }  
+	\textbf{输入:}\\
+	\STATE 数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。\\
+	\textbf{输出:}\\
+	\STATE 距离度量矩阵 $M$ 和线性投影矩阵$A$。\\ 
 	\caption{自适应相似性矩阵}
 	\label{alg1}
 	\begin{algorithmic}[1]
-		\REQUIRE ~~\\
-		数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。
-		\ENSURE ~~\\
-		距离度量矩阵 $M$ 和线性投影矩阵$A$。
-		\STATE 构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；
-		\STATE 根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；
-		\STATE 根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；
-		\STATE 求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;
+		\STATE 构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
+		\STATE 根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
+		\STATE 根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
+		\STATE 求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;\\
 		\STATE 通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
 	\end{algorithmic}
 \end{algorithm}
