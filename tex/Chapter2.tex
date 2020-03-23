@@ -167,19 +167,17 @@
 在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
 
 \begin{algorithm}[!htbp]
-	\textbf{输入:}\\
-	\STATE 数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。\\
-	\textbf{输出:}\\
-	\STATE 距离度量矩阵 $M$ 和线性投影矩阵$A$。\\ 
+	\SetKwInput{KwData}{{输入:}
+	\SetKwInput{KwResult}{输出:}
 	\caption{自适应相似性矩阵}
 	\label{alg1}
-	\begin{algorithmic}[1]
-		\STATE 构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
-		\STATE 根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
-		\STATE 根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
-		\STATE 求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;\\
-		\STATE 通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
-	\end{algorithmic}
+	\KwData{数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。}
+	\KwResult{距离度量矩阵 $M$ 和线性投影矩阵$A$。}
+	构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
+	根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
+	根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
+	求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;\\
+	通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
 \end{algorithm}
 
 \begin{figure}[!htbp]
