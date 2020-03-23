@@ -109,19 +109,19 @@
 
 一般性地，对于真实世界数据集中数据点$x_i$，$\|x_i\|_2^2\neq0$恒成立，故能够最小化目标函数（\ref{eq2:XLX}）第一部分的最优解$P$ 具有性质$D_\Delta = \textbf{0}$。同时可知，具有性质$D_\Delta = \textbf{0}$的所有$P$的集合构成优化问题（\ref{eq2:XD}）的解集。
 
-\begin{figure}[t]
+\begin{figure}[!hbtp]
 	\centering
-	\subfigure[]{
+	\begin{subfigure}{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.45\columnwidth]{chap2/itera_data.pdf}
+		\includegraphics[width=0.45\textwidth]{chap2/itera_data.pdf}
 		\label{fig2:itera}
-	}
+	\end{subfigure}
 	\hspace{1em}
-	\subfigure[]{
+	\begin{subfigure}{0.45\textwidth}
 		\centering
-		\includegraphics[width=0.45\columnwidth]{chap2/delta_hist.pdf}
+		\includegraphics[width=0.45\textwidth]{chap2/delta_hist.pdf}
 		\label{fig2:Hist}
-	}
+	\end{subfigure}
 	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%。（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图。}
 			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
 \end{figure}
