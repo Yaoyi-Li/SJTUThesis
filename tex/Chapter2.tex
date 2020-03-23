@@ -81,7 +81,77 @@
 	% 	\end{split}
 	\label{eq2:XLX}
 \end{equation}
-此处，
+此处，我们舍弃了连接权重为非负相似度以及图拉普拉斯为半正定矩阵这两个特性。相似性矩阵$\Delta$中的负值连接权重可以用于度量数据点间的不相似度。在下文中，我们将展示此优化问题的最优解将使$D_\Delta$ 等于 $\bf0$。
 
+对于公式（\ref{eq2:XLX}）中的第一部分，我们可以将其写为
+\begin{equation}
+	\begin{split}
+		\mathop{\mathrm{min}}\;&\sum_{i=1}^{n} \|x_i\|_2^2\;d_{\Delta ii},\\
+		s.t. \;\; &P^TP=I;\\
+		&d_{\Delta ii}=(PP^T\textbf{1})_i.
+	\end{split}
+	\label{eq2:XD}
+\end{equation}
+
+令$z=(\|x_1\|_2^2, \|x_2\|_2^2, ... , \|x_n\|_2^2)^T$。此处，取拉格朗日乘子为$\lambda$，公式（\ref{eq2:XD}）在一维情况下的优化问题可以表示为
+\begin{equation}
+	\mathop{\mathrm{min}}\; z^Tpp^T\textbf{1}-\lambda (p^Tp-1)
+\end{equation}
+
+最终，最小化优化问题（\ref{eq2:XD}）可以被化简为求解问题
+\begin{equation}
+	\textbf{1}z^Tp=\lambda p
+\end{equation}
+中最小特征值对应地特征向量。因为矩阵$\textbf{1}z^T$为秩$1$矩阵，所以只存在一个非零特征值$\sum_{i=1}^{n}\|x_i\|_2^2$，同时这也意味着 $\lambda = 0$。由此可知，对于具有任意的小于 $n$的列数且满足优化问题（\ref{eq2:XD}）的列正交矩阵$P$,我们可以得出$z^TPP^T\textbf{1}=0$。这个结论等价于
+\begin{equation}
+	\sum_{i=1}^{n} \|x_i\|_2^2\;d_{\Delta ii} = 0.
+\end{equation}
+
+一般性地，对于真实世界数据集中数据点$x_i$，$\|x_i\|_2^2\neq0$恒成立，故能够最小化目标函数（\ref{eq2:XLX}）第一部分的最优解$P$ 具有性质$D_\Delta = \textbf{0}$。同时可知，具有性质$D_\Delta = \textbf{0}$的所有$P$的集合构成优化问题（\ref{eq2:XD}）的解集。
+
+\begin{figure}[t]
+	\centering
+	\subfigure[]{
+		\centering
+		\includegraphics[width=0.45\columnwidth]{chap2/itera_data.pdf}
+		\label{fig2:itera}
+	}
+	\hspace{1em}
+	\subfigure[]{
+		\centering
+		\includegraphics[width=0.45\columnwidth]{chap2/delta_hist.pdf}
+		\label{fig2:Hist}
+	}
+	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%。（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图。}
+			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
+\end{figure}
+
+最小化优化目标函数（\ref{eq2:XLX}）的第二部分的矩阵$P$，可以通过求解下述特征问题中最大特征值获得：
+\begin{equation}
+	\begin{split}
+		(XX^T)p = \lambda p
+		\Rightarrow {\bf1}XX^Tp = \lambda {\bf1}p
+	\end{split}
+	\label{eq2:Solu}
+\end{equation}
+
+由数据矩阵$X$为零均值标准化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
+\begin{equation}
+	%\begin{split}
+	{\bf1}^T P = {\bf0} \Rightarrow {\bf1}^T PP^T = {\bf0} \Rightarrow d_{\Delta ii} = 0. %\quad(i=1,...,n)
+	%\end{split}
+\end{equation}
+由此可知，特性$D_\Delta = \textbf{0}$对于公式（\ref{eq2:XLX}）第二部分的最优解恒成立，并且该最优解属于公式（\ref{eq2:XD}）的解集。所以，公式（\ref{eq2:XLX}）第二部分的最优解同时可以使目标函数（\ref{eq2:XD}）达到最优。完整的优化问题（\ref{eq2:XLX}）的最优解使得$D_\Delta$ 等于$\bf0$。因此，优化目标函数（\ref{eq2:XLX}）可以进一步化简为
+\begin{equation}
+	P=\mathop{\mathrm{arg\;max}}_{P^TP=I} \;tr(P^TXX^TP).
+	\label{eq2:PXXP}
+\end{equation}
+公式（\ref{eq2:PXXP}）的最优解可以通过对数据矩阵 $X$ 的奇异值分解求得，其运算复杂度依赖于数据维度$d$而不是数据量$n$。至此，我们从同时具有相似度和不相似度信息的原始数据分布中获得了中间态相似性矩阵 $\Delta = PP^T$。矩阵$\Delta$所对应的图拉普拉斯矩阵为$L_\Delta = D_\Delta-\Delta =-\Delta $。
+
+为了能够缓解计算中的噪声影响以及矩阵秩减少的问题，我对矩阵$\Delta$进行了稀疏化处理。我们将在第\ref{sec2:sparse}节对稀疏化处理的细节进行进一步讨论。
+
+\subsection{最终自适应相似性矩阵}
+\subsection{稀疏化策略}
+\label{sec2:sparse}
 \section{实验结果}
 \label{sec2:Exp}
