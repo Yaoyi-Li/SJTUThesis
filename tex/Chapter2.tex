@@ -7,7 +7,7 @@
 
 为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$近邻（$k$ nearest neighborhood，$k$-NN）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
-\begin{figure}[h]
+\begin{figure}[!htbp]
 	\centering
 	\bisubcaptionbox{理想的相似性矩阵}%
 					{Ideal affinity matrix}
@@ -33,7 +33,7 @@
 \section{自适应相似性矩阵}
 在本节中，我们首先对本节采用的数学符号进行说明，其次介绍中间态相似性矩阵的计算方法，然后描述最终自适应相似性矩阵的获取方式，最后对算法流程中的稀疏化策略进行介绍。
 \subsection{符号说明}
-在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（Centering Matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将假设数据矩阵$X$为零均值标准化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
+在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（centering matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将假设数据矩阵$X$为零均值归一化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
 \begin{equation}
 	w_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|x_i-x_j\|_{2}}{t}), \; &x_i\in\mathcal{N}_k(x_j)\;\mathrm{or}\; x_j\in\mathcal{N}_k(x_i);\\
 		0, &\mathrm{otherwise.}\end{cases}          
@@ -61,10 +61,10 @@
 \end{equation}
 在对原优化问题进行约束松弛的情况下，我们最终需要求解问题为：
 \begin{equation}
-	\begin{split}
-		&U = \mathop{\mathrm{arg\;min}}_{U^TU=I}\; tr(X^TUU^TX) \\
-		&\Rightarrow U = \mathop{\mathrm{arg\;min}}_{U^TU=I} \;tr(U^TXX^TU)
-	\end{split}
+	% \begin{split}
+		U = \mathop{\mathrm{arg\;min}}_{U^TU=I}\; tr(X^TUU^TX) 
+		\Rightarrow U = \mathop{\mathrm{arg\;min}}_{U^TU=I} \;tr(U^TXX^TU)
+	% \end{split}
 	\label{eq2:simpEigmap}
 \end{equation}
 
@@ -118,7 +118,7 @@
 	\label{eq2:Solu}
 \end{equation}
 
-由数据矩阵$X$为零均值标准化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
+由数据矩阵$X$为零均值归一化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
 \begin{equation}
 	%\begin{split}
 	{\bf1}^T P = {\bf0} \Rightarrow {\bf1}^T PP^T = {\bf0} \Rightarrow d_{\Delta ii} = 0. %\quad(i=1,...,n)
@@ -134,8 +134,57 @@
 为了能够缓解计算中的噪声影响以及矩阵秩减少的问题，我对矩阵$\Delta$进行了稀疏化处理。我们将在第\ref{sec2:sparse}节对稀疏化处理的细节进行进一步讨论。
 
 \subsection{最终自适应相似性矩阵}
+在本节中，我们对朴素的线性谱聚类进行公式化，并且给出最终自适应相似性矩阵的求解方法。
 
-\begin{figure}[h]
+在已经求得中间态相似性矩阵$\Delta$的情况下，我们可以通过求解下述问题获得一个线性投影矩阵$A$：
+\begin{equation}
+	a = \mathop{\mathrm{arg\;min}}_{a^Ta=1}\; tr(a^TX^T(L+L_\Delta)Xa),
+	\label{eq2:AXLXA}
+\end{equation}
+此处，$a$ 为矩阵$A$的一维情况，且$L+L_\Delta$是$k$-NN热力核与中间态相似性矩阵的拉普拉斯矩阵的组合。投影向量$a$可通过求解特征分解问题的最小特征值得到：
+\begin{equation}
+	X^T(L-\Delta)Xa = \lambda a
+\end{equation}
+
+然后，为在给定$A$的情况下求解公式（\ref{eq2:AXLXA}）中的$L_\Delta$，我们依照对公式（\ref{eq2:XLX}）的变形，将相似性优化问题进行重写并引入线性投影矩阵$A$：
+\begin{equation}
+	% \begin{split}		
+		P = \mathop{\mathrm{arg\;min}}_{P^TP=I}\; \Big( c+tr(A^TX^TD_\Delta XA) 
+		+tr(A^TX^T(-PP^T)XA)\Big),
+	% \end{split}
+	\label{eq2:AXDXA-PXAAXP}
+\end{equation}
+这里$c=tr(A^TX^TLXA)$，并且我们假设最终自适应相似性矩阵为$\Delta = PP^T$。由于$X$为列零均值归一化矩阵，则$XA$同样为列零均值矩阵，特性$D_\Delta = \textbf{0}$依然成立。由此可知，公式（\ref{eq2:AXDXA-PXAAXP}）可化简为
+\begin{equation}
+	P = \mathop{\mathrm{arg\;max}}_{P^TP=I}\; tr(P^TXAA^TX^TP)
+	\label{eq2:PXAAXP}
+\end{equation}
+
+公式（\ref{eq2:PXAAXP}）可以通过对矩阵$A$进行奇异值分解并提取前$t$个最大奇异值对应的左奇异向量（left-singular vectors）进行求解。我们对从公式（\ref{eq2:PXAAXP}）求解得到的自适应相似性矩阵$\Delta=PP^T$进行稀疏化处理，由此可以得到稀疏相似性矩阵。
+
+直观来说，我们可以通过对公式（\ref{eq2:AXLXA}）和公式（\ref{eq2:PXAAXP}）进行交替迭代求解以使目标函数最小化。然而，如图\ref{fig2:itera}所示，在实际计算中，仅在执行一次迭代运算后所得到的自适应相似性矩阵即可取得很好的聚类效果。持续的迭代求解并没有表现出显著的聚类准确率提升。
+
+在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
+
+\begin{algorithm}[!htbp]
+	\renewcommand{\algorithmicrequire}{\textbf{输入:}}  
+	\renewcommand\algorithmicensure {\textbf{输出:} }  
+	\caption{自适应相似性矩阵}
+	\label{alg1}
+	\begin{algorithmic}[1]
+		\REQUIRE ~~\\
+		数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。
+		\ENSURE ~~\\
+		距离度量矩阵 $M$ 和线性投影矩阵$A$。
+		\STATE 构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；
+		\STATE 根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；
+		\STATE 根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；
+		\STATE 求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;
+		\STATE 通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
+	\end{algorithmic}
+\end{algorithm}
+
+\begin{figure}[!htbp]
 	\centering
 	\begin{subfigure}{0.49\textwidth}
 		\centering
@@ -158,3 +207,29 @@
 \label{sec2:sparse}
 \section{实验结果}
 \label{sec2:Exp}
+
+
+
+\begin{table}[!htbp]
+	\bicaption{不同图像数据集上的聚类准确率（\%）}
+	{Clustering accuracy on different image datasets(\%)}
+	\label{tab2:Acc}
+	\centering
+	% \begin{small}
+		%\begin{sc}
+		\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|c|c|}
+			\hline
+			\multicolumn{1}{|l||}{} &\multicolumn{2}{|c|}{\bf AdaAM} &\multicolumn{2}{|c|}{\bf $k$-NN} &\multicolumn{2}{|c|}{\bf Cons-$k$NN} &\multicolumn{2}{|c|}{\bf DN} &\multicolumn{2}{|c|}{\bf ClustRF-Bi} & \multicolumn{2}{|c|}{\bf PCAN-$k$Means} & \multicolumn{1}{|c|}{\bf PCAN}
+			\\ \hline
+			& Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max & \\
+			\hline
+			UMIST    & \textbf{66.06}& \textbf{75.65}& 58.16& 65.39& 60.27& 69.22& 59.15& 66.96& 64.63& 74.44& 53.79& 56.52& 55.30\\
+			COIL20   & 74.72& \textbf{87.29}& 71.89& 81.18& 75.53& 84.31& 71.95& 82.01& \textbf{76.50}& 85.07& 72.28& 83.75& 81.74\\
+			USPS     & \textbf{69.36}& \textbf{69.61}& 68.25& 68.35& 68.21& 68.34& 68.08& 68.31& 58.74& 65.90& 64.04& 67.95& 64.20\\
+			MNIST    & \textbf{60.84}& \textbf{61.34}& 48.13& 48.27& 47.88& 48.00& 49.72& 49.76& 51.93& 52.03& 58.93& 58.98& 59.83\\
+			ExYaleB  & \textbf{54.36}& \textbf{57.87}& 24.17& 26.76& 25.63& 28.75& 24.21& 27.42& 23.10& 26.43& 25.74& 27.63& 25.89\\
+			\hline
+		\end{tabular}
+		%\end{sc}
+	% \end{small}
+\end{table}
