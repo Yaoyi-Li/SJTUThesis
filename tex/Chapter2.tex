@@ -7,7 +7,7 @@
 
 为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$近邻（$k$ nearest neighborhood，$k$-NN）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
-\begin{figure}[!hbtp]
+\begin{figure}[h]
 	\centering
 	\bisubcaptionbox{理想的相似性矩阵}%
 					{Ideal affinity matrix}
@@ -109,25 +109,6 @@
 
 一般性地，对于真实世界数据集中数据点$x_i$，$\|x_i\|_2^2\neq0$恒成立，故能够最小化目标函数（\ref{eq2:XLX}）第一部分的最优解$P$ 具有性质$D_\Delta = \textbf{0}$。同时可知，具有性质$D_\Delta = \textbf{0}$的所有$P$的集合构成优化问题（\ref{eq2:XD}）的解集。
 
-\begin{figure}[!hbtp]
-	\centering
-	\begin{subfigure}{0.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{chap2/itera_data.pdf}
-		\caption{}
-		\label{fig2:itera}
-	\end{subfigure}
-	\hspace{1em}
-	\begin{subfigure}{0.45\textwidth}
-		\centering
-		\includegraphics[width=\textwidth]{chap2/delta_hist.pdf}
-		\caption{}
-		\label{fig2:Hist}
-	\end{subfigure}
-	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%。（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图。}
-			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
-\end{figure}
-
 最小化优化目标函数（\ref{eq2:XLX}）的第二部分的矩阵$P$，可以通过求解下述特征问题中最大特征值获得：
 \begin{equation}
 	\begin{split}
@@ -153,6 +134,26 @@
 为了能够缓解计算中的噪声影响以及矩阵秩减少的问题，我对矩阵$\Delta$进行了稀疏化处理。我们将在第\ref{sec2:sparse}节对稀疏化处理的细节进行进一步讨论。
 
 \subsection{最终自适应相似性矩阵}
+
+\begin{figure}[h]
+	\centering
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{chap2/itera_data.pdf}
+		\caption{}
+		\label{fig2:itera}
+	\end{subfigure}
+	% \hspace{1em}
+	\begin{subfigure}{0.49\textwidth}
+		\centering
+		\includegraphics[width=\textwidth]{chap2/delta_hist.pdf}
+		\caption{}
+		\label{fig2:Hist}
+	\end{subfigure}
+	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%。（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图。}
+			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
+\end{figure}
+
 \subsection{稀疏化策略}
 \label{sec2:sparse}
 \section{实验结果}
