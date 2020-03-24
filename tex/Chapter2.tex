@@ -167,8 +167,8 @@
 在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
 
 \begin{algorithm}[!htbp]
-	\SetKwInput{KwData}{{输入:}
-	\SetKwInput{KwResult}{输出:}
+	\SetKwInput{KwData}{输入}
+	\SetKwInput{KwResult}{输出}
 	\caption{自适应相似性矩阵}
 	\label{alg1}
 	\KwData{数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。}
@@ -205,7 +205,6 @@
 \label{sec2:Exp}
 
 
-
 \begin{table}[!htbp]
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
 	{Clustering accuracy on different image datasets(\%)}
@@ -213,18 +212,21 @@
 	\centering
 	% \begin{small}
 		%\begin{sc}
-		\begin{tabular}{|c||c|c|c|c|c|c|c|c|c|c|c|c|c|}
-			\hline
-			\multicolumn{1}{|l||}{} &\multicolumn{2}{|c|}{\bf AdaAM} &\multicolumn{2}{|c|}{\bf $k$-NN} &\multicolumn{2}{|c|}{\bf Cons-$k$NN} &\multicolumn{2}{|c|}{\bf DN} &\multicolumn{2}{|c|}{\bf ClustRF-Bi} & \multicolumn{2}{|c|}{\bf PCAN-$k$Means} & \multicolumn{1}{|c|}{\bf PCAN}
-			\\ \hline
-			& Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max & \\
-			\hline
-			UMIST    & \textbf{66.06}& \textbf{75.65}& 58.16& 65.39& 60.27& 69.22& 59.15& 66.96& 64.63& 74.44& 53.79& 56.52& 55.30\\
-			COIL20   & 74.72& \textbf{87.29}& 71.89& 81.18& 75.53& 84.31& 71.95& 82.01& \textbf{76.50}& 85.07& 72.28& 83.75& 81.74\\
-			USPS     & \textbf{69.36}& \textbf{69.61}& 68.25& 68.35& 68.21& 68.34& 68.08& 68.31& 58.74& 65.90& 64.04& 67.95& 64.20\\
-			MNIST    & \textbf{60.84}& \textbf{61.34}& 48.13& 48.27& 47.88& 48.00& 49.72& 49.76& 51.93& 52.03& 58.93& 58.98& 59.83\\
-			ExYaleB  & \textbf{54.36}& \textbf{57.87}& 24.17& 26.76& 25.63& 28.75& 24.21& 27.42& 23.10& 26.43& 25.74& 27.63& 25.89\\
-			\hline
+		\begin{tabular}{l|cccccccccc}
+			\toprule
+			 &\multicolumn{2}{*}{UMIST} &\multicolumn{2}{*}{COIL20}  &\multicolumn{2}{*}{USPS} &\multicolumn{2}{*}{MNIST} &\multicolumn{2}{*}{ExYaleB}
+			\\
+			\midrule
+			& Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max  \\
+			\midrule
+			$k$-NN   & 58.16& 65.39& 71.89& 81.18& 68.25& 68.35& 48.13& 48.27 & 24.17& 26.76\\
+			Cons-$k$NN  & 60.27& 69.22 & 75.53& 84.31& 68.21& 68.34& 47.88& 48.00& 25.63& 28.75\\
+			DN  & 59.15& 66.96 & 71.95& 82.01& 68.08& 68.31& 49.72& 49.76 & 24.21& 27.42 \\
+			ClustRF-Bi  & 64.63& 74.44& \textbf{76.50}& 85.07 & 58.74& 65.90& 51.93& 52.03& 23.10& 26.43 \\
+			PCAN-$k$Means & 53.79& 56.52& 72.28& 83.75& 64.04& 67.95& 58.93& 58.98 & 25.74& 27.63\\
+			PCAN & \multicolumn{2}{*}{55.30}& \multicolumn{2}{*}{81.74}& \multicolumn{2}{*}{64.20}& \multicolumn{2}{*}{59.83}& \multicolumn{2}{*}{25.89}\\
+			AdaAM & \textbf{66.06}& \textbf{75.65}& 74.72& \textbf{87.29}& \textbf{69.36}& \textbf{69.61}& \textbf{60.84}& \textbf{61.34}& \textbf{54.36}& \textbf{57.87}\\
+			\bottomrule
 		\end{tabular}
 		%\end{sc}
 	% \end{small}
