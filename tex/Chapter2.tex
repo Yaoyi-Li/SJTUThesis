@@ -38,7 +38,7 @@
 	w_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|x_i-x_j\|_{2}}{t}), \; &x_i\in\mathcal{N}_k(x_j)\;\mathrm{or}\; x_j\in\mathcal{N}_k(x_i);\\
 		0, &\mathrm{otherwise.}\end{cases}          
 \end{equation}
-此处，$\mathcal{N}_k(x)$表示数据点$x$的 $k$ 个最近邻的集合。相应的拉普拉斯矩阵表示为$L=D-W$，其中$D$为对角权重矩阵：$d_{ii} = \sum_j w_{ij}$。我们对中间态增量矩阵及最终自适应相似性矩阵都采用$\Delta$表示，相应的对角权重矩阵和拉普拉斯矩阵分别表示为$D_\Delta$和$L_\Delta = D_\Delta-\Delta$。
+此处，$\mathcal{N}_k(x)$表示数据点$x$的 $k$ 个最近邻的集合，我们延续了文献\parencite{niyogi2004locality}中对时间参数$t$的设定。相应的拉普拉斯矩阵表示为$L=D-W$，其中$D$为对角权重矩阵：$d_{ii} = \sum_j w_{ij}$。我们对中间态增量矩阵及最终自适应相似性矩阵都采用$\Delta$表示，相应的对角权重矩阵和拉普拉斯矩阵分别表示为$D_\Delta$和$L_\Delta = D_\Delta-\Delta$。
 
 \subsection{中间态相似性矩阵}
 我们将提出的AdaAM算法分为两个部分，分别是中间态相似性矩阵和最终自适应相似性矩阵。本节将对其中的中间态相似性矩阵部分的生成进行介绍。对于第$i$个数据点$x_i$，我们使用相似度$\delta_{ij}$对任意的数据点$x_i$和数据点$x_j$进行连接。由于希望任意两个数据点之间较近的欧氏距离能导致较大的数据点相似度，我们的目标为通过选择最优的相似度$\delta_{ij}$在特定合适的约束下最小化下述的目标函数，
@@ -70,7 +70,7 @@
 
 如果我们假设矩阵$X$的乘积为矩阵$K$，即$K = XX^T$，则公式（\ref{eq2:simpEigmap}）所得为一个简单形式的拉普拉斯特征映射\cite{belkin2001laplacian}。
 由此，该优化问题可以通过选择矩阵$K$的多个最小特征值所对应的特征向量形成矩阵进行求解。但是，由于$K$为一个低秩矩阵，一般情况下满足条件$d\ll n$，$K$可以最小化公式（\ref{eq2:simpEigmap}）中目标函数的特征向量都存在于数据矩阵$X$的零空间中。
-因此，上述问题的最优解不唯一。受LSC（Landmark-based Spectral Clustering）算法\cite{chen2011large}启发，我们将相似性矩阵假设为一个半正定矩阵。不同于对拉普拉斯矩阵进行分解，我们将半正定的相似性矩阵分解为列正交矩阵 $P\in \mathbb{R}^{n\times t}$及其转置矩阵$P^T$的乘积，其中 $t$ 为预期下的矩阵$\Delta$的秩。
+因此，上述问题的最优解不唯一。受LSC（Landmark-based Spectral Clustering）算法\cite{chen2011large}启发，我们将相似性矩阵假设为一个半正定矩阵。不同于对拉普拉斯矩阵进行分解，我们将半正定的相似性矩阵分解为列正交矩阵 $P\in \mathbb{R}^{n\times r}$及其转置矩阵$P^T$的乘积，其中 $r$ 为预期下的矩阵$\Delta$的秩。
 
 由此，我们可以将公式（\ref{eq2:Delta}）改写为
 \begin{equation}
@@ -160,25 +160,11 @@
 	\label{eq2:PXAAXP}
 \end{equation}
 
-公式（\ref{eq2:PXAAXP}）可以通过对矩阵$A$进行奇异值分解并提取前$t$个最大奇异值对应的左奇异向量（left-singular vectors）进行求解。我们对从公式（\ref{eq2:PXAAXP}）求解得到的自适应相似性矩阵$\Delta=PP^T$进行稀疏化处理，由此可以得到稀疏相似性矩阵。
+公式（\ref{eq2:PXAAXP}）可以通过对矩阵$A$进行奇异值分解并提取前$r$个最大奇异值对应的左奇异向量（left-singular vectors）进行求解。我们对从公式（\ref{eq2:PXAAXP}）求解得到的自适应相似性矩阵$\Delta=PP^T$进行稀疏化处理，由此可以得到稀疏相似性矩阵。
 
 直观来说，我们可以通过对公式（\ref{eq2:AXLXA}）和公式（\ref{eq2:PXAAXP}）进行交替迭代求解以使目标函数最小化。然而，如图\ref{fig2:itera}所示，在实际计算中，仅在执行一次迭代运算后所得到的自适应相似性矩阵即可取得很好的聚类效果。持续的迭代求解并没有表现出显著的聚类准确率提升。
 
 在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
-
-\begin{algorithm}[!htbp]
-	\SetKwInput{KwData}{输入}
-	\SetKwInput{KwResult}{输出}
-	\caption{自适应相似性矩阵}
-	\label{alg1}
-	\KwData{数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。}
-	\KwResult{距离度量矩阵 $M$ 和线性投影矩阵$A$。}
-	构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
-	根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
-	根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
-	求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;\\
-	通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
-\end{algorithm}
 
 \begin{figure}[!htbp]
 	\centering
@@ -201,8 +187,39 @@
 
 \subsection{稀疏化策略}
 \label{sec2:sparse}
+
+从优化问题（\ref{eq2:PXXP}）和（\ref{eq2:PXAAXP}）我们可以观察到，矩阵$XX^T$ 和 $XAA^TX^T$都是低秩矩阵。由于上述的优化问题都需要通过矩阵奇异值分解进行求解，所以这个低秩现象将会导致最优解矩阵$P$的列的数量远小于矩阵 $XX^T$ 和 $XAA^TX^T$ 的秩数。这个计算流程将会产生低秩的相似性矩阵，而低秩相似性矩阵会导致我们的算法中的矩阵秩的进一步减小。为避免该矩阵秩持续减小问题的发生，我们在提出的算法中对矩阵实施了稀疏化操作。我们采用的稀疏化策略可以同时缓解数据图中的噪声边问题。
+
+在图\ref{fig2:Hist}中，我们展示了不经过稀疏化处理情况下通过公式（\ref{eq2:PXAAXP}）求得的自适应相似性矩阵的元素强度直方图。从图\ref{fig2:Hist}中我们可以观察到，绝大多数的相似性矩阵元素都集中在数值强度较小的范围内，这有效证明了我们对相似性矩阵进行稀疏化处理的合理性。同时，稀疏化处理可以有效的保留住一部分表达能力更强的相似性元素。
+
+受到$k$-NN热力核构造思路的启发，我们对相似性矩阵$\Delta$中的全部元素根据强度大小进行降序排序，只保留其中的前$s$个元素。假设在稀疏化处理后，仅有类内数据点间的相似性被保留下来，不同类间的数据点相似性被删除。在这种情况下，我们考虑到参数$s$的大小应该与聚类的类数成反比，这可以使最终保留下来元素数量近似与图\ref{fig2:affMat}中所示的理想情况下元素数量保持固定比例。参数$s$的计算公式为：
+\begin{equation}
+	s = \lfloor \frac{n^2}{\alpha c}\rfloor
+\end{equation}
+此处 $\lfloor \cdot\rfloor$为向下取整函数，$n^2$为矩阵$\Delta$中的元素总数量，$c$为聚类的类数，$\alpha$为一个可调的比例系数。
+
+对于计算中间态相似性矩阵中的第一次稀疏化处理，我们设置$\alpha$为$2.5$，对于计算最终自适应相似性矩阵中的第二次稀疏化，我们将$\alpha$设置为$5$。此处的$\alpha$通过参数搜索确定，并且能够在大多数数据集上给出稳定的表现。
+
+我们在算法\ref{alg2:AdaAM}中对我们所提出的AdaAM算法流程进行了总结。我们在算法实现中将降维后的维度$m$设置为与聚类的类数相同。
+
+
+\begin{algorithm}[!htbp]
+	\SetKwInput{KwData}{输入}
+	\SetKwInput{KwResult}{输出}
+	\caption{自适应相似性矩阵}
+	\label{alg2:AdaAM}
+	\KwData{数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。}
+	\KwResult{距离度量矩阵 $M$ 和线性投影矩阵$A$。}
+	构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
+	根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
+	根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
+	求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$;\\
+	通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
+\end{algorithm}
+
 \section{实验结果}
 \label{sec2:Exp}
+
 
 
 \begin{table}[!htbp]
@@ -212,10 +229,11 @@
 	\centering
 	% \begin{small}
 		%\begin{sc}
-		\begin{tabular}{l|cccccccccc}
+		\begin{tabular}{lcccccccccc}
 			\toprule
 			 &\multicolumn{2}{c}{UMIST} &\multicolumn{2}{c}{COIL20}  &\multicolumn{2}{c}{USPS} &\multicolumn{2}{c}{MNIST} &\multicolumn{2}{c}{ExYaleB}
 			\\
+			\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
 			& Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max  \\
 			\midrule
 			$k$-NN   & 58.16& 65.39& 71.89& 81.18& 68.25& 68.35& 48.13& 48.27 & 24.17& 26.76\\
@@ -223,7 +241,7 @@
 			DN  & 59.15& 66.96 & 71.95& 82.01& 68.08& 68.31& 49.72& 49.76 & 24.21& 27.42 \\
 			ClustRF-Bi  & 64.63& 74.44& \textbf{76.50}& 85.07 & 58.74& 65.90& 51.93& 52.03& 23.10& 26.43 \\
 			PCAN-$k$Means & 53.79& 56.52& 72.28& 83.75& 64.04& 67.95& 58.93& 58.98 & 25.74& 27.63\\
-			PCAN & \multicolumn{2}{c}{55.30}& \multicolumn{2}{c}{81.74}& \multicolumn{2}{c}{64.20}& \multicolumn{2}{c}{59.83}& \multicolumn{2}{c}{25.89}\\
+			PCAN & 55.30& 55.30& 81.74& 81.74& 64.20& 64.20&59.83&59.83& 25.89& 25.89\\
 			AdaAM & \textbf{66.06}& \textbf{75.65}& 74.72& \textbf{87.29}& \textbf{69.36}& \textbf{69.61}& \textbf{60.84}& \textbf{61.34}& \textbf{54.36}& \textbf{57.87}\\
 			\bottomrule
 		\end{tabular}
