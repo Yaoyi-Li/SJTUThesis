@@ -5,7 +5,7 @@
 
 谱聚类方法是一类在基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}. 上述提到的谱聚类算法有三点不足之处。第一，这些谱聚类算法只提供了训练数据的嵌入映射，对样本外数据（out-of-sample）的计算比较困难。第二，这些算法的复杂度依赖于数据点数量，相对比较耗时，可扩展性不强。第三，谱聚类算法的稳定性高度依赖于相似性图（affinity graph）的鲁棒性。
 
-为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$近邻（$k$ nearest neighborhood，$k$-NN）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
+为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$-NN（$k$ nearest neighborhood）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
 \begin{figure}[!htbp]
 	\centering
@@ -20,7 +20,7 @@
 	\bisubcaptionbox{$k=1000$下的热力核相似性矩阵}%
 					{Affinity matrix of heat kernel with $k=1000$}%
 					[0.3\textwidth]{\includegraphics[width=0.3\textwidth]{chap2/k1000.jpg}}
-	\bicaption{MNIST子集在理想情况及不同近邻数量$k$下的相似性矩阵。}
+	\bicaption{MNIST子集在理想情况及不同近邻数量$k$下的相似性矩阵}
 			  {Ideal affinity matrix and affinity matrices with different neighborhood size $k$ on a subset of MNIST}
   	\label{fig2:affMat}
 \end{figure}
@@ -181,7 +181,7 @@
 		\caption{}
 		\label{fig2:Hist}
 	\end{subfigure}
-	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%。（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图。}
+	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%；（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图}
 			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
 \end{figure}
 
@@ -219,8 +219,50 @@
 
 \section{实验结果}
 \label{sec2:Exp}
+在本节中，我们将进行一些实验，以证明所提出的AdaAM算法的有效性和高效性。
+\subsection{数据集描述}
+我们在五个图像数据集上评估所提出的算法：
 
+\begin{itemize}
+	\item {\textbf{UMIST}}。UMIST人脸数据集 \cite{graham1998characterising}包括20个人的共计575张灰度图片，每张图片尺寸为220$ \times $220像素。在我们的实验中，我们将原图缩小到40$ \times $40像素。
+	\item {\textbf{COIL20}}。COIL20数据集\cite{nene1996columbia}包含20各不同物体，共1,440张灰度图片。数据集图片尺寸为32$\times$32像素，图片背景被丢弃仅保留了前景物体。
+	\item {\textbf{USPS}}。USPS手写数字数据库\cite{hull1994database}包含了10个数字共计9,298张的灰度图像，图像尺寸为16$\times$16像素。
+	\item {\textbf{MNIST}}。MNIST手写数字数据库\cite{lecun1998gradient}训练集包含10类数字共计70,000张灰度图像。图片尺寸为28$\times$28像素。在我们的实验中，我们使用了该数据库训练集中前10,000张图片。
+	\item {\textbf{ExYaleB}}。Extended Yale Face Database B（ExYaleB）人脸数据集\cite{KCLee05}由2,414张经过裁剪的人脸图像组成，包含38个个体，每个个体在不同光照下拍摄大约64张图像。在实验中，我们将ExYaleB图像缩小到32$ \times $32像素。
+\end{itemize}
 
+在表格\ref{tab2:Data}中，我们总结了五个基准图像数据集的统计量描述。
+
+\begin{table}[!htbp]
+	\bicaption{五个基准数据集的统计量描述}{Statistics of five benchmark data sets}
+	\label{tab2:Data}
+	\centering
+	% \begin{small}
+		%\begin{sc}
+		\begin{tabular}{l c c c}
+			\toprule
+			数据集 & 实例数目 & 特征维度 & 类别数目\\ 
+			\midrule
+			UMIST & 575 & 1,600 & 20\\
+			COIL20 & 1,440 & 1,024 & 20\\
+			USPS & 9,298 & 256 & 10\\
+			MNIST & 10,000 & 784 & 10\\
+			ExYaleB & 2,414 & 1,024 & 38\\
+			\bottomrule
+		\end{tabular}
+		%\end{sc}
+	\end{small}
+\end{table}
+
+\subsection{对照算法介绍}
+我们将所提出的AdaAM方法的聚类效果与本节中介绍的其他相似性学习算法进行了比较。 我们将LPP方法分别应用于通过这些最先进方法生成的相似性矩阵，以获取距离度量矩阵。
+
+\begin{itemize}
+	\item \textbf{Con-$k$NN}。Consensus $k$-NNs（Cons-$k$NN）算法\cite{premachandran2013consensus}的目标在于选取更鲁棒的数据点近邻集合。Cons-$k$NN方法通过收集多轮$k$-NN相似性计算中的共识信息，来为数据点近邻集合的选择提供判断标准。
+	\item \textbf{DN}。Dominant Neighborhoods（DN）算法通过在已构建出的相似性图中迭代地选取最大团的方法，实现对相似性矩阵中存在的噪声边的过滤。
+	\item \textbf{ClustRF-Bi}。ClustRF-Bi算法\cite{criminisi2012decision,pei2013unsupervised}是ClustRF-Strct \cite{zhu2014constructing}算法的一个计算量较小的特例。由于原始ClustRF-Strct算法在仅有数千个数据实例的情况就需要极大量的计算机内存，我们在本章的实验中采用了这个计算量和内存需求相对可行的特例。ClustRF-Strct提出了一种具有结构感知能力的相似性推断模型，该模型通过利用随机森林进行聚类从而构建数据的相似性图。ClustRF-Bi作为一个特例仅通过随机森林聚类构建二值化的相似性矩阵。
+	\item \textbf{PCAN}。文献\parencite{nie2014clustering}提出了Projected Clustering with Adaptive Neighbors（PCAN）方法。由于PCAN是一种可以同时生成线性投影和聚类的算法，所以在结果展示中，我们将PCAN的投影和$k$-means聚类的组合方法表示为PCAN-$k$Means方法，并在表格\ref{tab2:Acc}中显示仅采用PCAN算法生成的聚类结果以供对照参考。
+	\item \textbf{$k$-NN}。我们还将所提出的方法与采用$k$-NN热力核相似性矩阵直接进行线性投影的效果进行比较，即采用$k$-NN热力核的LPP算法。我们在后续实验中使用$k$-NN表示这种典型的方法。
 
 \begin{table}[!htbp]
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
@@ -248,3 +290,52 @@
 		%\end{sc}
 	% \end{small}
 \end{table}
+
+\subsection{参数选择与实验设置}
+由于在无监督学习任务中不存在验证数据集，所以为了实现更一般化的参数选择情况，我们对实验中的所有算法采用了相同的参数选择标准。我们将每个数据实例的近邻数量设置为$k = \mathrm{Round}(\mathrm{log}_2\frac{n}{c})$，其中$n$为数据实例数量，$c$为类别数量，$Round(x)=\lfloor x+\frac{1}{2}\rfloor$。我们参考文献\parencite{ng2002spectral}的结论，将投影的维度设置为与类别数目相同，即距离度量矩阵的秩与类别数相同。所提出的算法中的其他参数在所有实验中均固定不变。
+
+我们将10次独立重复的$k$-means聚类表示为1轮聚类，并在每轮所有结果中选择类内和最小的结果作为该轮$k$-means的聚类结果。在进行聚类性能评估中，我们对每种算法分别应用100轮$k$-means聚类用于（参见表\ref{tab2:Acc}）。在近邻数量$k$的敏感性实验中，我们应用10轮$k$-means聚类（参见图\ref{fig2:Sen}），而在运行时间测试实验中，我们仅进行一轮$k$-means聚类（参见图\ref{fig2:Time}）。
+
+在聚类效果评估中，我们通过将获得的聚类标签与数据集的真实标注进行比较，使用准确率（accuracy，Acc）来衡量性能。准确率定义如下：
+\begin{equation}
+	\mathrm{Acc} = \frac{1}{n}\sum^{n}_{i=1}\delta(p_i, map(q_i))
+\end{equation}
+其中$n$为数据实例数量，$p_i$是数据$x_i$的预测标签，$q_i$为真实标签。当$x=y$时$\delta(x, y) = 1$，否则$\delta(x,y) = 0$。$map(q_i)$表示最佳匹配函数，该函数通过在预测出的类之间交换类标签实现，预测标签与真实标签的最佳匹配。
+
+全部实验都通过MATLAB R2014a实现，并运行在具有Quad Core 3.00 GHz CPU和16 GB内存的Linux系统计算机上。
+
+\begin{figure}[!htbp]
+	\centering
+	\bisubcaptionbox{UMIST数据集}%
+					{UMIST dataset}
+					[0.48\textwidth]{\includegraphics[width=0.48\textwidth]{chap2/sens_UMIST.pdf}}
+	\bisubcaptionbox{COIL20数据集}%
+					{COIL20 dataset}
+					[0.48\textwidth]{\includegraphics[width=0.48\textwidth]{chap2/sens_COIL20.pdf}}
+
+	\bisubcaptionbox{USPS数据集}%
+					{USPS dataset}
+					[0.48\textwidth]{\includegraphics[width=0.48\textwidth]{chap2/sens_USPS.pdf}}
+	\bisubcaptionbox{ExYaleB数据集}%
+					{ExYaleB dataset}
+					[0.48\textwidth]{\includegraphics[width=0.48\textwidth]{chap2/sens_ExYaleB.pdf}}
+	\bicaption{不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$}
+	\label{fig2:Sen}
+\end{figure} 
+
+\subsection{性能评估与比较}
+在聚类准确率评估的实验中，我们在上述五个基准数据集上对提出的AdaAM方法及其他五种算法进行了数据投影效果的评估。表\ref{tab2:Acc}给出每个模型在100轮$k$-means聚类中聚类预测准确率的平均值和最大值。从表\ref{tab2:Acc}中我们可以观察到AdaAM算法在无监督度量学习任务上的优越性。在绝大多数情况下，AdaAM算法的性能明显优于其他方法。我们的方法在五个数据集的平均准确率指标上获得了四个最优，在最大准确率指标上五个全部最优。我们还可以观察到，所提出的AdaAM在ExYaleB数据集上相对其他五种方法具有绝对性优势。与其他数据集不同，ExYaleB中的图像数据已针对人脸进行了较好地对齐，并图片拍摄场景处于不同的光照环境下。这种差异使得相同光照下的图片即使属于不同类别的图像依然具有较大的相似度，从而使数据图上类间连接增多，导致了高秩的相似性矩阵。我们的方法基于最优相似性矩阵的低秩近似，能够有效处理相似性矩阵中的此类噪声。
+
+由于在准确率评估实验中近邻数量$k$选择标准是固定的，这可能会导致无法获得最优性能。因此我们在图\ref{fig2:Sen}中展示了聚类准确率随近邻数量大小变化的趋势。 从图\ref{fig2:Sen}中可以看出，在大多数情况下，AdaAM可取得最佳性能，并且对近邻数量的敏感性与其他模型相当或更低。 由于我们的方法基于最佳相似性矩阵的低秩近似，因此需要更多的成对相似度的信息。 因此，对于较小的近邻数量$k$，部分基线方法有时比我们的方法效果更好。
+
+在图\ref{fig2:Time}中，我们通过半对数图描绘了六种算法在不同数据量的MNIST子集上的运行时间，以此说明AdaAM方法的高效性。 可以看出，我们的方法在实际使用中是一种时间代价较低的算法。相比于PCAN-$k$Means，ClustRF-Bi和DN方法，AdaAM算法的时间消耗要低得多。我们还展示了AdaAM的运行时间大约为Cons-$k$NN的两倍，但整体性能性能要好得多。
+
+\begin{figure}[!htbp]
+	\centering
+	\includegraphics[width=0.9\columnwidth]{chap2/time.pdf}
+	\bicaption{不同数据实例数量的情况下六个算法的时间使用比较}{Time consumption of six approaches with different number of data instances}
+	\label{fig2:Time}
+\end{figure}
+
+\section{本章小结}
+在本章中，我们提出了一种用于无监督度量学习的创新性的的相似性学习方法，称为自适应相似性矩阵矩阵（Adaptive Affinity Matrix，AdaAM）。在我们所提出的新的相似性学习模型中，相似性矩阵是从与谱聚类相同的计算框架中学习获得的。 更具体地说，我们表明相似性学习可以简化为奇异值分解问题。获得学习到的相似性矩阵后，可以借助于类似LPP这样基于相似性图的现成的算法来学习距离度量。在图像数据集上的大量聚类实验证明了所提出的方法AdaAM的优越性。
