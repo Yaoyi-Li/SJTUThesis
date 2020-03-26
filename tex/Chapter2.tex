@@ -7,7 +7,7 @@
 
 为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$-NN（$k$ nearest neighborhood）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 	\centering
 	\bisubcaptionbox{理想的相似性矩阵}%
 					{Ideal affinity matrix}
@@ -166,7 +166,7 @@
 
 在一些算法中图节点的权重具有重要作用，同时例如LPP的一类基于归一化割（Normalized Cuts，NCuts）的方法存在依赖于矩阵$D_\Delta$的优化约束条件。然而在我们的算法中有$D_\Delta = \textbf{0}$，因此，我们将由原始$k$-NN热力核计算得到的权重矩阵$D$叠加到求得的自适应相似性矩阵上，以还原损失的权重信息。最后，我们将原LPP算法中的相似性矩阵替换为由AdaAM方法求得的矩阵$\Delta+D$即可求解出线性投影矩阵$A$ 以及距离度量矩阵$M = A^TA$。
 
-\begin{figure}[!htbp]
+\begin{figure}[t]
 	\centering
 	\begin{subfigure}{0.49\textwidth}
 		\centering
@@ -181,8 +181,8 @@
 		\caption{}
 		\label{fig2:Hist}
 	\end{subfigure}
-	\bicaption{（a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%；（b）数据集USPS的最终自适应相似性矩阵的元素强度直方图}
-			  {(a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. (b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
+	\bicaption{a）在数据集USPS上不同的迭代计算次数的聚类效果评价结果。迭代计算所贡献的精度提升小于0.5\%；b）数据集USPS的最终自适应相似性矩阵的元素强度直方图}
+			  {a)The evaluation of the clustering performance with different times iterative computation on the data set USPS. The contribution to accuracy made by iteration is less than 0.5\%. b)The histogram of the element magnitude of the final adaptive affinity matrix obtained from data set USPS. }
 \end{figure}
 
 \subsection{稀疏化策略}
@@ -198,12 +198,7 @@
 \end{equation}
 此处 $\lfloor \cdot\rfloor$为向下取整函数，$n^2$为矩阵$\Delta$中的元素总数量，$c$为聚类的类数，$\alpha$为一个可调的比例系数。
 
-对于计算中间态相似性矩阵中的第一次稀疏化处理，我们设置$\alpha$为$2.5$，对于计算最终自适应相似性矩阵中的第二次稀疏化，我们将$\alpha$设置为$5$。此处的$\alpha$通过参数搜索确定，并且能够在大多数数据集上给出稳定的表现。
-
-我们在算法\ref{alg2:AdaAM}中对我们所提出的AdaAM算法流程进行了总结。我们在算法实现中将降维后的维度$m$设置为与聚类的类数相同。
-
-
-\begin{algorithm}[!htbp]
+\begin{algorithm}[t]
 	\SetKwInput{KwData}{输入}
 	\SetKwInput{KwResult}{输出}
 	\caption{自适应相似性矩阵}
@@ -217,11 +212,30 @@
 	通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
 \end{algorithm}
 
+对于计算中间态相似性矩阵中的第一次稀疏化处理，我们设置$\alpha$为$2.5$，对于计算最终自适应相似性矩阵中的第二次稀疏化，我们将$\alpha$设置为$5$。此处的$\alpha$通过参数搜索确定，并且能够在大多数数据集上给出稳定的表现。
+
+我们在算法\ref{alg2:AdaAM}中对我们所提出的AdaAM算法流程进行了总结。我们在算法实现中将降维后的维度$m$设置为与聚类的类数相同。
+
+
 \section{实验结果}
 \label{sec2:Exp}
 在本节中，我们将进行一些实验，以证明所提出的AdaAM算法的有效性和高效性。
 \subsection{数据集描述}
 我们在五个图像数据集上评估所提出的算法：
+
+
+\begin{figure}[t]
+	\centering
+	\bisubcaptionbox{UMIST数据集}%
+					{UMIST dataset}
+					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_UMIST.pdf}}
+	\hspace{1em}
+	\bisubcaptionbox{COIL20数据集}%
+					{COIL20 dataset}
+					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_COIL20.pdf}}
+	\bicaption{在数据集UMIST和COIL20上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on UMIST and COIL20}
+	\label{fig2:Sen}
+\end{figure} 
 
 \begin{itemize}
 	\item {\textbf{UMIST}}。UMIST人脸数据集 \cite{graham1998characterising}包括20个人的共计575张灰度图片，每张图片尺寸为220$ \times $220像素。在我们的实验中，我们将原图缩小到40$ \times $40像素。
@@ -233,7 +247,7 @@
 
 在表格\ref{tab2:Data}中，我们总结了五个基准图像数据集的统计量描述。
 
-\begin{table}[!htbp]
+\begin{table}[t]
 	\bicaption{五个基准数据集的统计量描述}{Statistics of five benchmark data sets}
 	\label{tab2:Data}
 	\centering
@@ -262,31 +276,44 @@
 	\item \textbf{PCAN}。文献\parencite{nie2014clustering}提出了Projected Clustering with Adaptive Neighbors（PCAN）方法。由于PCAN是一种可以同时生成线性投影和聚类的算法，所以在结果展示中，我们将PCAN的投影和$k$-means聚类的组合方法表示为PCAN-$k$Means方法，并在表格\ref{tab2:Acc}中显示仅采用PCAN算法生成的聚类结果以供对照参考。
 	\item \textbf{$k$-NN}。我们还将所提出的方法与采用$k$-NN热力核相似性矩阵直接进行线性投影的效果进行比较，即采用$k$-NN热力核的LPP算法。我们在后续实验中使用$k$-NN表示这种典型的方法。
 
-\begin{table}[!htbp]
+\begin{figure}[t]
+	\centering
+	\bisubcaptionbox{USPS数据集}%
+					{USPS dataset}
+					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_USPS.pdf}}
+	\hspace{1em}
+	\bisubcaptionbox{MNIST数据集}%
+					{MNIST dataset}
+					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_MNIST.pdf}}
+	\bicaption{在数据集USPS和MNIST上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on USPS and MNIST}
+	\label{fig2:Sen2}
+\end{figure} 
+\begin{table}[t]
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
 	{Clustering accuracy on different image datasets(\%)}
 	\label{tab2:Acc}
 	\centering
 	% \begin{small}
 		%\begin{sc}
-		\begin{tabular}{lcccccc}
+		\begin{tabular}{llcccccc}
 			\toprule
-			 &&{UMIST} &{COIL20}  &{USPS} &{MNIST} &{ExYaleB}
+			& &$k$-NN &Cons-$k$NN &DN &ClustRF-Bi &PCAN-$k$Means &PCAN& AdaAM
 			\\
 			\midrule
-			\multirow{2}{*}{$k$-NN}  & Avg & 58.16& 71.89& 68.25& 48.13 & 24.17\\
-			& Max& 65.39& 81.18& 68.35& 48.27& 26.76\\
-			\multirow{2}{*}{Cons-$k$NN}& Avg  & 60.27 & 75.53& 68.21& 47.88& 25.63\\
-			& Max& 69.22& 84.31& 68.34& 48.00& 28.75\\
-			\multirow{2}{*}{DN} & Avg & 59.15 & 71.95& 68.08& 49.72 & 24.21 \\
-			& Max& 66.96& 82.01& 68.31& 49.76& 27.42\\
-			\multirow{2}{*}{ClustRF-Bi} & Avg & 64.63& \textbf{76.50} & 58.74& 51.93& 23.10\\
-			 & Max& 74.44& 85.07& 65.90& 52.03& 26.43\\
-			\multirow{2}{*}{PCAN-$k$Means} &Avg & 53.79& 72.28& 64.04& 58.93 & 25.74\\
-			& Max& 56.52& 83.75& 67.95& 58.98& 27.63\\
-			PCAN & 55.30& 55.30& 81.74& 81.74& 64.20& 64.20&59.83&59.83& 25.89& 25.89\\
-			\multirow{2}{*}{AdaAM}& Avg & \textbf{66.06}& 74.72& \textbf{69.36}& \textbf{60.84}& \textbf{54.36}\\
-			& Max& \textbf{75.65}& \textbf{87.29}& \textbf{69.61}& \textbf{61.34}& \textbf{57.87}\\
+			\multirow{2}{*}{UMIST} & Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\
+			& Max& 65.39& 69.22& 66.96& 74.44& 56.52&& \textbf{75.65}\\
+			\midrule
+			\multirow{2}{*}{COIL20} & Avg & 71.89& 75.53& 71.95& \textbf{76.50}& 72.28& \multirow{2}{*}{81.74}& 74.72\\
+			& Max& 81.18& 84.31& 82.01& 85.07& 83.75&& \textbf{87.29}\\
+			\midrule
+			\multirow{2}{*}{USPS}  & Avg & 68.25& 68.21& 68.08& 58.74& 64.04& \multirow{2}{*}{64.20}  & \textbf{69.36}\\
+			& Max& 68.35& 68.34& 68.31& 65.90& 67.95&& \textbf{69.61}\\
+			\midrule
+			\multirow{2}{*}{MNIST} & Avg & 48.13& 47.88& 49.72& 51.93& 58.93& \multirow{2}{*}{59.83}  & \textbf{60.84}\\
+			& Max& 48.27& 48.00& 49.76& 52.03& 58.98&& \textbf{61.34}\\
+			\midrule
+			\multirow{2}{*}{ExYaleB} & Avg& 24.17& 25.63& 24.21& 23.10& 25.74& \multirow{2}{*}{25.89} & \textbf{54.36}\\
+			& Max& 26.76& 28.75& 27.42& 26.43& 27.63&& \textbf{57.87}\\
 			\bottomrule
 		\end{tabular}
 		%\end{sc}
@@ -322,8 +349,16 @@
 \subsection{参数选择与实验设置}
 由于在无监督学习任务中不存在验证数据集，所以为了实现更一般化的参数选择情况，我们对实验中的所有算法采用了相同的参数选择标准。我们将每个数据实例的近邻数量设置为$k = \mathrm{Round}(\mathrm{log}_2\frac{n}{c})$，其中$n$为数据实例数量，$c$为类别数量，$Round(x)=\lfloor x+\frac{1}{2}\rfloor$。我们参考文献\parencite{ng2002spectral}的结论，将投影的维度设置为与类别数目相同，即距离度量矩阵的秩与类别数相同。所提出的算法中的其他参数在所有实验中均固定不变。
 
-我们将10次独立重复的$k$-means聚类表示为1轮聚类，并在每轮所有结果中选择类内和最小的结果作为该轮$k$-means的聚类结果。在进行聚类性能评估中，我们对每种算法分别应用100轮$k$-means聚类用于（参见表\ref{tab2:Acc}）。在近邻数量$k$的敏感性实验中，我们应用10轮$k$-means聚类（参见图\ref{fig2:Sen}），而在运行时间测试实验中，我们仅进行一轮$k$-means聚类（参见图\ref{fig2:Time}）。
+我们将10次独立重复的$k$-means聚类表示为1轮聚类，并在每轮所有结果中选择类内和最小的结果作为该轮$k$-means的聚类结果。在进行聚类性能评估中，我们对每种算法分别应用100轮$k$-means聚类用于（参见表\ref{tab2:Acc}）。在近邻数量$k$的敏感性实验中，我们应用10轮$k$-means聚类（参见图\ref{fig2:Sen}，图\ref{fig2:Sen2}和图\ref{fig2:Sen3}），而在运行时间测试实验中，我们仅进行一轮$k$-means聚类（参见图\ref{fig2:Time}）。
 
+
+\begin{figure}[t]
+	\bisubcaptionbox{ExYaleB数据集}%
+					{ExYaleB dataset}
+					[0.85\textwidth]{\includegraphics[width=0.85\textwidth]{chap2/sens_ExYaleB.pdf}}
+	\bicaption{在数据集ExYaleB上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on ExYaleB}
+	\label{fig2:Sen3}
+\end{figure} 
 在聚类效果评估中，我们通过将获得的聚类标签与数据集的真实标注进行比较，使用准确率（accuracy，Acc）来衡量性能。准确率定义如下：
 \begin{equation}
 	\mathrm{Acc} = \frac{1}{n}\sum^{n}_{i=1}\delta(p_i, map(q_i))
@@ -332,30 +367,8 @@
 
 全部实验都通过MATLAB R2014a实现，并运行在具有Quad Core 3.00 GHz CPU和16 GB内存的Linux系统计算机上。
 
-\begin{figure}[!htbp]
-	\centering
-	\bisubcaptionbox{UMIST数据集}%
-					{UMIST dataset}
-					[0.46\textwidth]{\includegraphics[width=0.46\textwidth]{chap2/sens_UMIST.pdf}}
-	\hspace{1em}
-	\bisubcaptionbox{COIL20数据集}%
-					{COIL20 dataset}
-					[0.46\textwidth]{\includegraphics[width=0.46\textwidth]{chap2/sens_COIL20.pdf}}
-
-	\centering
-	\bisubcaptionbox{USPS数据集}%
-					{USPS dataset}
-					[0.46\textwidth]{\includegraphics[width=0.46\textwidth]{chap2/sens_USPS.pdf}}
-	\hspace{1em}
-	\bisubcaptionbox{ExYaleB数据集}%
-					{ExYaleB dataset}
-					[0.46\textwidth]{\includegraphics[width=0.46\textwidth]{chap2/sens_ExYaleB.pdf}}
-	\bicaption{不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$}
-	\label{fig2:Sen}
-\end{figure} 
-
 \subsection{性能评估与比较}
-\begin{figure}[!htbp]
+\begin{figure}[t]
 	\centering
 	\includegraphics[width=0.9\columnwidth]{chap2/time.pdf}
 	\bicaption{不同数据实例数量的情况下六个算法的时间使用比较}{Time consumption of six approaches with different number of data instances}
@@ -364,7 +377,7 @@
 
 在聚类准确率评估的实验中，我们在上述五个基准数据集上对提出的AdaAM方法及其他五种算法进行了数据投影效果的评估。表\ref{tab2:Acc}给出每个模型在100轮$k$-means聚类中聚类预测准确率的平均值和最大值。由于PCAN算法不通过$k$-means聚类而直接产生聚类结果，所有PCAN性能评估结果仅有唯一结果，不存在平均值与最大值。从表\ref{tab2:Acc}中我们可以观察到AdaAM算法在无监督度量学习任务上的优越性。在绝大多数情况下，AdaAM算法的性能明显优于其他方法。我们的方法在五个数据集的平均准确率指标上获得了四个最优，在最大准确率指标上五个全部最优。我们还可以观察到，所提出的AdaAM在ExYaleB数据集上相对其他五种方法具有绝对性优势。与其他数据集不同，ExYaleB中的图像数据已针对人脸进行了较好地对齐，并图片拍摄场景处于不同的光照环境下。这种差异使得相同光照下的图片即使属于不同类别的图像依然具有较大的相似度，从而使数据图上类间连接增多，导致了高秩的相似性矩阵。我们的方法基于最优相似性矩阵的低秩近似，能够有效处理相似性矩阵中的此类噪声。
 
-由于在准确率评估实验中近邻数量$k$选择标准是固定的，这可能会导致无法获得最优性能。因此我们在图\ref{fig2:Sen}中展示了聚类准确率随近邻数量大小变化的趋势。 从图\ref{fig2:Sen}中可以看出，在大多数情况下，AdaAM可取得最佳性能，并且对近邻数量的敏感性与其他模型相当或更低。 由于我们的方法基于最佳相似性矩阵的低秩近似，因此需要更多的成对相似度的信息。 因此，对于较小的近邻数量$k$，部分基线方法有时比我们的方法效果更好。
+由于在准确率评估实验中近邻数量$k$选择标准是固定的，这可能会导致无法获得最优性能。因此我们在图\ref{fig2:Sen}、图\ref{fig2:Sen2}及图\ref{fig2:Sen3}中展示了聚类准确率随近邻数量大小变化的趋势。 从图中可以看出，在大多数情况下，AdaAM可取得最佳性能，并且对近邻数量的敏感性与其他模型相当或更低。 由于我们的方法基于最佳相似性矩阵的低秩近似，需要更多的成对相似度的信息。 因此，对于极小的近邻数量$k$，部分基线方法有时比我们的方法效果更好，这一点可以从图\ref{fig2:Sen2}可以看出。
 
 在图\ref{fig2:Time}中，我们通过半对数图描绘了六种算法在不同数据量的MNIST子集上的运行时间，以此说明AdaAM方法的高效性。 可以看出，我们的方法在实际使用中是一种时间代价较低的算法。相比于PCAN-$k$Means，ClustRF-Bi和DN方法，AdaAM算法的时间消耗要低得多。我们还展示了AdaAM的运行时间大约为Cons-$k$NN的两倍，但整体性能性能要好得多。
 
