@@ -1,0 +1,8 @@
+% !TEX root = ../thesis.tex
+\chapter{基于相似性融合学习的多模态约束传播}
+\section{引言}
+在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，也称为比然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
+
+在过去的十几年的时间里，成对约束已广泛用于约束聚类和度量学习问题中。Wagstaff 等人首先在他们的工作中将成对约束引入聚类问题\cite{wagstaff2000clustering,wagstaff2001constrained}。Xing等人提出了一个具有成对约束的距离度量学习框架\cite{xing2002distance}。 度量学习中的一些后续工作也证明了成对约束的作用\cite{weinberger2005distance,davis2007information}。
+
+由于成对约束是一种特殊的弱监督信息，因此一些约束传播方法\cite{lu2008constrained,lu2010constrained,fu2011symmetric}陆续被提出以充分利用成对约束信息。Lu和Carreira-Perpinan在文献\parencite{lu2008constrained}中提出了Affinity Propagation（AP）算法，该算法通过借助高斯过程实现了约束传播。Lu和Ip在文献\parencite{lu2010constrained}中提出了Exhaustive and Efficient Constraint Propagation（E$^2$CP）方法。E$^2$CP算法在标签传播（label propagation）\cite{zhou2004learning}的学习框架下对成对约束信息进行传播，并且作者将约束信息的传播解释为半监督的二分类学习问题。作为能够有效利用辅助信息的一种有力工具，约束传播已经被广泛应用在半监督学习场景中。文献\parencite{jian2016interactive}提出了ACP Cut算法，以将用户所提供的交互式信息的特征传播到整个图像中，以用于个性化地图像分割。文献\parencite{han2016segmentation}提出了一种用于图像分割的高效的选择性约束传播方法，并且仅在图像的一个像素子集上执行约束传播。在实际应用中，由于观察到的真实信息数据的量很少，半监督学习方法经常会面临标注有缺陷的问题。Zhu等人设计了约束传播随机森林（Constraint Propagation Random Forest，COP-RF）算法\cite {zhu2016constrained}，该方法不仅能够应对由于有缺陷的标注数据产生的噪声约束，而且能够执行有效的稀疏化约束传播。文献\parencite{wang2016semi}利用成对约束传播的方法来提升半监督的非负矩阵分解的效果。Wu等人采用约束传播方法在初始化的约束信息中扩展增加更多的有用信息，以用于在视频中进行人脸的聚类和跟踪\cite{wu2017coupled}。
