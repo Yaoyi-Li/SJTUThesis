@@ -275,6 +275,7 @@
 	\item \textbf{ClustRF-Bi}。ClustRF-Bi算法\cite{criminisi2012decision,pei2013unsupervised}是ClustRF-Strct \cite{zhu2014constructing}算法的一个计算量较小的特例。由于原始ClustRF-Strct算法在仅有数千个数据实例的情况就需要极大量的计算机内存，我们在本章的实验中采用了这个计算量和内存需求相对可行的特例。ClustRF-Strct提出了一种具有结构感知能力的相似性推断模型，该模型通过利用随机森林进行聚类从而构建数据的相似性图。ClustRF-Bi作为一个特例仅通过随机森林聚类构建二值化的相似性矩阵。
 	\item \textbf{PCAN}。文献\parencite{nie2014clustering}提出了Projected Clustering with Adaptive Neighbors（PCAN）方法。由于PCAN是一种可以同时生成线性投影和聚类的算法，所以在结果展示中，我们将PCAN的投影和$k$-means聚类的组合方法表示为PCAN-$k$Means方法，并在表格\ref{tab2:Acc}中显示仅采用PCAN算法生成的聚类结果以供对照参考。
 	\item \textbf{$k$-NN}。我们还将所提出的方法与采用$k$-NN热力核相似性矩阵直接进行线性投影的效果进行比较，即采用$k$-NN热力核的LPP算法。我们在后续实验中使用$k$-NN表示这种典型的方法。
+\end{itemize}
 
 \begin{figure}[t]
 	\centering
@@ -295,7 +296,7 @@
 	\centering
 	% \begin{small}
 		%\begin{sc}
-		\begin{tabular}{llcccccc}
+		\begin{tabular}{llccccccc}
 			\toprule
 			& &$k$-NN &Cons-$k$NN &DN &ClustRF-Bi &PCAN-$k$Means &PCAN& AdaAM
 			\\
@@ -353,6 +354,7 @@
 
 
 \begin{figure}[t]
+	\centering
 	\bisubcaptionbox{ExYaleB数据集}%
 					{ExYaleB dataset}
 					[0.85\textwidth]{\includegraphics[width=0.85\textwidth]{chap2/sens_ExYaleB.pdf}}
