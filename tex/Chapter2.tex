@@ -3,7 +3,10 @@
 \section{引言}
 数据在数据空间中的空间分布学习一直是一个困难的问题。经验上，数据往往分布在高维空间的一个低维流形上，而不是完全随机分布。这导致了不同标签的数据之间可能有较近的欧氏距离。这种分布特性会对基于传统欧氏距离度量的分类或聚类算法的效果产生影响。一个较好的选择是构建一个能够保持数据对之间局部近邻结构的低维映射。
 
-谱聚类方法是一类在基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}. 上述提到的谱聚类算法有三点不足之处。第一，这些谱聚类算法只提供了训练数据的嵌入映射，对样本外数据（out-of-sample）的计算比较困难。第二，这些算法的复杂度依赖于数据点数量，相对比较耗时，可扩展性不强。第三，谱聚类算法的稳定性高度依赖于相似性图（affinity graph）的鲁棒性。
+事实证明，度量学习相对于最近邻方法和其他依赖于距离的算法具有巨大优势。在早期的度量学习工作中，文献\parencite{xing2002distance}提出了利用辅助信息的度量学习的框架。这个学习框架的目的在于，通过学习一个距离度量矩阵缩小相似数据之间的距离并同时拉大不相似数据之间的距离。文献\cite{weinberger2005distance}在支持向量机中将度量学习应用于基于铰链损失的凸优化分类问题。
+文献\cite{davis2007information}提出了基于信息论观点的距离度量学习。他们的工作将度量学习问题表述为在距离函数约束下两个多元高斯分布之间的微分相对熵最小化。
+
+另一方面，谱聚类方法是一类在基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}. 上述提到的谱聚类算法有三点不足之处。第一，这些谱聚类算法只提供了训练数据的嵌入映射，对样本外数据（out-of-sample）的计算比较困难。第二，这些算法的复杂度依赖于数据点数量，相对比较耗时，可扩展性不强。第三，谱聚类算法的稳定性高度依赖于相似性图（affinity graph）的鲁棒性。
 
 为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$-NN（$k$ nearest neighborhood）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
 
@@ -227,11 +230,10 @@
 	\centering
 	\bisubcaptionbox{UMIST数据集}%
 					{UMIST dataset}
-					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_UMIST.pdf}}
-	\hspace{1em}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap2/sens_UMIST.pdf}}
 	\bisubcaptionbox{COIL20数据集}%
 					{COIL20 dataset}
-					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_COIL20.pdf}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap2/sens_COIL20.pdf}}
 	\bicaption{在数据集UMIST和COIL20上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on UMIST and COIL20}
 	\label{fig2:Sen}
 \end{figure} 
@@ -280,11 +282,10 @@
 	\centering
 	\bisubcaptionbox{USPS数据集}%
 					{USPS dataset}
-					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_USPS.pdf}}
-	\hspace{1em}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap2/sens_USPS.pdf}}
 	\bisubcaptionbox{MNIST数据集}%
 					{MNIST dataset}
-					[0.45\textwidth]{\includegraphics[width=0.45\textwidth]{chap2/sens_MNIST.pdf}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap2/sens_MNIST.pdf}}
 	\bicaption{在数据集USPS和MNIST上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on USPS and MNIST}
 	\label{fig2:Sen2}
 \end{figure} 
@@ -320,32 +321,6 @@
 	% \end{small}
 \end{table}
 
-% \begin{table}[!htbp]
-% 	\bicaption{不同图像数据集上的聚类准确率（\%）}
-% 	{Clustering accuracy on different image datasets(\%)}
-% 	\label{tab2:Acc}
-% 	\centering
-% 	% \begin{small}
-% 		%\begin{sc}
-% 		\begin{tabular}{lcccccccccc}
-% 			\toprule
-% 			 &\multicolumn{2}{c}{UMIST} &\multicolumn{2}{c}{COIL20}  &\multicolumn{2}{c}{USPS} &\multicolumn{2}{c}{MNIST} &\multicolumn{2}{c}{ExYaleB}
-% 			\\
-% 			\cmidrule(lr){2-3}\cmidrule(lr){4-5}\cmidrule(lr){6-7}\cmidrule(lr){8-9}\cmidrule(lr){10-11}
-% 			& Avg & Max & Avg & Max & Avg & Max & Avg & Max & Avg & Max  \\
-% 			\midrule
-% 			$k$-NN   & 58.16& 65.39& 71.89& 81.18& 68.25& 68.35& 48.13& 48.27 & 24.17& 26.76\\
-% 			Cons-$k$NN  & 60.27& 69.22 & 75.53& 84.31& 68.21& 68.34& 47.88& 48.00& 25.63& 28.75\\
-% 			DN  & 59.15& 66.96 & 71.95& 82.01& 68.08& 68.31& 49.72& 49.76 & 24.21& 27.42 \\
-% 			ClustRF-Bi  & 64.63& 74.44& \textbf{76.50}& 85.07 & 58.74& 65.90& 51.93& 52.03& 23.10& 26.43 \\
-% 			PCAN-$k$Means & 53.79& 56.52& 72.28& 83.75& 64.04& 67.95& 58.93& 58.98 & 25.74& 27.63\\
-% 			PCAN & 55.30& 55.30& 81.74& 81.74& 64.20& 64.20&59.83&59.83& 25.89& 25.89\\
-% 			AdaAM & \textbf{66.06}& \textbf{75.65}& 74.72& \textbf{87.29}& \textbf{69.36}& \textbf{69.61}& \textbf{60.84}& \textbf{61.34}& \textbf{54.36}& \textbf{57.87}\\
-% 			\bottomrule
-% 		\end{tabular}
-% 		%\end{sc}
-% 	% \end{small}
-% \end{table}
 \subsection{参数选择与实验设置}
 由于在无监督学习任务中不存在验证数据集，所以为了实现更一般化的参数选择情况，我们对实验中的所有算法采用了相同的参数选择标准。我们将每个数据实例的近邻数量设置为$k = \mathrm{Round}(\mathrm{log}_2\frac{n}{c})$，其中$n$为数据实例数量，$c$为类别数量，$Round(x)=\lfloor x+\frac{1}{2}\rfloor$。我们参考文献\parencite{ng2002spectral}的结论，将投影的维度设置为与类别数目相同，即距离度量矩阵的秩与类别数相同。所提出的算法中的其他参数在所有实验中均固定不变。
 
@@ -383,4 +358,6 @@
 在图\ref{fig2:Time}中，我们通过半对数图描绘了六种算法在不同数据量的MNIST子集上的运行时间，以此说明AdaAM方法的高效性。 可以看出，我们的方法在实际使用中是一种时间代价较低的算法。相比于PCAN-$k$Means，ClustRF-Bi和DN方法，AdaAM算法的时间消耗要低得多。我们还展示了AdaAM的运行时间大约为Cons-$k$NN的两倍，但整体性能性能要好得多。
 
 \section{本章小结}
-在本章中，我们提出了一种用于无监督度量学习的创新性的的相似性学习方法，称为自适应相似性矩阵矩阵（Adaptive Affinity Matrix，AdaAM）。在我们所提出的新的相似性学习模型中，相似性矩阵是从与谱聚类相同的计算框架中学习获得的。 更具体地说，我们表明相似性学习可以简化为奇异值分解问题。获得学习到的相似性矩阵后，可以借助于类似LPP这样基于相似性图的现成的算法来学习距离度量。在图像数据集上的大量聚类实验证明了所提出的方法AdaAM的优越性。
+在本章中，我们提出了一种用于无监督度量学习的创新性的的相似性学习方法，称为自适应相似性矩阵矩阵（Adaptive Affinity Matrix，AdaAM）。在我们所提出的新的相似性学习模型中，相似性矩阵是从与谱聚类相同的计算框架中学习获得的。 更具体地说，我们表明相似性学习可以简化为奇异值分解问题。获得学习到的相似性矩阵后，可以借助于类似LPP这样基于相似性图的现成的算法来学习距离度量。我们所采用的低秩近似的优化方法可以在相似性矩阵学习的过程中进一步提高学习效率。
+我们在UMIST、COIL20、USPS、MNIST及ExYaleB五个被广泛使用的图像数据集上对AdaAM及其他对照算法的进行了大量聚类实验。
+实验结果证明了所提出的方法AdaAM的性能优越性、稳定性与高效性。
