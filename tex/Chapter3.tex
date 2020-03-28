@@ -17,3 +17,65 @@
 在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法：Multi-modal Fusion Learning（MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，我们将该算法视为基线方法。由于我们通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此我们将其称为松弛权重组合（Relaxed Weight Combination，RWC）。
 实验结果表明，RWC方法所学习的融合结果可能会深陷入一些判别性较差的模态而忽视高判别性的模态。
 受RWC方法的进一步启发，我们提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模式融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。我们提出的MFL同时还可以作为模态选择器，NFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
+
+\section{约束传播背景知识}
+在本节中我们首先将针对多模态约束传播对所用到的数学符号进行补充说明，然后简要回顾典型的单模态约束传播算法E$^2$CP\cite{lu2010constrained}和多模态约束传播算法MMCP\cite{fu2011multi}。
+\subsection{符号说明}
+在下文中，矩阵将用大写字母表示，向量和标量以写字母表示。给定矩阵$ {A} \in \mathbb{R}^{n\times m}$，$ a_{i,j} $为矩阵$A$在位置$ i,j $的元素。相似地，$ \alpha_{i} $ 为向量 $ \boldsymbol{\alpha} $的第 $ i $个元素。考虑到多模态的情况，在为特殊说明的情况下，我们用上标$s$区分多模态数据集不同的模态，即${A}^s$表示源自模态$s$中的一个矩阵。矩阵$ {A}^s $ 中的第$ i,j $个元素被表示为$a_{i,j}^s$。此外，对于矩阵$A$和矩阵$D$我们定义$ \|{A}\|_{D} = \mathrm{tr} ({A}^T{D}{A})^{\frac{1}{2}}$ 以保持文中公式的简洁。
+
+我们用大写的花体字母表示集合和图。给定一个数据集合$\mathcal{U} = \{u_1,\dots,u_n \}$，每一个数据实例的数据被表示为$u_i$。$u_i$仅表示第$i$个数据实例本身，不代表任何数据向量或特征向量，更进一步地，我们将数据$u_i$在模态$s$上的数据特征向量表示为$u^s_i$。
+
+对于第$s$个模态，我们可以在全部$n$个数据实例上通过$k$-NN热力核构建相似性矩阵$ {W}^s$:
+\begin{equation}
+w^s_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|u^s_i-u^s_j\|_{2}}{t}), \; &u_i\in\mathcal{N}_s(u^s_j)\;\mathrm{or}\; u_j\in\mathcal{N}_k(u^s_i);\\
+0,&\mathrm{otherwise,}\end{cases}   
+\label{eq3:GaussKer}                              
+\end{equation}
+其中$\mathcal{N}_k(u^s_i$为数据$u_i^s$的$k$个最近邻集合。
+
+模态$s$上的拉普拉斯矩阵$ {L}^s $定义为$ {L}^s={D}^s-{W}^s $，此处对角矩阵
+$ {D} ^s \in \mathbb{R}^{n\times n}$ 通过相似性矩阵 $ {W} ^s$ 构建且$ d^s_{i,i} =\sum_i w^s_{i,j}$\cite{chung1997spectral}。归一化图拉普拉斯矩阵 $ \bar{{L}} $定义为
+\begin{equation}
+	\bar{{L}} = {D}^{-1/2}{LD}^{-1/2}.
+\end{equation}
+我们将数据图定义为$\mathcal{G}^s = (\mathcal{U},{W}^s)$，在我们的问题表述里图$\mathcal{G}^s$等价于第$s$个模态的全部信息。
+
+在约束传播问题中，我们可以将相似性矩阵中的成对约束看作数据点对之间的关系的标签。因此，我们可以对两类不同的约束定义两个集合。必然连接（must-link）集合$ \mathcal{M} = \{(u_i,u_j)\} $包含的数据对中$ u_i $ 和 $ u_j $属于同一个类别中。必然不连接（cannot-link）集合$ \mathcal{C} = \{(u_i,u_j)\}$元素数据对中的两个数据点属于不同标签类别。根据must-link集合和cannot-link集合，我们可以构建约束矩阵$ {Y} \in  \mathbb{R}^{n\times n}$，
+\begin{equation}
+y_{i,j} = 
+\begin{cases}
+1, \qquad&(u_i,u_j)\in \mathcal{M};\\
+-1, &(u_i,u_j)\in\; \mathcal{C};\\
+0, &\text{otherwise}.
+\end{cases}
+\label{eq3:Y}
+\end{equation}
+
+\subsection{单模态约束传播算法E$^2$CP}
+E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问题。
+观测到的约束信息被视为数据点对之间已知的关系二分类标签，其中must-link中元素作为正样本，cannot-link的元素为负样本。
+我们从公式（\ref{eq3:Y}）观察到矩阵$Y$中对应于数据$u_i$的第$i$列或第$i$行与半监督问题的问题设置非常相似。其中$ 1 $ 和 $ -1 $为半监督问题中两个不同类的类标签，大量的$0$代表未观测到的需要预测的标签。利用相似性信息，这样的半监督问题可以通过标签传播\cite{zhou2004learning}解决。
+
+我们进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。 如果我们采用矩阵$F_v$表示竖直方向的传播，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
+\begin{equation}
+	\mathop{\mathrm{min}}_{\mathbf{F}_v}\;\frac{1}{2}\eta\|\mathbf{F}_v-\mathbf{Y}\|^2_F+\frac{1}{2}\mathrm{tr}(\mathbf{F}_v^T\bar{\mathbf{L}}\mathbf{F}_v), 
+\end{equation}
+此处，$ \eta $为正则化参数。
+而传播结果$F_v$的闭式解为
+\begin{equation}
+	\mathbf{F}_v = \eta(\eta\mathbf{I}+\bar{\mathbf{L}})^{-1}\mathbf{Y}.
+\end{equation}
+
+相似地，如果我们以矩阵$F_h$表示水平传播的结果，我们可以将其闭式解写为
+\begin{equation}
+\mathbf{F}_h = \eta\mathbf{Y}(\eta\mathbf{I}+\bar{\mathbf{L}})^{-1}.
+\end{equation}
+
+如果将竖直方向传播的结果$F_v$作为水平方向传播中的初始化约束矩阵$Y$，即可实现两个方向的交替传播。则约束传播的结果矩阵$F$为
+\begin{equation}
+{F} = \eta^2(\eta{I}+\bar{{L}})^{-1}\mathbf{Y}(\eta\mathbf{I}+\bar{\mathbf{L}})^{-1}
+\label{eq3:e2cp}
+\end{equation}
+
+\subsection{多模态约束传播算法MMCP}
+MMCP算法基于迁移概率将E$^2$CP算法推广到了多模态的情况下。
