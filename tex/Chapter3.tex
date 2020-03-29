@@ -154,7 +154,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 					{PASCAL VOC'07 dataset}
 					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_RWC_nmi.eps}
                     \label{fig3:rwc_voc}}
-	\bicaption{在Corel 5k数据集和PASCAL VOC'07数据集上，参数$\gamma$在不同的模态数量下对约束聚类效果的影响}{The influence of $ \gamma $ on Corel 5k and PASCAL VOC'07 datasets with different number of  modalities}
+	\bicaption{在Corel 5k数据集和PASCAL VOC'07数据集上，超参数$\gamma$在不同的模态数量下对约束聚类效果的影响}{The influence of $ \gamma $ on Corel 5k and PASCAL VOC'07 datasets with different number of  modalities}
 	\label{fig3:rwc}
 \end{figure}
 
@@ -172,8 +172,125 @@ s.t.\;&\sum_s \alpha_s = 1;\\
 L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \alpha_s - 1)-\sum_s \mu_s \alpha_s,
 \label{eq3:labelpro_L}
 \end{equation}
-其中$\lambda$和$\mu_s$为拉格朗日乘子，并且有$ \mu_s \ge 0$，$ \mu_s\alpha_s=0$。令函数\eqref{eq3:labelpro_L}对$ \alpha_s $的导数为零，我们能够得到
+其中$\lambda$和$\mu_s$为拉格朗日乘子，并且有$ \mu_s \ge 0$，$ \mu_s\alpha_s=0$。令函数（\ref{eq3:labelpro_L}）对$ \alpha_s $的导数为零，我们能够得到
 \begin{equation}
 \gamma \alpha_s^{\gamma-1}{f}^T {\bar{{L}}}_s{f} =\lambda + \mu_s.
 \label{eq3:labelpro_L_der}
 \end{equation}
+需要注意的是，为满足$ \mu_s\alpha_s=0 $，对于全部的$s$需要有$\mu_s=0 $。下文中将给出简要证明。
+
+\begin{proposition}
+   \label{thm3} 
+    公式（\ref{eq3:labelpro_L_der}）中，$\forall s \in \{1,\dots,m\}, \; \mu_s=0$。
+\end{proposition}
+
+\begin{proof}
+    根据公式（\ref{eq3:labelpro_L}）的约束条件已知$ \forall s \in \{1,\dots,m\}, \;\mu_s \ge 0$成立。
+
+    现假设$\exists s \in \{1,\dots,m\}, \; \mu_s>0 $。由$ \mu_s\alpha_s=0 $可知必有$\alpha_s=0 $成立。
+    则根据公式（\ref{eq3:labelpro_L_der}）可知$\lambda + \mu_s = 0 $成立且$ \lambda<0 $成立。
+    由于拉普拉斯矩阵$ {\bar{{L}}}_s $恒为半正定矩阵\cite{chung1997spectral}，可知公式（\ref{eq3:labelpro_L_der}）中$\forall s \in \{1,\dots,m\}, \;{f}^T {\bar{{L}}}_s{f} \ge 0$，即有$\forall s \in \{1,\dots,m\}, \; \lambda + \mu_s \ge 0 $。故：
+    \begin{equation}
+        \begin{split}
+        \exists s \in \{1,\dots,m\}, \; \mu_s>0\; &\Rightarrow \;\lambda<0 \\&\Rightarrow \;\forall s \in \{1,\dots,m\}, \; \mu_s>0 \\&\Rightarrow \; \forall s \in \{1,\dots,m\}, \;\alpha_s=0.     
+        \end{split}
+    \end{equation}
+
+    根据公式（\ref{eq3:labelpro_L}）的约束条件$ \forall s \in \{1,\dots,m\}, \;\sum_s \alpha_s = 1$可知$ \exists s \in \{1,\dots,m\}, \;\alpha_s>0$，与假设产生矛盾，所以可知假设不成立，即有$\forall s \in \{1,\dots,m\}, \; \mu_s=0 $
+\end{proof}
+
+将公式（\ref{eq:labelpro_L_der}）代入约束条件 $ \sum_s \alpha_s=1 $ 可以得到
+\begin{equation}
+\alpha_s = \frac{({f}^T \bar{{L}}_s{f})^\frac{1}{1-\gamma}}{\sum_s({f}^T \bar{{L}}_s{f})^\frac{1}{1-\gamma}}.
+\end{equation}
+
+不同于线性组合权重$ \alpha_s$, 模态的权重系数被松弛为指数形式 $ \alpha_s^\gamma $ 以避免求得平凡解使得 $ {\alpha} $中仅有一个元素为 $ 1 $ 其他元素全部为 $ 0 $。
+
+值得注意的是，在约束传播中，存在两个待优化函数。最理想化的方法是将公式（\ref{eq3:sol-v}）中的$ {F}_v $看作是权重系数$\alpha$的一个函数，并用这个函数替换优化问题（\ref{eq3:MMCP-h}）中的约束矩阵$Y$，以求解权重系数$\alpha$的最优解。将计算代价纳入考虑范围后，我们通过优化问题（\ref{eq3:baselinev}）和（\ref{eq3:baselineh}）来近似原优化问题的最小化子（minimizer），在其中我们不通过$F_v$和$F_h$来区分竖直传播和水平传播的结果，统一采用$F$表示传播结果，仅使用目标函数$g_v({F})$和$g_h({F})$来区分竖直传播和水平传播过程。
+
+\begin{equation}
+\mathop{\mathrm{min}}_{{F}}\;g_v({F})=\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})^T\bar{{D}}({F}-{Y}))+\frac{1}{2}\mathrm{tr}({F}^T \sum_s(\alpha_s^{old})^\gamma\bar{{L}}_s{F}).
+\label{eq3:baselinev}
+\end{equation}
+
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{F},{\alpha}}\;g_h({F},{\alpha})&=\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F} \sum_s(\alpha_s)^\gamma\bar{{L}}_s{F}^T), \\
+s.t.\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
+\end{split}
+\label{eq3:baselineh}
+\end{equation}
+
+我们假设公式（\ref{eq3:baselinev}）中的权重系数为固定的常数向量，用$ {\alpha}^{old} $表示，而只通过优化问题（\ref{eq3:baselineh}）更新权重系数，即$\alpha$。通过将向量$\alpha$的值赋给$ {\alpha}^{old} $，我们可以迭代地求解权重系数和约束传播结果$F$。
+
+在固定$\alpha$的情况下，先求解公式（\ref{eq3:baselinev}）并将其最优解作为$Y$带入公式（\ref{eq3:baselineh}），可求得$F$为
+\begin{equation}
+{F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1}, 
+\label{eq3:bl_F}
+\end{equation}
+其中$\bar{{D}} = \sum_s (\alpha_s^{old})^\gamma  \bar{{D}}_s $ 且 $  \bar{{L}} = \sum_s (\alpha_s^{old})^\gamma  \bar{{L}}_s $，这与公式（ \ref{eq3:unifiedW}）相似。
+
+在固定$F$的情况下，由公式（\ref{eq3:baselineh}）可求得$\alpha$为
+\begin{equation}
+\alpha_s = \frac{\mathrm{tr}({F} \bar{{L}}_s{F}^T)^\frac{1}{1-\gamma}}{\sum_s \mathrm{tr}({F} \bar{{L}}_s{F}^T)^\frac{1}{1-\gamma}}, 
+\end{equation}
+并且更新${\alpha}^{old}$：$ {\alpha}^{old} \leftarrow {\alpha}$。由于根据公式（\ref{eq3:bl_F}）计算出的$F$为对称矩阵，因此从竖直传播或水平传播中学习权重系数在结果上是等价的。
+
+从公式（\ref{eq3:baselinev）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
+
+我们在图\ref{fig3:cvg}中给出了RWC方法的收敛曲线。我们对优化问题的近似，公式（\ref{eq3:baselinev）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。我们将在第\ref{sec3:opt}中进行更多的收敛性讨论。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 0.9\columnwidth]{chap3/cvg.eps}
+	\bicaption{所提出的RWC方法和MFL方法在Corel 5k数据集上的收敛曲线}{The convergence curve of the proposed RWC and MFL on Corel 5k dataset.}
+	\label{fig3:cvg}
+\end{figure}
+
+\subsection{多模态融合学习的公式化}
+我们所提出的多模态融合学习（Multi-modal Fusion Learning，MFL）方法基于以下假设：在使用完美的权重系数的情况下，我们可以从每种模态的相似性矩阵中以最小的损失重建出观察到的约束。 换句话说，我们可以将数据中的成对约束视为每个模态的相似性的凸组合。而在观察到一部分成对约束的情况下，即已知约束矩阵$Y$，我们可以通过回归的方式来重构其他未观察到的约束。
+
+基于这样的假设，我们将重构误差引入多模态约束传播的框架中。
+假设在矩阵$Y$中有$l$个观测到的成对约束，即$Y$中有$l$个非零元素。然后我们可以对这$l$个不同的约束进行编号。定义两个函数$ r(i) $ 和 $ c(i) $，其中$ r(i) $ 的函数值为编号为$i$的约束在矩阵$Y$中的行号，函数$ c(i) $的值为相应的列号（$i \in \{1,\dots,l\}$）。
+则我们可以通过元素$ y_{r(i),c(i)} $对$Y$中的第$i$个约束进行定位和检索。基于这两个函数，我们可以构建约束向量$ {z} \in \mathbb{R}^n$：
+\begin{equation}
+z_i = \begin{cases}1,\quad\quad &\text{if}\;\; y_{r(i),c(i)} =1; \\
+0, \quad\quad &\text{otherwise}.
+\end{cases}
+\end{equation} 
+此处可理解为，must-link在向量$z$中对应$1$，cannot-link对应$0$，为观测到的约束不出现在约束向量$z$中。
+
+同时我们可以根据所有模态的相似性矩阵$ \{{W}_s|s\in\{1,\dots,m\}\} $构建相应的基矩阵$ {S} \in \mathbb{R}^{l\times m}$（$l$为约束的数量，$m$为模态数量），
+\begin{equation}
+ {S}_{i,s} = w_{r(i), c(i), s}.
+\end{equation}
+则重构误差可以定义为
+\begin{equation}
+error = \|{S}{\alpha}-{z}\|_2^2,
+\end{equation}
+这里 $ {\alpha} $ 为权重系数。
+由于${W}_s$为稀疏的相似性矩阵，所以该重构误差可以理解为，对于相似性为$0$的点对关系应对应于向量$z$中的cannot-link值即$0$，而相似性大于$0$的点对关系对应于向量$z$中的must-link值即$1$。
+
+需要引起注意的是，$z$中的must-link和cannot-link的比例大约为$1:c-1 $，其中$c$为类别数。如果我们从高度稀疏的相似性矩阵中生成矩阵 $S$，则在矩阵 $S$中会存在极大量的零元素，这将使得样本分布不均衡，重构变得很困难。所以与用于构造拉普拉斯矩阵$ \bar{{L}}_s $的高度稀疏的相似性矩阵不同，基矩阵$S$ 由近邻数为$ k=\frac{\#sample}{\#cluster} = \frac{n}{c}$ 的相对密集的相似性矩阵生成。在这种情况下 矩阵$S$ 和 向量$z$中零元素与非零元素的比例大致相似。
+
+将重构误差纳入考虑范围后，我们可以设计一个优化问题以同时最小化传播误差和重构误差。与RWC方法中的近似方式相似，我们仅从水平方向的约束传播学习权重系数，从而可以得出以下优化问题：
+
+\begin{equation}
+\mathop{\mathrm{min}}_{{F}}\;g_v({F})=\frac{1}{2}\eta \;\mathrm{tr}(({F}-{Y})^T\bar{{D}}({F}-{Y}))+\frac{1}{2}\mathrm{tr}({F}^T \sum_s\alpha_s^{old}\bar{{L}}_s{F}),
+\label{eq3:MFL_v}
+\end{equation}
+及
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{F},{\alpha}}\;g_h({F}, {\alpha})=&\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) +\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2,\\
+s.t.\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
+\end{split}
+\label{eq3:MFL}
+\end{equation}
+
+在公式（\ref{eq3:MFL}）中，我们采用了与E$^2$CP\cite{lu2010constrained} 和MMCP\cite{fu2011multi}方法中相同的$ \eta $取值，即$ \eta = 0.25 $，并且我们将竖直方向的传播问题（\ref{eq3:MFL_v}）的最优解作为水平方向传播约束矩阵 $ {Y} $。至于参数 $ \zeta $，我们认为在重构误差中的元素应该与$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $中的元素具有相似的重要性。 如果我们将$ \sum_s\alpha_s\bar{{L}}_s $ 看作一个距离度量矩阵，则$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $ 可以认为时投影后的$ {F}^T $的Frobenius 范数的平方，即是$\#sample^2=n^2$个元素的平方和。同时，重构误差也可以被看作是一个Frobenius范数平方的特例，其中包含了$ \#constraint = l $ 个元素。所以我们选择 $ \zeta = \frac{\#sample^2}{\#constraint}=\frac{n^2}{l} $使这两项处于同一重要性级别。
+
+公式（\ref{eq3:MFL}）可以利用观察到的成对约束来学习权重系数，而不是仅仅从与约束传播相同的优化目标函数中学习一个比率。使用更多的观察到的信息将能够提高我们提出的方法的鲁棒性。通过组合重构误差和约束传播误差，多模态约束传播的目标函数不再是单模态约束传播目标函数的简单组合，并且不会出现我们在第\ref{sec3:rwc}节中提到的平凡解，因此也不需要采用指数形式对权重系数进行松弛。
+
+\subsection{多模态融合学习的优化}
+\label{sec:opt}

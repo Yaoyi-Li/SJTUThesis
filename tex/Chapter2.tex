@@ -37,7 +37,7 @@
 \section{自适应相似性矩阵}
 在本节中，我们首先对本节采用的数学符号进行说明，其次介绍中间态相似性矩阵的计算方法，然后描述最终自适应相似性矩阵的获取方式，最后对算法流程中的稀疏化策略进行介绍。
 \subsection{符号说明}
-在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（centering matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将假设数据矩阵$X$为零均值归一化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
+在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（centering matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将假设数据矩阵$X$为零均值列归一化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
 \begin{equation}
 	w_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|x_i-x_j\|_{2}}{t}), \; &x_i\in\mathcal{N}_k(x_j)\;\mathrm{or}\; x_j\in\mathcal{N}_k(x_i);\\
 		0, &\mathrm{otherwise.}\end{cases}          
@@ -85,8 +85,14 @@
 	% 	\end{split}
 	\label{eq2:XLX}
 \end{equation}
-此处，我们舍弃了连接权重为非负相似度以及图拉普拉斯为半正定矩阵这两个特性。相似性矩阵$\Delta$中的负值连接权重可以用于度量数据点间的不相似度。在下文中，我们将展示此优化问题的最优解将使$D_\Delta$ 等于 $\bf0$。
+此处，我们舍弃了连接权重为非负相似度以及图拉普拉斯为半正定矩阵这两个特性。相似性矩阵$\Delta$中的负值连接权重可以用于度量数据点间的不相似度。下面，我们将证明此优化问题的最优解将使$D_\Delta$ 等于 $\bf0$。
 
+\begin{proposition}
+	\label{thm2}
+	在数据矩阵$X$为列归一化矩阵的条件下，最优化问题（\ref{eq2:XLX}）的最优解$P$将使得$D_\Delta=\bf0$成立。
+\end{proposition}
+
+\begin{proof}
 对于公式（\ref{eq2:XLX}）中的第一部分，我们可以将其写为
 \begin{equation}
 	\begin{split}
@@ -122,13 +128,19 @@
 	\label{eq2:Solu}
 \end{equation}
 
-由数据矩阵$X$为零均值归一化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
+由数据矩阵$X$为零均值列归一化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
 \begin{equation}
 	%\begin{split}
 	{\bf1}^T P = {\bf0} \Rightarrow {\bf1}^T PP^T = {\bf0} \Rightarrow d_{\Delta ii} = 0. %\quad(i=1,...,n)
 	%\end{split}
 \end{equation}
-由此可知，特性$D_\Delta = \textbf{0}$对于公式（\ref{eq2:XLX}）第二部分的最优解恒成立，并且该最优解属于公式（\ref{eq2:XD}）的解集。所以，公式（\ref{eq2:XLX}）第二部分的最优解同时可以使目标函数（\ref{eq2:XD}）达到最优。完整的优化问题（\ref{eq2:XLX}）的最优解使得$D_\Delta$ 等于$\bf0$。因此，优化目标函数（\ref{eq2:XLX}）可以进一步化简为
+由此可知，特性$D_\Delta = \textbf{0}$对于公式（\ref{eq2:XLX}）第二部分的最优解恒成立，并且该最优解属于公式（\ref{eq2:XD}）的解集。所以，公式（\ref{eq2:XLX}）第二部分的最优解同时可以使目标函数（\ref{eq2:XD}）达到最优。完整的优化问题（\ref{eq2:XLX}）的最优解使得
+\begin{equation}
+	D_\Delta={\bf0}。
+\end{equation}
+\end{proof}
+
+由命题\ref{thm3}可知，优化目标函数（\ref{eq2:XLX}）可以进一步化简为
 \begin{equation}
 	P=\mathop{\mathrm{arg\;max}}_{P^TP=I} \;tr(P^TXX^TP).
 	\label{eq2:PXXP}
@@ -158,7 +170,7 @@
 	% \end{split}
 	\label{eq2:AXDXA-PXAAXP}
 \end{equation}
-这里$c=tr(A^TX^TLXA)$，并且我们假设最终自适应相似性矩阵为$\Delta = PP^T$。由于$X$为列零均值归一化矩阵，则$XA$同样为列零均值矩阵，特性$D_\Delta = \textbf{0}$依然成立。由此可知，公式（\ref{eq2:AXDXA-PXAAXP}）可化简为
+这里$c=tr(A^TX^TLXA)$，并且我们假设最终自适应相似性矩阵为$\Delta = PP^T$。由于$X$为列零均值的列归一化矩阵，则$XA$同样为列零均值矩阵，特性$D_\Delta = \textbf{0}$依然成立。由此可知，公式（\ref{eq2:AXDXA-PXAAXP}）可化简为
 \begin{equation}
 	P = \mathop{\mathrm{arg\;max}}_{P^TP=I}\; tr(P^TXAA^TX^TP)
 	\label{eq2:PXAAXP}
