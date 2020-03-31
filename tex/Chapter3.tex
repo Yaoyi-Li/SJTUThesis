@@ -108,7 +108,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \bar{{W}} = \sum_k P(\mathcal{G}_s)\bar{{W}}_s, 
 \label{eq3:unifiedW}
 \end{equation}
-以及相应的统一的权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{i,i} = P(u_i) =\sum_i \bar{w}_{i,j}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
+以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{i,i} = P(u_i) =\sum_i \bar{w}_{i,j}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
 
 在该设定下的竖直方向传播的优化问题为
 \begin{equation}
@@ -139,7 +139,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \label{}
 \end{equation}
 
-\subsection{多模态融合}
+\section{多模态融合}
 在本节中，首先我们将在约束传播中引入松弛权重组合（Relaxed Weight Combination，RWC）作为基线方法，然后展示我们所提出了MFL（Multi-modal Fusion Learning）方法。
 \subsection{松弛权重组合}
 \label{sec3:rwc}
@@ -162,12 +162,12 @@ RWC方法在多模态聚类和多模态标签传播问题较为普遍\cite{wang2
 \begin{equation}
 \begin{split}
 \mathop{\mathrm{min}}_{{f},{\alpha}}\;g({f},{\alpha})=&\frac{1}{2}\eta\; \|{f}-{y}\|^2_2+\frac{1}{2}{f}^T \sum_s(\alpha_s)^\gamma{\bar{{L}}}_s{f}, \\
-s.t.\;&\sum_s \alpha_s = 1;\\
+s.t. \quad&\sum_s \alpha_s = 1;\\
 &\;\alpha_s \ge 0,
 \end{split}
 \label{eq3:labelpro}
 \end{equation}
-此处，向量$ {y} \in  \mathbb{R}^{n} $为观测到的类标签信息，向量$ {\alpha} \in  \mathbb{R}^m$为可学习的模态权重（$m$为不同的模态数量），$ {f} \in  \mathbb{R}^{n}$为标签传播的估计结果，$ \gamma > 1$ 和$ \eta $ 是手动设定的参数。拉普拉斯矩阵$ \bar{{L}}_s $ 由公式（\ref{eq3:jointW}）中的 $ \bar{{W}}_s $  及其相应的权重矩阵 $ \bar{{D}}_s $生成。在固定$f$的情况下，我们可以忽略公式（\ref{eq3:labelpro}）中的第一项，并通过拉格朗日函数求解$ {\alpha} $
+此处，向量$ {y} \in  \mathbb{R}^{n} $为观测到的类标签信息，向量$ {\alpha} \in  \mathbb{R}^m$为可学习的模态权重（$m$为不同的模态数量），$ {f} \in  \mathbb{R}^{n}$为标签传播的估计结果，$ \gamma > 1$ 和$ \eta $ 是手动设定的参数。拉普拉斯矩阵$ \bar{{L}}_s $ 由公式（\ref{eq3:jointW}）中的 $ \bar{{W}}_s $  及其相应的对角权重矩阵 $ \bar{{D}}_s $生成。在固定$f$的情况下，我们可以忽略公式（\ref{eq3:labelpro}）中的第一项，并通过拉格朗日函数求解$ {\alpha} $
 \begin{equation}
 L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \alpha_s - 1)-\sum_s \mu_s \alpha_s,
 \label{eq3:labelpro_L}
@@ -199,7 +199,7 @@ L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \al
     根据公式（\ref{eq3:labelpro_L}）的约束条件$ \forall s \in \{1,\dots,m\}, \;\sum_s \alpha_s = 1$可知$ \exists s \in \{1,\dots,m\}, \;\alpha_s>0$，与假设产生矛盾，所以可知假设不成立，即有$\forall s \in \{1,\dots,m\}, \; \mu_s=0 $
 \end{proof}
 
-将公式（\ref{eq:labelpro_L_der}）代入约束条件 $ \sum_s \alpha_s=1 $ 可以得到
+将公式（\ref{eq3:labelpro_L_der}）代入约束条件 $ \sum_s \alpha_s=1 $ 可以得到
 \begin{equation}
 \alpha_s = \frac{({f}^T \bar{{L}}_s{f})^\frac{1}{1-\gamma}}{\sum_s({f}^T \bar{{L}}_s{f})^\frac{1}{1-\gamma}}.
 \end{equation}
@@ -216,7 +216,7 @@ L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \al
 \begin{equation}
 \begin{split}
 \mathop{\mathrm{min}}_{{F},{\alpha}}\;g_h({F},{\alpha})&=\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F} \sum_s(\alpha_s)^\gamma\bar{{L}}_s{F}^T), \\
-s.t.\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
+s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \end{split}
 \label{eq3:baselineh}
 \end{equation}
@@ -236,9 +236,9 @@ s.t.\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \end{equation}
 并且更新${\alpha}^{old}$：$ {\alpha}^{old} \leftarrow {\alpha}$。由于根据公式（\ref{eq3:bl_F}）计算出的$F$为对称矩阵，因此从竖直传播或水平传播中学习权重系数在结果上是等价的。
 
-从公式（\ref{eq3:baselinev）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
+从公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
 
-我们在图\ref{fig3:cvg}中给出了RWC方法的收敛曲线。我们对优化问题的近似，公式（\ref{eq3:baselinev）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。我们将在第\ref{sec3:opt}中进行更多的收敛性讨论。
+我们在图\ref{fig3:cvg}中给出了RWC方法的收敛曲线。我们对优化问题的近似，公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。我们将在第\ref{sec3:opt}中进行更多的收敛性讨论。
 
 \begin{figure}[t]
 	\centering
@@ -282,8 +282,8 @@ error = \|{S}{\alpha}-{z}\|_2^2,
 及
 \begin{equation}
 \begin{split}
-\mathop{\mathrm{min}}_{{F},{\alpha}}\;g_h({F}, {\alpha})=&\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) +\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2,\\
-s.t.\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
+\mathop{\mathrm{min}}_{{F},{\alpha}}\;g_h({F}, {\alpha})=&\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) \\ &+\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2,\\
+s.t. \quad\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \end{split}
 \label{eq3:MFL}
 \end{equation}
@@ -294,3 +294,75 @@ s.t.\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 
 \subsection{多模态融合学习的优化}
 \label{sec:opt}
+
+\begin{algorithm}[t]
+	\SetKwInput{KwData}{输入}
+    \SetKwInput{KwResult}{输出}
+	\caption{多模态融合学习}
+	\label{alg3:MFL}
+	\KwData{相似性矩阵 $W_s$；约束矩阵$Y$；基矩阵 $S$；聚类数量$c$。}
+    \KwResult{统一的相似性矩阵 $W^*$。}
+    选择初始化的可行权重参数向量$ {\alpha}^0_0 $，$ i = 0 $。\\
+    \Repeat{收敛}{
+        根据公式（\ref{eq3:MFL_F}）计算$ {F}_{i+1} $。\\
+        选择初始化的乘子$ \lambda_0 $ 和惩罚参数$ \mu_0 $； 初始化$ \varepsilon_0 > 0 $； $ j = 0 $。\\
+        \Repeat{收敛}{
+            通过投影梯度法近似求解${\alpha}^i_j =  \mathrm{arg}\mathop{\mathrm{min}}\limits_{{\alpha}}\;\mathcal{L}({\alpha},\lambda_j;\mu_j)$。\\                        
+            \uIf{$ \|\mathbf{1}^T{\alpha}_j^i- 1\| \le \varepsilon_j $}{
+                $ \lambda_{j+1} \leftarrow \lambda_j - \mu_j(\mathbf{1}^T{\alpha}_j^i- 1) $。\\
+                $ \mu_{j+1} \leftarrow \mu_j $。\\
+                $ \varepsilon_{j+1} \leftarrow \varepsilon_j \mu^{-0.9 }$。\\
+            }
+            \Else{
+                $ \lambda_{j+1} \leftarrow \lambda_j$。\\
+                $ \mu_{j+1} \leftarrow 100\mu_j $。\\
+                $ \varepsilon_{j+1} \leftarrow \mu^{-0.1 }$。\\
+            }
+            $ j\leftarrow j+1 $。\\
+        }
+        $ i\leftarrow i+1 $。\\
+    }
+    根据公式（\ref{eq3:rSa}），通过整流Sigmoid激活函数，由$F_i$生成$W^*$。
+\end{algorithm}
+
+MFL方法的求解可以分解为两个子问题，并能够通过交替迭代法求解。在本节中，我们将描述优化求解过程的一些细节。
+
+\begin{itemize}
+    \item 固定$\alpha$求解$F$。
+    当权重系数$\alpha$固定时，公式（\ref{eq3:MFL}）可以被化简为公式（\ref{eq3:MMCP-h}）。因此，我们可以发现$F$的解与公式（\ref{eq3:bl_F}）非常相似：
+    \begin{equation}
+    {F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1},
+    \label{eq3:MFL_F}
+    \end{equation}
+    在其中$  \bar{{D}} = \sum_s \alpha_s  \bar{{D}}_s $ and $  \bar{{L}} = \sum_s \alpha_s \bar{{L}}_s $
+
+    \item 固定$F$求解$\alpha$。
+    当$F$固定时，公式（\ref{eq3:MFL}）可以被变形为有界约束的二次优化问题（bound-constrained quadratic optimization problem）：
+    \begin{equation}
+    \begin{split}
+    \mathop{\mathrm{min}}_{{\alpha}}\;&\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T)+\frac{1}{2}\zeta\|{S}{\alpha} - {z}  \|_2^2,\\
+    s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
+    \end{split}
+    \label{eq3:MFL_ALM}
+    \end{equation}
+    
+    考虑到公式（\ref{eq3:MFL_ALM}）的计算复杂度与$\alpha$的维度相关，即与模态数量相关，并且$\alpha$为低维向量，我们采用了增广拉格朗日方法\cite{bertsekas1982constrained}优化所提出的目标函数。
+
+    我们沿用了文献\parencite{nocedal2006numerical} 和文献\parencite{bertsekas1982constrained}中所介绍的有界约束拉格朗日优化方法（bound-constrained Lagrangian，BCL）的详细策略。通过将公式（\ref{eq3:MFL_ALM}）中的等式约束纳入增广拉格朗日方法可以生成子问题
+    \begin{equation}\label{eq3:MFL_L}
+    \begin{split}
+    \mathop{\mathrm{min}}_{{\alpha}}\;\mathcal{L}({\alpha},\lambda;\mu) =&\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2+\frac{1}{2}\sum_s\alpha_s\mathrm{tr}({F} \bar{{L}}_s{F}^T) \\
+    &- \lambda({1}^T{\alpha}-1)+\frac{\mu}{2}({1}^T{\alpha}-1)^2\\
+    s.t.\quad &\alpha_s \ge 0.
+    \end{split}
+    \end{equation}
+
+    我们采用了投影梯度法（gradient projection method）对公式（\ref{eq:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。我们在算法\ref{alg3:MFL}中对我们所提出的方法以及后处理进行了总结。
+\end{itemize}
+
+    我们在图\ref{fig3:cvg}中展示了MFL方法的收敛曲线。我们可以发现，一旦我们在RWC方法和MFL方法将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，我们仅需要考虑更新传播结果$F$即系数$\alpha$。
+    
+    由于对角权重矩阵$ \bar{{D}}_s $和拉普拉斯矩阵$\bar{L}_s$都为半正定矩阵，其凸组合$ \sum_s\alpha_s\bar{\mathbf{L}}_s $也为半正定矩阵。因此，公式（\ref{eq3:MFL}）的目标函数中三项皆为为负值，且有$ g_h({F}, {\alpha}) \ge 0 $。我们可以通过任意可行解$F_0$对$F$的解集进行定界，以得到一个$(F, \alpha)$的紧致解集。假设我们在原优化问题基础上增加一个辅助约束：
+    \begin{equation}
+         \frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)  \le g_h({F}_0, {\alpha})
+    \end{equation}
