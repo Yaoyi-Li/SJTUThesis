@@ -103,9 +103,9 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \end{equation}
 公式（\ref{eq3:jointW}）给出的矩阵$\bar{W}_s$也可以被看作是由公式（\ref{eq3:mmcp_trans}）及（\ref{eq3:Pulg}）计算出的给定条件$\mathcal{G}_s$的联合概率分布表。
 
-假设我们可以第$s$个模态信息的重要性权重，并将其对应的图$\mathcal{G}_s$的先验概率设置为$ P(\mathcal{G}_s) $，则数据$u_i$和$u_j$的联合概率分布可以通过$ \bar{w}_{i,j}= P(u_i, u_j) = \sum_k P(\mathcal{G}_s) P(u_i, u_j|\mathcal{G}_s) $，即可以构建统一的相似性矩阵：
+假设我们可以第$s$个模态信息的重要性权重，并将其对应的图$\mathcal{G}_s$的先验概率设置为$ P(\mathcal{G}_s) $，则数据$u_i$和$u_j$的联合概率分布可以通过$ \bar{w}_{i,j}= P(u_i, u_j) = \sum_s P(\mathcal{G}_s) P(u_i, u_j|\mathcal{G}_s) $，即可以构建统一的相似性矩阵：
 \begin{equation}
-\bar{{W}} = \sum_k P(\mathcal{G}_s)\bar{{W}}_s, 
+\bar{{W}} = \sum_s P(\mathcal{G}_s)\bar{{W}}_s, 
 \label{eq3:unifiedW}
 \end{equation}
 以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{i,i} = P(u_i) =\sum_i \bar{w}_{i,j}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
@@ -117,7 +117,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \end{equation}
 相应的水平传播可写为
 \begin{equation}
-\mathop{\mathrm{min}}_{\mathbf{F_h}}\;\frac{1}{2}\eta \;\mathrm{tr}( ({F_h}-{Y})\bar{{D}}({F_h}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F_h} \bar{{L}}{F_h}^T),
+\mathop{\mathrm{min}}_{{F_h}}\;\frac{1}{2}\eta \;\mathrm{tr}( ({F_h}-{Y})\bar{{D}}({F_h}-{Y})^T)+\frac{1}{2}\mathrm{tr}({F_h} \bar{{L}}{F_h}^T),
 \label{eq3:MMCP-h}
 \end{equation}
 其中$ \eta > 0  $为正则化参数。
@@ -293,7 +293,7 @@ s.t. \quad\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 公式（\ref{eq3:MFL}）可以利用观察到的成对约束来学习权重系数，而不是仅仅从与约束传播相同的优化目标函数中学习一个比率。使用更多的观察到的信息将能够提高我们提出的方法的鲁棒性。通过组合重构误差和约束传播误差，多模态约束传播的目标函数不再是单模态约束传播目标函数的简单组合，并且不会出现我们在第\ref{sec3:rwc}节中提到的平凡解，因此也不需要采用指数形式对权重系数进行松弛。
 
 \subsection{多模态融合学习的优化}
-\label{sec:opt}
+\label{sec3:opt}
 
 \begin{algorithm}[t]
 	\SetKwInput{KwData}{输入}
@@ -302,67 +302,145 @@ s.t. \quad\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 	\label{alg3:MFL}
 	\KwData{相似性矩阵 $W_s$；约束矩阵$Y$；基矩阵 $S$；聚类数量$c$。}
     \KwResult{统一的相似性矩阵 $W^*$。}
-    选择初始化的可行权重参数向量$ {\alpha}^0_0 $，$ i = 0 $。\\
+    选择初始化的可行权重参数向量$ {\alpha}^0_0 $，$ i = 0 $；\\
     \Repeat{收敛}{
         根据公式（\ref{eq3:MFL_F}）计算$ {F}_{i+1} $。\\
-        选择初始化的乘子$ \lambda_0 $ 和惩罚参数$ \mu_0 $； 初始化$ \varepsilon_0 > 0 $； $ j = 0 $。\\
+        选择初始化的乘子$ \lambda_0 $ 和惩罚参数$ \mu_0 $； 初始化$ \varepsilon_0 > 0 $； $ j = 0 $；\\
         \Repeat{收敛}{
-            通过投影梯度法近似求解${\alpha}^i_j =  \mathrm{arg}\mathop{\mathrm{min}}\limits_{{\alpha}}\;\mathcal{L}({\alpha},\lambda_j;\mu_j)$。\\                        
+            通过投影梯度法近似求解公式（\ref{eq3:MFL_L}）${\alpha}^i_j =  \mathrm{arg}\mathop{\mathrm{min}}\limits_{{\alpha}}\;\mathcal{L}({\alpha},\lambda_j;\mu_j)$；\\                        
             \uIf{$ \|\mathbf{1}^T{\alpha}_j^i- 1\| \le \varepsilon_j $}{
-                $ \lambda_{j+1} \leftarrow \lambda_j - \mu_j(\mathbf{1}^T{\alpha}_j^i- 1) $。\\
-                $ \mu_{j+1} \leftarrow \mu_j $。\\
-                $ \varepsilon_{j+1} \leftarrow \varepsilon_j \mu^{-0.9 }$。\\
+                $ \lambda_{j+1} \leftarrow \lambda_j - \mu_j(\mathbf{1}^T{\alpha}_j^i- 1) $；\\
+                $ \mu_{j+1} \leftarrow \mu_j $；\\
+                $ \varepsilon_{j+1} \leftarrow \varepsilon_j \mu^{-0.9 }$；\\
             }
             \Else{
-                $ \lambda_{j+1} \leftarrow \lambda_j$。\\
-                $ \mu_{j+1} \leftarrow 100\mu_j $。\\
-                $ \varepsilon_{j+1} \leftarrow \mu^{-0.1 }$。\\
+                $ \lambda_{j+1} \leftarrow \lambda_j$；\\
+                $ \mu_{j+1} \leftarrow 100\mu_j $；\\
+                $ \varepsilon_{j+1} \leftarrow \mu^{-0.1 }$；\\
             }
-            $ j\leftarrow j+1 $。\\
+
+            $ j\leftarrow j+1 $；\\
         }
-        $ i\leftarrow i+1 $。\\
+        $ i\leftarrow i+1 $；\\
     }
     根据公式（\ref{eq3:rSa}），通过整流Sigmoid激活函数，由$F_i$生成$W^*$。
 \end{algorithm}
 
 MFL方法的求解可以分解为两个子问题，并能够通过交替迭代法求解。在本节中，我们将描述优化求解过程的一些细节。
 
-\begin{itemize}
-    \item 固定$\alpha$求解$F$。
-    当权重系数$\alpha$固定时，公式（\ref{eq3:MFL}）可以被化简为公式（\ref{eq3:MMCP-h}）。因此，我们可以发现$F$的解与公式（\ref{eq3:bl_F}）非常相似：
-    \begin{equation}
-    {F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1},
-    \label{eq3:MFL_F}
-    \end{equation}
-    在其中$  \bar{{D}} = \sum_s \alpha_s  \bar{{D}}_s $ and $  \bar{{L}} = \sum_s \alpha_s \bar{{L}}_s $
+    \textbf{固定$\alpha$求解$F$}：
 
-    \item 固定$F$求解$\alpha$。
-    当$F$固定时，公式（\ref{eq3:MFL}）可以被变形为有界约束的二次优化问题（bound-constrained quadratic optimization problem）：
-    \begin{equation}
-    \begin{split}
-    \mathop{\mathrm{min}}_{{\alpha}}\;&\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T)+\frac{1}{2}\zeta\|{S}{\alpha} - {z}  \|_2^2,\\
-    s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
-    \end{split}
-    \label{eq3:MFL_ALM}
-    \end{equation}
-    
-    考虑到公式（\ref{eq3:MFL_ALM}）的计算复杂度与$\alpha$的维度相关，即与模态数量相关，并且$\alpha$为低维向量，我们采用了增广拉格朗日方法\cite{bertsekas1982constrained}优化所提出的目标函数。
+当权重系数$\alpha$固定时，公式（\ref{eq3:MFL}）可以被化简为公式（\ref{eq3:MMCP-h}）。因此，我们可以发现$F$的解与公式（\ref{eq3:bl_F}）非常相似：
+\begin{equation}
+{F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1},
+\label{eq3:MFL_F}
+\end{equation}
+在其中$  \bar{{D}} = \sum_s \alpha_s  \bar{{D}}_s $ and $  \bar{{L}} = \sum_s \alpha_s \bar{{L}}_s $
 
-    我们沿用了文献\parencite{nocedal2006numerical} 和文献\parencite{bertsekas1982constrained}中所介绍的有界约束拉格朗日优化方法（bound-constrained Lagrangian，BCL）的详细策略。通过将公式（\ref{eq3:MFL_ALM}）中的等式约束纳入增广拉格朗日方法可以生成子问题
-    \begin{equation}\label{eq3:MFL_L}
-    \begin{split}
-    \mathop{\mathrm{min}}_{{\alpha}}\;\mathcal{L}({\alpha},\lambda;\mu) =&\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2+\frac{1}{2}\sum_s\alpha_s\mathrm{tr}({F} \bar{{L}}_s{F}^T) \\
-    &- \lambda({1}^T{\alpha}-1)+\frac{\mu}{2}({1}^T{\alpha}-1)^2\\
-    s.t.\quad &\alpha_s \ge 0.
-    \end{split}
-    \end{equation}
+    \textbf{固定$F$求解$\alpha$}：
 
-    我们采用了投影梯度法（gradient projection method）对公式（\ref{eq:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。我们在算法\ref{alg3:MFL}中对我们所提出的方法以及后处理进行了总结。
-\end{itemize}
+当$F$固定时，公式（\ref{eq3:MFL}）可以被变形为有界约束的二次优化问题（bound-constrained quadratic optimization problem）：
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{\alpha}}\;&\frac{1}{2}\mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T)+\frac{1}{2}\zeta\|{S}{\alpha} - {z}  \|_2^2,\\
+s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
+\end{split}
+\label{eq3:MFL_ALM}
+\end{equation}    
+考虑到公式（\ref{eq3:MFL_ALM}）的计算复杂度与$\alpha$的维度相关，即与模态数量相关，并且$\alpha$为低维向量，我们采用了增广拉格朗日方法\cite{bertsekas1982constrained}优化所提出的目标函数。
+我们沿用了文献\parencite{nocedal2006numerical} 和文献\parencite{bertsekas1982constrained}中所介绍的有界约束拉格朗日优化方法（bound-constrained Lagrangian，BCL）的详细策略。通过将公式（\ref{eq3:MFL_ALM}）中的等式约束纳入增广拉格朗日方法可以生成子问题
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{\alpha}}\;\mathcal{L}({\alpha},\lambda;\mu) =&\frac{1}{2}\zeta\|{S}{\alpha} - {z}\|_2^2+\frac{1}{2}\sum_s\alpha_s\mathrm{tr}({F} \bar{{L}}_s{F}^T) \\
+&- \lambda(\mathbf{1}^T{\alpha}-1)+\frac{\mu}{2}(\mathbf{1}^T{\alpha}-1)^2\\
+s.t.\quad &\alpha_s \ge 0.
+\end{split}
+\label{eq3:MFL_L}
+\end{equation}
+我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。我们在算法\ref{alg3:MFL}中对我们所提出的方法以及后处理进行了总结。
 
-    我们在图\ref{fig3:cvg}中展示了MFL方法的收敛曲线。我们可以发现，一旦我们在RWC方法和MFL方法将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，我们仅需要考虑更新传播结果$F$即系数$\alpha$。
-    
-    由于对角权重矩阵$ \bar{{D}}_s $和拉普拉斯矩阵$\bar{L}_s$都为半正定矩阵，其凸组合$ \sum_s\alpha_s\bar{\mathbf{L}}_s $也为半正定矩阵。因此，公式（\ref{eq3:MFL}）的目标函数中三项皆为为负值，且有$ g_h({F}, {\alpha}) \ge 0 $。我们可以通过任意可行解$F_0$对$F$的解集进行定界，以得到一个$(F, \alpha)$的紧致解集。假设我们在原优化问题基础上增加一个辅助约束：
-    \begin{equation}
-         \frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)  \le g_h({F}_0, {\alpha})
-    \end{equation}
+我们在图\ref{fig3:cvg}中展示了MFL方法的收敛曲线。我们可以发现，一旦我们在RWC方法和MFL方法将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，我们仅需要考虑更新传播结果$F$和系数$\alpha$。下文中我们将简要论述该迭代算法的收敛性。
+
+由于对角权重矩阵$ \bar{{D}}_s $和拉普拉斯矩阵$\bar{L}_s$都为半正定矩阵，其凸组合$ \sum_s\alpha_s\bar{{L}}_s $也为半正定矩阵。因此，公式（\ref{eq3:MFL}）的目标函数中三项皆为为负值，且有$ g_h({F}, {\alpha}) \ge 0 $。我们可以通过任意可行解$F_0$对$F$的解集进行定界，以得到一个$(F, \alpha)$的紧致解集。例如，我们在原优化问题基础上增加一个辅助约束：
+\begin{equation}
+        \frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)  \le g_h({F}_0, {\alpha}),
+\end{equation}
+并且优化问题（\ref{eq3:MFL}）的最优解恒满足此辅助约束条件。极值定理（extreme value theorem）保证了从非空紧空间到一个实数子集的连续映射函数$ g_h({F}, {\alpha})$必然存在最优解$({F}^*, {\alpha}^*) $使得函数取得最小值。
+
+更进一步地，原目标函数为分别关于$F$和$\alpha$的凸函数。对于一个迭代序列集合$ \{({F}^{(t)}, {\alpha}^{(t)})\} $，我们有
+\begin{equation}
+    g_h({F}^{(t)}, {\alpha}^{(t)}) \ge \mathop{\mathrm{min}}_{{F}} g_h({F}, {\alpha}^{(t)}) = g_h({F}^{(t+1)}, {\alpha}^{(t)}) \ge \mathop{\mathrm{min}}_ {{\alpha}} g_h({F}^{(t+1)}, {\alpha}) =g_h({F}^{(t+1)}, {\alpha}^{(t+1)}).
+\end{equation}
+所以，针对$F$和针对$\alpha$的迭代步骤都可以最小化目标函数（\ref{eq3:MFL}），这显示了所提出的RWC和MFL算法都可以有效收敛。如图\ref{fig3:cvg}所示，MFL算法可以在大约两轮迭代中近似收敛。
+
+\subsection{后处理流程}
+在先前关于约束传播的大多数工作中，传播结果$F$被用于完善原始$k$-NN相似性矩阵$W$：
+\begin{equation}
+w^*_{i,j} = 
+\begin{cases}
+1-(1-f_{i,j})(1-w_{i,j}), \qquad &f_{i,j}\ge 0;\\
+(1+f_{i,j})w_{i,j}, &f_{i,j}< 0,
+\end{cases}
+\end{equation}
+其中，$ w_{i,j} $ 为数据实例 $ u_i $ 和$ u_j $之间的相似性。
+
+上述通过调整获得最终解的方法有两个不足之处。一方面，传播结果$ {F} $的信息未被充分利用。另一方面，求得的最终结果高度取决于原始相似性矩阵的质量。在我们的RWC和MFL方法中，我们放弃了原始的相似性矩阵，而采用整流Sigmoid激活函数从从$F$中直接生成统一的相似性矩阵：
+\begin{equation}
+w^*_{i,j} = 
+\begin{cases}
+\frac{1}{1+\text{exp}(-f_{i,j}/\sigma)}, \qquad &\text{if }f_{i,j}>0;\\
+0, &\text{otherwise, }
+\end{cases}
+\label{eq:rSa}
+\end{equation}
+在这里，$ \sigma  $为矩阵$F$中所有元素的强度的均值。整流Sigmoid函数使得统一的相似性矩阵完全依赖于传播的结果。此外，使用整流Sigmoid函数比完善方法更具有可解释性。对于传播结果$F$中的正元素，Sigmoid函数部分将传播结果的数值投影到$0.5$到$1$之间，这可以被解释为一个联合概率。对于负元素，负值表示两个数据样本被预测为不属于同一个类别。因此，我们根据$k$-NN热力核的定义，在统一相似性矩阵中将这些约束设置为$0$，而不是通过Sigmoid函数得到一个正值的相似性。
+
+随后，我们对$ W^* $应用谱聚类方法\cite{von2007tutorial}进行特征投影，并通过$ k$-means聚类对结果进行评估。
+
+\subsection{}
+\label{sec3:dis}
+如果基矩阵$S$的列向量线性无关，我们可以将矩阵$S$的左逆矩阵表示为$ {S} ^+ = ({S}^T{S})^{-1}{S}^T$。定义向量 $ {h} \in  \mathbb{R}^{m} $为
+\begin{equation}
+h_s = \text{tr}({F} \bar{{L}}_s{F}^T).
+\end{equation}
+我们可以将优化问题（\ref{eq3:MFL_ALM}）变形为
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{\alpha}}\;&\|{S}{\alpha} - ( \mathbf{z} - \frac{1}{2\zeta}{S}^+ {h}) \|_2^2,\\
+s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
+\label{eq3:nnls}
+\end{split}
+\end{equation}
+
+公式（\ref{eq3:nnls}）是一个在凸约束$ \sum_s \alpha_s = 1 $下的非负最小二乘法（non-negative least square，NNLS）问题的特例。在我们所提出的MFL可以观察到一些NNLS问题的特性。
+在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的系数性能，这一点在文献\parencite{slawski2011sparse}和文献\cite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
+
+\begin{table}[tb]
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上的聚类性能}{Clustering performance of 2 modalities on Corel 5k and PASCAL VOC'07.}
+	\label{tab3:2modal}
+	\centering
+	\setlength{\tabcolsep}{15pt}
+	\begin{tabular}{lcccc}
+		\toprule
+		&\multicolumn{2}{c}{Corel 5k} & \multicolumn{2}{c}{PASCAL VOC'07} \\
+		\cmidrule(lr){2-3}
+		\cmidrule(lr){4-5}
+		& ACC\% & NMI\% & ACC\% & NMI\% \\
+		\midrule
+		NCuts & 40.23 & 50.68 & 34.11 & 36.06 \\ 
+		E$^2$CP & 49.76 & 59.05 & 46.84 & 45.26 \\
+		MCMCP & 50.20 & 60.42 & 46.00 & 44.13 \\  
+		MMCP & 43.22 & 53.10 & 51.42 & 46.99 \\ 
+		UCP & 48.98 & 59.39 & 36.43 & 24.31 \\ 
+		MSCP & 50.18 & 60.74 & 37.33 & 32.82 \\ 
+		\midrule
+		SW & 48.44 & 56.33 & \textbf{57.44} & \textbf{50.28} \\ 
+		RWC & \textbf{54.97} & 62.11 & 56.80 & 50.24 \\ 
+		MFL & 54.87 & \textbf{62.32} & 55.07 & 48.55 \\ 
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+
+\section{实验结果}
+\label{sec:exp}

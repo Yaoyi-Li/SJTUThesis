@@ -221,10 +221,10 @@
 	\label{alg2:AdaAM}
 	\KwData{数据点 $X \in \mathbb{R}^{n \times d}$；聚类数量 $c$；近邻数量 $k$；降维后维度 $m$。}
 	\KwResult{距离度量矩阵 $M$ 和线性投影矩阵$A$。}
-	构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$。\\
-	根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$。\\
-	根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$。\\
-	求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$。\\
+	构建$k$-NN热力核矩阵$W$，相应的对角化权重矩阵$D$ 以及拉普拉斯矩阵$L$；\\
+	根据公式（\ref{eq2:PXXP}），计算获得列正交矩阵$P$，并求得相应的中间态相似性矩阵$\Delta = PP^T$；\\
+	根据公式（\ref{eq2:AXLXA}），求解得到线性投影矩阵$A$；\\
+	求解公式（\ref{eq2:PXAAXP}），构造新的$P$矩阵，生成相应的最终自适应相似性矩阵$\Delta = PP^T$；\\
 	通过将LPP算法作用于相似性矩阵$\Delta + D$，计算出线性投影矩阵 $A\in\mathbb{R}^{m\times d}$ 及距离度量矩阵 $M=A^TA$。
 \end{algorithm}
 
