@@ -1,6 +1,7 @@
 % !TEX root = ../thesis.tex
 \chapter{基于相似性融合学习的多模态约束传播}
 \section{引言}
+\ref{sec3:intro} 
 在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，也称为比然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
 
 在过去的十几年的时间里，成对约束已广泛用于约束聚类和度量学习问题中。Wagstaff 等人首先在他们的工作中将成对约束引入聚类问题\cite{wagstaff2000clustering,wagstaff2001constrained}。Xing等人提出了一个具有成对约束的距离度量学习框架\cite{xing2002distance}。度量学习中的一些后续工作也证明了成对约束的作用\cite{weinberger2005distance,davis2007information}。
@@ -236,7 +237,7 @@ s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \end{equation}
 并且更新${\alpha}^{old}$：$ {\alpha}^{old} \leftarrow {\alpha}$。由于根据公式（\ref{eq3:bl_F}）计算出的$F$为对称矩阵，因此从竖直传播或水平传播中学习权重系数在结果上是等价的。
 
-从公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
+从公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$\gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
 
 我们在图\ref{fig3:cvg}中给出了RWC方法的收敛曲线。我们对优化问题的近似，公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。我们将在第\ref{sec3:opt}中进行更多的收敛性讨论。
 
@@ -381,6 +382,7 @@ w^*_{i,j} =
 1-(1-f_{i,j})(1-w_{i,j}), \qquad &f_{i,j}\ge 0;\\
 (1+f_{i,j})w_{i,j}, &f_{i,j}< 0,
 \end{cases}
+\label{eq3:refine}
 \end{equation}
 其中，$ w_{i,j} $ 为数据实例 $ u_i $ 和$ u_j $之间的相似性。
 
@@ -391,13 +393,13 @@ w^*_{i,j} =
 \frac{1}{1+\text{exp}(-f_{i,j}/\sigma)}, \qquad &\text{if }f_{i,j}>0;\\
 0, &\text{otherwise, }
 \end{cases}
-\label{eq:rSa}
+\label{eq3:rSa}
 \end{equation}
 在这里，$ \sigma  $为矩阵$F$中所有元素的强度的均值。整流Sigmoid函数使得统一的相似性矩阵完全依赖于传播的结果。此外，使用整流Sigmoid函数比完善方法更具有可解释性。对于传播结果$F$中的正元素，Sigmoid函数部分将传播结果的数值投影到$0.5$到$1$之间，这可以被解释为一个联合概率。对于负元素，负值表示两个数据样本被预测为不属于同一个类别。因此，我们根据$k$-NN热力核的定义，在统一相似性矩阵中将这些约束设置为$0$，而不是通过Sigmoid函数得到一个正值的相似性。
 
 随后，我们对$ W^* $应用谱聚类方法\cite{von2007tutorial}进行特征投影，并通过$ k$-means聚类对结果进行评估。
 
-\subsection{}
+\subsection{权重系数的稀疏性}
 \label{sec3:dis}
 如果基矩阵$S$的列向量线性无关，我们可以将矩阵$S$的左逆矩阵表示为$ {S} ^+ = ({S}^T{S})^{-1}{S}^T$。定义向量 $ {h} \in  \mathbb{R}^{m} $为
 \begin{equation}
@@ -413,7 +415,7 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \end{equation}
 
 公式（\ref{eq3:nnls}）是一个在凸约束$ \sum_s \alpha_s = 1 $下的非负最小二乘法（non-negative least square，NNLS）问题的特例。在我们所提出的MFL可以观察到一些NNLS问题的特性。
-在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的系数性能，这一点在文献\parencite{slawski2011sparse}和文献\cite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
+在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的稀疏性能，这一点在文献\parencite{slawski2011sparse}和文献\cite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
 
 \begin{table}[tb]
 	\bicaption{在Corel 5k和PASCAL VOC'07数据集上的聚类性能}{Clustering performance of 2 modalities on Corel 5k and PASCAL VOC'07.}
@@ -443,4 +445,138 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 
 
 \section{实验结果}
-\label{sec:exp}
+\label{sec3:exp}
+在本节中，我们报告一些实验结果以证明所提出的MFL方法和基线方法RWC的有效性。我们在两个公开可用的数据集上进行了大量的约束聚类实验，展示了所提出的方法在不同的模态数量下的聚类性能及其模态选择能力。
+
+\subsection{数据集描述}
+在我们的实验中，我们采用了INRIA\footnote{\url{http://lear.inrialpes.fr/people/guillaumin/data.php}}发布的两个被广泛使用的多模态特征数据集\cite{guillaumin2009tagprop}：
+\begin{itemize}
+    \item {\textbf{Corel 5k}}。Corel 5k自然图像数据集是一个重要的基准数据集，在许多不同任务上被广泛采用。Corel 5k具有50个类别和4999张自然图像。数据集中的每张图像都有一组关键字描述，这些关键词选取自一个包含260个单词的关键词词典。
+    \item {\textbf{PASCAL VOC'07}}。PASCAL VOC'07数据集\cite{pascal-voc-2007}包含20个图像类别和9963张图像。据集中的所有图像均带有一个或多个类别标注。文字描述基于一个包含804个关键词的词典。
+\end{itemize}
+
+INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16中不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
+此外，为多模态半监督学习任务而创建的这些特征数据集也可以被视为多模态多视图数据集，在我们的实验中，我们将每种特征视为一个独立的模态。
+
+\subsection{对照算法介绍}
+我们将我们所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节种提及的目前先进的方法以及部分基线方法进行了比较。
+以下是我们在实验中所用于对比的算法：
+\begin{itemize}
+    \item {\textit MMCP}。正如在\ref{se3:intro}中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
+    \item {\textit SW}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
+    \item {\textit MSCP}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
+    \item {\textit UCP}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
+    \item {\textit MCMCP}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
+    \item {\textit E$^2$CP}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
+    \item {\textit NCuts}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
+\end{itemize}
+
+\subsection{实验设置}
+\begin{table}[t]
+	\bicaption{在Corel 5k数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on Corel 5k.}
+	\label{tab3:modal_corel}
+	\centering
+	\setlength{\tabcolsep}{8pt}
+	\begin{tabular}{l*{6}{c}}
+		\toprule
+		&\multicolumn{2}{c}{3 modalities} & \multicolumn{2}{c}{8 modalities} & \multicolumn{2}{c}{16 modalities} \\
+		\cmidrule(lr){2-3}
+		\cmidrule(lr){4-5}
+		\cmidrule(lr){6-7}
+		& ACC\% & NMI\% & ACC\% & NMI\% & ACC\% & NMI\% \\
+		\midrule
+		NCuts & 44.98 & 54.33 & 38.61 & 49.27 & 32.07 & 42.11 \\ 
+		E$^2$CP & 52.64 & 61.14 & 40.19 & 50.17 & 28.80 & 39.17 \\ 
+		MCMCP & 49.15 & 59.90 & 36.72 & 51.56 & 36.24 & 51.12 \\ 
+		MMCP & 48.50 & 56.58 & 37.82 & 48.33 & 32.98 & 43.63 \\ 
+		\midrule
+		SW & 51.83 & 60.40 & 42.61 & 50.53 & 33.74 & 42.81 \\
+		RWC & 55.51 & 63.44 & 43.60 & 51.60 & 36.56 & 45.43 \\
+		MFL & \textbf{56.36} & \textbf{63.99} & \textbf{57.04} & \textbf{64.11} & \textbf{56.67} &\textbf{ 64.09} \\
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\begin{table}[t]
+	\bicaption{在PASCAL VOC'07数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on PASCAL VOC'07.}
+	\label{tab:modal_voc}
+	\centering
+	\setlength{\tabcolsep}{8pt}
+	\begin{tabular}{lcccccc}
+		\toprule
+		&\multicolumn{2}{c}{3 modalities} & \multicolumn{2}{c}{8 modalities} & \multicolumn{2}{c}{16 modalities} \\
+		\cmidrule(lr){2-3}
+		\cmidrule(lr){4-5}
+		\cmidrule(lr){6-7}
+		& ACC \% & NMI \% & ACC \% & NMI \% & ACC\% & NMI\%		\\
+		\midrule 
+		NCuts & 26.76 & 25.04 & 23.07 & 21.26 & 22.31 & 18.40 \\
+		E$^2$CP & 40.46 & 39.50 & 29.39 & 26.40 & 25.66 & 21.29 \\ 
+		MCMCP & 34.85 & 27.34 & 29.36 & 24.79 & 29.80 & 24.98 \\  
+		MMCP & 38.29 & 36.14 & 29.04 & 26.40 & 27.85 & 24.90 \\
+		SW & 49.96 & 45.77 & 31.67 & 24.25 & 29.98 & 20.15 \\ 
+		RWC & 53.27 & 47.55 & 42.07 & 34.33 & 29.08 & 24.97 \\ 
+		MFL & \textbf{56.66} & \textbf{49.98} & \textbf{54.95} & \textbf{49.06} & \textbf{56.35} & \textbf{49.86} \\ 
+		\bottomrule
+	\end{tabular}
+\end{table}
+为了评估这些方法的聚类性能，我们在实验中采用准确率（accuracy，ACC）和归一化互信息（normalized mutual information，NMI）作为聚类结果的性能测度。
+由于约束传播方法的性能在某种程度上取决于约束矩阵${Y}$的选择。我们在每个实验中生成多个约束矩阵，并在本节中报告算法在不同约束矩阵上的平均性能。
+我们在$k$-means阶段部署30次聚类，并选择类内和最小的聚类结果作为$k$-means阶段的结果。
+
+
+\begin{figure}[t]
+	\centering
+	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
+					{ACC on  Corel 5k}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_acc.eps}
+                    \label{fig3:corel5k_cn_acc}}
+	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
+					{NMI on  Corel 5k}
+                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_nmi.eps}
+                    \label{fig3:corel5k_cn_nmi}}
+                    
+	\centering
+	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
+					{ACC on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_acc.eps}
+                    \label{fig3:voc_cn_acc}}
+	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
+					{NMI on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_nmi.eps}
+                    \label{fig3:voc_cn_nmi}}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用3个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints.}
+	\label{fig3:cn}
+\end{figure} 
+
+
+\begin{figure}[t]
+	\centering
+	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
+					{ACC on  Corel 5k}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_acc.eps}
+                    \label{fig3:corel5k_cn_16_acc}}
+	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
+					{NMI on  Corel 5k}
+                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_nmi.eps}
+                    \label{fig3:corel5k_cn_16_nmi}}
+                    
+	\centering
+	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
+					{ACC on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_acc.eps}
+                    \label{fig3:voc_cn_16_acc}}
+	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
+					{NMI on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_nmi.eps}
+                    \label{fig3:voc_cn_16_nmi}}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用16个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints.}
+	\label{fig3:cn}
+\end{figure} 
+
+实验中，除RWC中的$\gamma $之外，所有参数都有相同的参数选择标准。在RWC和MFL方法中传播参数$ \eta $如同MMCP和E$^2$CP一样都为$ 0.25 $。我们将$k$-NN近邻数量设置为$ k = \mathrm{Round}(\mathrm{log}_2(\frac{n}{c}))$，其中$ n $是数据实例的数量，$ c $是类别数。谱聚类中的特征嵌入维数为$ c + 1 $。
+
+与Corel 5k数据集不同，PASCAL VOC'07数据集是为目标检测而提出的多标签数据集。该数据集中的许多数据样本都在真实标签中被标注了多个类别。我们在PASCAL VOC'07数据集上采用了一个标注技巧，而不是多标签聚类方法，以使性能与在Corel 5k上的聚类结果保持一致可比较。
+我们将每个多标签数据样本复制多次以生成与其标签数量一样多的相同样本。然后，为每个副本分配一个标签。因此，带有$ t $个标签的数据样本将变成$ t $个分别仅带有一个标签的不同样本，尽管这些样本都有相同的的特征。使用这种多标签增强技巧后，性能测度ACC和NMI将始终小于1。因此，我们将评估结果除以理想化最优结果，以对评估分数进行归一化。
+
+\subsection{性能评估与比较}
