@@ -1,7 +1,7 @@
 % !TEX root = ../thesis.tex
 \chapter{基于相似性融合学习的多模态约束传播}
 \section{引言}
-\ref{sec3:intro} 
+\label{sec3:intro} 
 在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，也称为比然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
 
 在过去的十几年的时间里，成对约束已广泛用于约束聚类和度量学习问题中。Wagstaff 等人首先在他们的工作中将成对约束引入聚类问题\cite{wagstaff2000clustering,wagstaff2001constrained}。Xing等人提出了一个具有成对约束的距离度量学习框架\cite{xing2002distance}。度量学习中的一些后续工作也证明了成对约束的作用\cite{weinberger2005distance,davis2007information}。
@@ -415,10 +415,10 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \end{equation}
 
 公式（\ref{eq3:nnls}）是一个在凸约束$ \sum_s \alpha_s = 1 $下的非负最小二乘法（non-negative least square，NNLS）问题的特例。在我们所提出的MFL可以观察到一些NNLS问题的特性。
-在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的稀疏性能，这一点在文献\parencite{slawski2011sparse}和文献\cite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
+在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的稀疏性能，这一点在文献\parencite{slawski2011sparse}和文献\parencite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
 
 \begin{table}[tb]
-	\bicaption{在Corel 5k和PASCAL VOC'07数据集上的聚类性能}{Clustering performance of 2 modalities on Corel 5k and PASCAL VOC'07.}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上的聚类性能}{Clustering performance of 2 modalities on Corel 5k and PASCAL VOC'07}
 	\label{tab3:2modal}
 	\centering
 	\setlength{\tabcolsep}{15pt}
@@ -462,13 +462,13 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 我们将我们所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节种提及的目前先进的方法以及部分基线方法进行了比较。
 以下是我们在实验中所用于对比的算法：
 \begin{itemize}
-    \item {\textit MMCP}。正如在\ref{se3:intro}中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
-    \item {\textit SW}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
-    \item {\textit MSCP}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
-    \item {\textit UCP}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
-    \item {\textit MCMCP}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
-    \item {\textit E$^2$CP}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
-    \item {\textit NCuts}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
+    \item {\textbf{MMCP}}。正如在\ref{sec3:intro}中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
+    \item {\textbf{SW}}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
+    \item {\textbf{MSCP}}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
+    \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
+    \item {\textbf{MCMCP}}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
+    \item {\textbf{E$^2$CP}}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
+    \item {\textbf{NCuts}}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
 \end{itemize}
 
 \subsection{实验设置}
@@ -529,23 +529,23 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\centering
 	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
 					{ACC on  Corel 5k}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_acc.eps}
-                    \label{fig3:corel5k_cn_acc}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_acc.eps}}
+                    \label{fig3:corel5k_cn_acc}
 	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
 					{NMI on  Corel 5k}
-                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_nmi.eps}
-                    \label{fig3:corel5k_cn_nmi}}
+                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_nmi.eps}}
+                    \label{fig3:corel5k_cn_nmi}
                     
 	\centering
 	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
 					{ACC on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_acc.eps}
-                    \label{fig3:voc_cn_acc}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_acc.eps}}
+                    \label{fig3:voc_cn_acc}
 	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
 					{NMI on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_nmi.eps}
-                    \label{fig3:voc_cn_nmi}}
-	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用3个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints.}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_nmi.eps}}
+                    \label{fig3:voc_cn_nmi}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用3个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints}
 	\label{fig3:cn}
 \end{figure} 
 
@@ -554,23 +554,23 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\centering
 	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
 					{ACC on  Corel 5k}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_acc.eps}
-                    \label{fig3:corel5k_cn_16_acc}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_acc.eps}}
+                    \label{fig3:corel5k_cn_16_acc}
 	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
 					{NMI on  Corel 5k}
-                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_nmi.eps}
-                    \label{fig3:corel5k_cn_16_nmi}}
+                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_nmi.eps}}
+                    \label{fig3:corel5k_cn_16_nmi}
                     
 	\centering
 	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
 					{ACC on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_acc.eps}
-                    \label{fig3:voc_cn_16_acc}}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_acc.eps}}
+                    \label{fig3:voc_cn_16_acc}
 	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
 					{NMI on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_nmi.eps}
-                    \label{fig3:voc_cn_16_nmi}}
-	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用16个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints.}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_nmi.eps}}
+                    \label{fig3:voc_cn_16_nmi}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用16个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints}
 	\label{fig3:cn_16}
 \end{figure} 
 
