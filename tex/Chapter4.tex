@@ -233,7 +233,22 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
     根据公式（\ref{eq4:cons}}为每个模态构建共识相似性矩阵$ {W} ^{cons}_s$；\\
     根据公式（\ref{eq4:modalcohere}）、（\ref{eq4:cohere}）和（\ref{eq4:Pglu}），分别针对每个模态和每个数据实例计算一致性$ c_{mod}(\mathcal{G}_s)$、$c_s(i) $ 和概率 $ P^\dagger (\mathcal{G}_s|u_i) $；\\
     通过公式（\ref{eq4:OptSlv}）重构相容条件概率分布；\\
-    Generate unified multi-modal affinity $ \mathbf{W} $ according to Eq. \eqref{eq_uni_aff} and sparsify  $ \mathbf{W} $\;
-    Solve optimization problem Eq. \eqref{obj2} to obtain the balanced propagation result $ \mathbf{F} $\;
-    Normalize $ \mathbf{F} $ to get Sigmoid affinity matrix $ \mathbf{W^*}$  by Eq. \eqref{eq_sig}.
+    基于公式（\ref{eq4:uni_aff}）生成并稀疏化相似性矩阵 $ {W} $ ；\\
+    求解优化问题（\ref{eq4:obj2}）以获得两类约束数量均衡的传播结果$ {F} $；\\
+    利用公式（\ref{eq4:sig}）归一化 $ {F} $ 得到 Sigmoid 相似性矩阵$ {W^*}$。
 \end{algorithm}
+
+\subsection{后处理流程}
+\label{sec4:sigmoid}
+正如上一章所提及的，多数先前的工作利用传播结果$F$对原始的相似性矩阵进行调整。这会令最终获得的相似性矩阵依然非常稀疏。在ILMCP中，我们延续使用了MFL中采用的只通过传播结果$F$生成最终相似性矩阵的方法。最终相似性矩阵依然基于整流Sigmoid激活函数$W^*$生成：
+\begin{equation}
+{w}^*_{i,j} = 
+\begin{cases}
+\frac{1}{1+\text{exp}(-{F}_{i,j}/\sigma)}, \qquad &\text{if }{F}_{i,j}>0;\\
+0, &\text{otherwise, }
+\end{cases}
+\label{eq4:sig}
+\end{equation}
+其中$\sigma$为$F$所有元素绝对值的均值。需要注意的是，算法中所用来平衡正负约束数量的代价敏感加权过程是针对该Sigmoid相似性所设计的。至于先前工作中广泛采用的调整方法，由于高度依赖与原始相似性矩阵，数据均衡处理并不能有效改善聚类效果。
+
+最终，我们在矩阵$W^*$上通过谱聚类方法进行聚类\cite{von2007tutorial}，以产生用于评估的结果。算法\ref{alg4:ilmcp}对ILMCP算法的整体流程进行了总结。
