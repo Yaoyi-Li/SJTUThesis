@@ -1,0 +1,239 @@
+% !TEX root = ../thesis.tex
+\chapter{基于相容条件概率分布重构的相似性学习}
+\section{引言}
+如前文所述，约束传播方法多数为针对单模态情况而设计的。近年来，有大量的工作对多模态融合进行了深入的研究\cite{lahat2015multimodal,poria2017ensemble,yu2017deep,poria2017review,liu2018weakly,kiela2018efficient}。在无监督或半监督的多模态任务中，学习的核心阻碍是训练数据不足而难以学习不同模态的权重。
+模态权重表示了每种模态的重要性，因此，一些工作主张如果我们可以获得关于模态的先验知识，则可以为噪声较大的模态分配较小的权重\cite{kumar2011co,liu2013multi}。
+
+在前文中我们所提出的MFL算法将模态级的融合学习推广到了多模态约束传播问题中。但是，通常情况下从模态的鲁棒性推导得出模态权重是更加合理。Sohn等人提出了一种深度学习方法以最小化两种模态之间的信息差异\cite{sohn2014improved}，这可以视为通过鲁棒性学习模态融合的特殊情况。同时在鲁棒相似性矩阵学习方面也取得了一些进展\cite{pavan2007dominant,premachandran2013consensus,zhu2014constructing}。这些方法
+提供了不同的标准来衡量每个模态信息是否有噪声，而我们可以利用这些方法来生成模态的一些先验知识。
+
+在本文中，我们首先提出并解决了相容条件概率分布重构（Compatible Conditional Distributions Reconstruction，CCDR）这个基础问题。基于CCDR，我们设计了一种新的多模态约束传播相似性学习方法，被命名为实例级多模态约束传播（Instance Level Multi-Modal Constraint Propagation，ILMCP）。
+ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传播生成出统一的相似性图。所提出的方法将关注点集中在多模态约束传播中的转移概率推理上。
+此外，区别于先前的工作，我们在本章所提出的方法建立在数据实例的邻域鲁棒性上，而不是每个模态整体的稳健性。为此，我们在算法中对一对相容条件概率分布进行了重构，即给定特定数据实例条件下的模态概率以及给定某个模态条件下的特定数据实例的概率。随后，我们从上述分布中得出统一的转移概率，以生成一个相似性矩阵。除此之外，我们引入了一种代价敏感（cost-sensitive）的方法来平衡传播过程中的正约束和负约束数量问题。在数学符号表示上我们将延续上一章中的设定。
+
+\section{相容条件概率分布重构}
+在本节中，我们提出在特定假设下条件概率相容的必要和充分条件，并提出用于相容条件概率分布重构（Compatible Conditional Distributions Reconstruction，CCDR）的方法。
+
+在许多实际情况下，条件分布比联合分布更加易于直观理解。研究人员更倾向于在提出的方法中采用一组假定存在的条件分布族，例如$P(X|Y)$和$P(Y|X)$\cite{arnold1989compatible}。但是，可能并不存在能够生成特定条件分布族的相关联的边缘概率分布和联合概率分布，这种情况被称为条件概率分布不相容。为了更准确的描述这种情况，我们在下文中给出了相容条件概率分布的定义。
+
+\begin{definition}
+    对于两个候选的条件概率分布族$ P(X|Y) $ 和 $ P(Y|X) $，如果存在一个与两者相关联的 $ (X,Y) $的联合概率分布，则称两个候选条件概率分布族为相容，否则称两个候选条件概率分布族不相容。
+\end{definition}
+
+条件概率分布相容性的充分必要条件由Arnold等人在文献\parencite{arnold1989compatible}中首次提出。由于文献\parencite{arnold1989compatible}中提出的条件针对于概率分布的一般情况，该条件对两个条件概率分布中随机变量可能取值的任意组合进行了性质讨论。同时上述文献中并未对如何从两个不相容的条件概率分布中重建出相容条件概率分布进行研究。
+
+在假设这些双变量有限离散的条件概率分布中不存在\textbf{零值概率}的情况下，我们给出了更加简洁的相容条件概率分布的充要条件，并给出了一个线性代数角度的证明。
+
+\begin{theorem}
+    \label{thm4}
+    对于条件概率分布 $P(Y|X)$ 和 $P(X|Y)$，定义商矩阵$Q$，其中${q}_{i,j} = \frac{P(x_i|y_j)}{P(y_j|x_i)}$。$P(Y|X)$ 和 $P(X|Y)$为相容条件概率分布当且仅当商矩阵$Q$为秩$1$矩阵且$\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$。
+\end{theorem}
+\begin{proof}
+    假设$P(Y|X)$ 和 $P(X|Y)$为相容条件概率分布。则必然能找到相关联的边缘概率分布$P(X), P(Y)$，以及联合概率分布$P(X, Y)$。因此可以得到：
+    \begin{equation}
+    {q}_{i,j} = \frac{P(x_i|y_j)}{P(y_j|x_i)} = \frac{P(x_i)}{P(y_j)}.
+    \label{eq4:q}
+    \end{equation}
+    给定商矩阵$Q$的第$s$行，则能够通过求$s$行与$\frac{P(x_t)}{P(x_s)}$的乘积确定商矩阵$Q$的第$t$行元素。这导致了$Q$为一个秩$1$矩阵。且通过公式（\ref{eq4:q}）可以得到
+    \begin{equation}
+    \sum_j\frac{1}{\sum_i {q}_{i,j}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1  
+    \end{equation}
+
+    相反地，假设$Q$为一个秩$1$矩阵成立且。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{i,j} ={ m}_i{n}_j$ 带入 $\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
+    从而可以通过两个正向量$m$和$n$构建两个离散边缘概率分布：
+    \begin{equation}
+    P(x_i) = {m}_i, \quad P(y_j) = \frac{1}{{n}_j}.
+    \end{equation}
+
+    接下来，我们将证明存在能够满足 $P(X, Y) = P(Y|X)P(X) = P(X|Y)P(Y)$的联合概率分布$P(X, Y)$。
+    由于$P(Y|X)$ 和 $P(X)$ 分别唯一个条件概率分布和一个边缘概率分布，因此，也可以将两者的乘积视为一个概率分布。相似地，乘积 $P(X|Y)P(Y)$ 也可以构造为一个概率分布。故，存在性证明的核心在于证明 $P(y_j|x_i)P(x_i) = P(x_i|y_j)P(y_j)$ 对于所有的 $i$ 和$j$恒成立。
+    基于 ${q}_{i,j} = {m}_i{n}_j$可知
+    \begin{equation}
+    \begin{split}
+    &\frac{P(x_i|y_j)}{P(y_j|x_i)} = {q}_{i,j} = {m}_i{n}_j\\
+    \Rightarrow &\frac{P(x_i|y_j)}{{n}_j} = P(y_j|x_i) {m}_i\\
+    \Rightarrow &P(x_i|y_j)P(y_j) = P(y_j|x_i)P(x_i), 
+    \end{split}
+    \end{equation}
+    即表明$P(Y|X)$ 和 $P(X|Y)$为两个相容的条件概率分布族。
+\end{proof}
+
+基于定理\ref{thm4}我们可以设计出通过两个不相容条件概率分布重建出近似的相容条件概率分布的方法。这里需要注意的是，我们将通过概率$P^\dagger (x_i|y_j)$ 和 $P^\dagger (y_j|x_i)$中的上标$\dagger$ 来表示相应的条件概率分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$是不相容的。
+
+从定理\ref{thm4}中可以注意到如果希望概率分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$是相容的，并能够从中推导出概率$P(x_i), P(y_j)$，则需要商矩阵$Q$为秩$1$矩阵。这里我们将暂时忽略条件$\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$，该条件可以在求解后通过缩放重新满足。一般情况下，矩阵$Q$不会为秩$1$矩阵。一个可能的解决方案为假设不相容分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$在观测中受噪声干扰，其真实分布为相容条件概率分布，并且含有噪声的商矩阵$Q$接近秩$1$矩阵。
+
+在下文中，我们假设$P^\dagger(X|Y)$ 和 $P^\dagger(Y|X)$ 分别受到高斯噪声$ \mathcal{N}(0, \alpha^2) $ 和  $ \mathcal{N}(0, \beta^2) $的干扰。因此，我们通过对矩阵$Q$进行奇异值分解得到其秩为$1$的近似矩阵$\hat{{Q}}$。目标相容概率分布 $P(X|Y)$ 和  $P(Y|X)$可以通过求解在近似商矩阵$\hat{{Q}}$约束下的极大似然估计求得。最大化对数似然的优化问题可写为：
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{P(x_i|y_j), P(y_j|x_i)} & \quad \frac{1}{2 \alpha^2} \sum_{i,j}(P(x_i|y_j)-P^\dagger(x_i|y_j))^2 \\
+&+ \frac{1}{2 \beta^2} \sum_{i,j}(P(y_j|x_i)-P^\dagger(y_j|x_i))^2\\
+\mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{i,j}\\
+%             &\quad \;\sum_{s}P(u_i|\mathcal{G}_s) = 1\\
+%             &\quad \;\sum_{s}P(G_s|u_i) = 1
+\end{split}
+\label{eq4:Opt}
+\end{equation}
+
+在公式（\ref{eq4:Opt}）中我们移除了归一化约束$\sum_{i}P(x_i|y_s) = 1$ 和  $\sum_{j}P(y_j|x_i) = 1$。在这个松弛条件下，该优化问题可以通过逐元素独立计算高效地求解，且归一化流程可以在优化求解后进行。在我们的实现中，高斯噪声的方差选择基于受噪声干扰的条件分布确定。更具体地，令$\alpha^2 = \sum_{i,j}P^\dagger(x_i|y_j)^2$ 且 $\beta^2 = \sum_{i,j}P^\dagger(y_j|x_i)^2$。
+
+\section{实例级多模态约束传播}
+在本节中我们将对所提出的基于相容条件概率分布重构的实例级多模态约束传播（ILMCP）方法进行介绍，并对部分实现细节进行描述。
+\subsection{模态信息鲁棒性}
+在ILMCP中，我们通过近似Consensus $k$-NNs\cite{premachandran2013consensus}的方法对每个模态的鲁棒性进行近似估计。Consensus $k$-NNs方法通过收集多轮$k$-NN近邻的公式信息提供一个可供进行近邻选择的判别标准，该方法可以被看作是二阶相似性（Second-order Proximity）\cite{tang2015line,wang2016structural}的一种近似。如果数据点对$u_i$ 和 $u_j$同时出现在许多其他数据点的$k$-NN近邻中，则该点对相似的可能性更高。反之，如果两个数据点$u_i$和$u_j$从未同时出现在其他数据实例的近邻中，则即使在该点对上观测到高相似性也有比较大的概率为观测噪声。
+在算法\ref{alg4:consknn}中我们给出了根据Consensus $k$-NNs构建共识矩阵$C$的算法细节。$C$中的元素可以被用于估计任意两个数据点间的相似性的鲁棒程度。此外，通过在Consensus $k$-NNs中设置阈值$\tau$，可以${c}_{i,j}\le\tau$的任意点对$u_i$和$u_j$互相从对方的近邻集合中移除。
+\begin{algorithm}[tb]
+    %		\small
+            %	\renewcommand{\algorithmicrequire}{\mathbf{Input:}}
+            %	\renewcommand{\algorithmicensure}{\mathbf{Output:}}
+            \caption{构造共识矩阵}
+            \label{alg4:consknn}
+            ${C} = \mathbf{0}$;
+            \For {$i = 1:N$}{
+                \ForAll {$u_j, u_k$满足$u_j, u_k \in \mathcal{N}_k(u_i)$}{
+                    % 					 \text{ \AND } j\neq k$}
+                    ${c}_{j,k} = {c}_{j,k}+1$\;
+                    ${c}_{k,j} = {c}_{k,j}+1$\;
+                }
+            }
+\end{algorithm}
+
+在我们的方法中，共识矩阵的构造与文献\parencite{premachandran2013consensus}中提出的原始算法不同。我们利用共识矩阵从现有的相似性矩阵中对噪声进行剪枝，而不是重建新的近邻集合：
+\begin{equation}
+{w}^{cons}_{i,j} = 
+\begin{cases}
+0,\quad\qquad\qquad&\text{if }{c}_{i,j}<\tau;\\ {w}^{dense}_{i,j},&\text{otherwise,}
+\end{cases},
+\label{eq4:cons}
+\end{equation}
+这其中，${W}^{dense}$为稠密的$k$NN热力核相似性矩阵，即近邻数量$k$取值较大，我们在实现中令$k = \mathrm{Round}( \frac{\#sample}{\#cluster})$。 ${W}^{cons}$为经过共识矩阵剪枝后的相似性矩阵。由于公式（\ref{eq4:cons}）为针对相似性矩阵的一般性公式，不表示某个特定模态，所以我们忽略了矩阵的第三个下标以保持公式的简洁。由于通过$k$-NN近邻构建的矩阵${W}^{dense}$仅是相对稠密的，所以我们的算法实现比原始的Consensus $k$-NNs方法更加高效，在下文中我们将对这一点进行进一步说明。
+
+对于每个模态图$\mathcal{G}_s$，根据公式（\ref{eq4:cons}）计算共识相似性矩阵${W}^{cons}_s$。我们对矩阵${W}_s^{dense}$ 和 ${W}_s^{cons}$分别进行行归一化，使得矩阵中的每行可以作为一个概率分布。然后，通过KL散度（Kullback-Leibler divergence）对数据实例在每个模态中的相似性的不一致性（incoherence）进行定义：
+\begin{equation}
+inc_s(i) = \sum_j {w}^{dense}_{i,j,s}\;\text{ln}\frac{{w}^{dense}_{i,j,s}}{{w}^{cons}_{i,j,s}}, 
+\label{eq4:incohere}
+\end{equation}
+式中${W}^{dense}_{i,j,s}$为数据点对 $u_i$ 和 $u_j$在图$\mathcal{G}_s$上的$k$-NN相似性，${w}^{cons}_{i,j,s}$为相对应的共识相似性取值。
+
+实例级不一致性函数$inc_s(i)$是用于估计图$\mathcal{G}_s$上数据点$u_i$和其近邻间相似性值的鲁棒程度的一个测度。不一致性越小，则说明在数据实例上所观测到的近邻关系越稳定。此外，有两个实现中的细节需要关注。一方面相似性矩阵${W}^{dense}_s$为相对稠密的矩阵。另一方面，我们通过在矩阵 ${W}_s^{dense}$ 和 ${W}_s^{cons}$上叠加一个极小值（例如$10^{-8}$）以解决在离散概率中存在的零值问题。
+
+更进一步地，根据上一章所提出的MFL方法，我们同时定义模态级一致性$ {c}_{mod} = [c_{mod}(\mathcal{G}_1), c_{mod}(\mathcal{G}_2),...] $来描述全局信息：
+\begin{equation}
+\begin{split}
+{c}_{mod} = \;&\mathop{\mathrm{argmin}}_{{c}_{mod}}\; \frac{1}{2}\|{S}{c}_{mod} - {z}  \|_2^2, \\
+s.t.\quad&\sum_{s} c_{mod}(\mathcal{G}_s) = 1;\\ &\; c_{mod}(\mathcal{G}_s) \ge 0,
+\end{split}
+\label{eq4:modalcohere}
+\end{equation}
+其中$z$为约束向量，$S$为相应的基矩阵， 
+\begin{equation}
+{S}_{k,s} =  {w}^{dense}_{r(k), c(k), s}, \quad  {z}_k = \begin{cases}1,\quad &\text{if }  {Y}_{r(k),c(k)} =1; \\
+0, \quad &\text{otherwise}.
+\end{cases}
+\end{equation}
+函数$ r(i) $返回$Y$中第$i$个约束的行数，$ c(i) $返回相应的列数。
+
+\subsection{统一的多模态相似性学习}
+一旦能够求得条件概率$P(\mathcal{G}_s|u_i)$，则可以计算出统一的转移概率$ P(u_i\rightarrow u_j) $。在通过公式（\ref{eq4:modalcohere}）和（\ref{eq4:incohere}）获取到模态级和实例级的鲁棒性信息后，我们首先根据实例级的不一致性对实例级一致性测度 $ c_s(i) $进行定义，然后给定数据实例$u_i$条件下的图$\mathcal{G}_s$的条件概率则可以通过计算模态级一致性和实例级一致性的归一化乘积得到：
+\begin{equation}
+c_s(i) = \frac{1}{inc_s(i)+1}
+\label{eq4:cohere},
+\end{equation}
+\begin{equation}
+P^\dagger (\mathcal{G}_s|u_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(i) c_{mod}(\mathcal{G}_s)}
+\label{eq4:Pglu}.
+\end{equation}
+
+公式（\ref{eq4:cohere}）中的定义可以令人联想到t-SNE\cite{maaten2008visualizing}方法中对联合概率的定义形式。而公式（\ref{eq4:Pglu}）则基于假设：实例$u_i$在不同模态信息下的不一致性能够反映出不同模态的可信度。具有高可信度的模态可能具有更鲁棒的信息，以及更少的噪声。这里需要注意的是，所计算出的可信度只对应于特定的数据实例$u_i$，因此这属于实例级的可信度。基于该假设，我们需要对概率测度$ P(\mathcal{G}_s|u_i) $进行设计。该概率测度应与不一致性成反比，而相应的最简的构造形式为$ 1/inc_s(i) $。从公式（\ref{eq4:Pglu}）中可以发现，在给定模态$s$的情况下，较小的不一致性即隐含了图$\mathcal{G}_s$具有较大的条件概率。在特定情况下，可能出现$ inc_s(i) =0 $的情况，所以我们采用$ inc_s(i) +1 $替代$ inc_s(i)$。因此 $ P(\mathcal{G}_s|u_i) $ 应当正比于 $ (inc_i+1)^{-1} $，而概率公式中的分母项则用于归一化。公式（\ref{eq4:Pglu}）为满足该条件的概率测度的最简形式。相应的条件概率$P^\dagger(u_i|\mathcal{G}_s)$可以采用与公式（\ref{eq3:Pulg}）相同的方式进行计算。
+
+此处令上文所述的商矩阵中$q_{i,s} = \frac{P^\dagger(u_i|\mathcal{G}_s)}{P^\dagger(\mathcal{G}_s|u_i)}$，通过对矩阵$Q$进行秩$1$近似得到近似矩阵$\hat{Q}$并求解优化问题（\ref{eq4:Opt}），能够得到两个相容条件概率分布的闭式解：
+\begin{equation}
+\begin{split}
+&P(u_i|\mathcal{G}_s) = \frac{\alpha P^\dagger(u_i|\mathcal{G}_s)\hat{{q}}_{i,s}^2+\beta P^\dagger(\mathcal{G}_s|u_i)\hat{{q}}_{i,s}}{\alpha \hat{{q}}_{i,s}^2 + \beta},\\
+%             &\quad(\alpha = \frac{1}{\sum_{i,j}P(u_i|\mathcal{G}_j)^2}, \beta = \frac{1}{\sum_{i,j}P(G_j|u_i)^2})\\
+&P(\mathcal{G}_s|u_i) = \frac{P(u_i|\mathcal{G}_s)}{\hat{{q}}_{i,s}}\;. 
+\end{split}
+\label{eq4:OptSlv}
+\end{equation}
+
+而由于$\hat{Q}$为近似后的秩$1$商矩阵，边缘概率$P(u_i)$和$P(\mathcal{G}_s)$可以通过分别归一化$\hat{Q}$中的任意一行和任意一列获得，例如：
+\begin{equation}
+    P(u_i) = \frac{\hat{q}_{i,1}}{\sum_i\hat{q}_{i,1}}, \quad\quad P(\mathcal{G}_s) = \frac{\hat{q}_{1,s}}{\sum_i\hat{q}_{1,s}}.
+\end{equation}
+相应的根据$\bar{d}_ii=P(u_i)$可以计算出对角权重矩阵$\bar{D}$。
+
+我们可以进一步根据公式（\ref{eq3:mmcp_trans}）获得统一的归一化相似性矩阵$\bar{W}$，
+\begin{equation}
+\begin{split}
+\bar{w}_{i,j} &= P(u_i,u_j) \\ &= P(u_i)P(u_i\rightarrow u_j)\\
+&=P(u_i)\sum_s P(u_j|u_i, \mathcal{G}_s)P(\mathcal{G}_s|u_i), 
+\end{split}
+\label{eq4:uni_aff}
+\end{equation}
+并对该矩阵进行稀疏化。
+
+
+\subsection{约束传播中的样本不均衡}
+需要注意到的是，从数据相似性中采样到的成对约束可能会存在严重的数据分布不均衡问题。 正负约束之间的数量不均衡会在传播后被严重加剧。在本节中我们将从不均衡的二分类角度考虑约束传播问题。更具体地说，我们要将传播的相似性分为两类（即must-link和cannot-link），并控制它们之间的比率。
+
+在不均衡学习上问题有大量的方法先后被提出，两种经典策略：重采样和代价敏感学习仍然在当前的研究工作中占据主导地位\cite{he2009learning,huang2016learning}。考虑到约束信息的稀缺性，我们仅将代价敏感策略引入我们的方法中以解决数据不均衡问题。最近的一些工作显示了在不均衡数据中采用代价敏感学习的优势\cite{shi2000normalized,DBLP:journals/corr/KhanBST15}。
+
+ILMCP方法将约束矩阵$Y$分解成两个矩阵的和的形式${Y} = {Y}_++{Y}_-$，其中${Y}_+$由$Y$中的所有正元素构成：
+\begin{equation}
+{y}_{+i,j} = 
+\begin{cases}
+y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
+\end{cases},
+\end{equation}
+相应的${Y}_-$由$Y$中所有的负元素构成。
+可以证明，有${Y}_+^T{\bar{{D}} Y}_- = \mathbf{0}$。然后，通过展开 $ \mathrm{tr}(({F}_v - {Y} )^T{\bar{D}}({F}_v - {Y})) $可以得到
+\begin{equation}
+\begin{split}
+\mathrm{tr}((F_v - Y )^T\bar{D}(F_v - Y))=\;&\mathrm{tr}(({F}_v-{Y}_+)^T{\bar{D}}({F}_v-{Y}_+))+\mathrm{tr}(({F}_v-{Y}_-)^T{\bar{D}}({F}_v-{Y}_-))\\
+&-\mathrm{tr}({F}_v^T{\bar{D} F}_v). 
+\end{split}
+\label{eq4:fpif2}
+\end{equation}
+
+通过对公式（\ref{eq4:fpif2}）的正元素部分增加权重参数$\alpha$，可以将该公式近似看作是一个代价敏感问题。基于文献\parencite{elkan2001foundations}中所提出的定理，如果参数$\alpha$被设置为must-link和cannot-link数量的比值，则可以近似解决样本不均衡的问题。事实上，最理想情况是这两种约束在采样得到的约束矩阵$Y$和转移概率矩阵$F$中有相同的数量比例，而不是令生成的转移概率矩阵$F$中两类约束数量近似相同以完全解决不均衡情况。因此，本方法对不均衡情况的加剧（$\alpha=1$）和缓解（$\alpha= \frac{\#\text{cannot-link}}{\#\text{must-link}}$）进行了折衷，最终选取权重参数为
+\begin{equation}
+    \alpha = \sqrt{\frac{\#\text{cannot-link}}{\#\text{must-link}}}.
+\end{equation}
+
+将加权后的约束、求解出的相似性矩阵$\bar{W}$，代入回公式（\ref{eq3:MMCP-v}）可以得到优化目标函数：
+\begin{equation}
+\begin{split}
+\mathop{\mathrm{min}}_{{F}_v}\;&\frac{1}{2}\alpha\eta \mathrm{tr}(({F}_v-{Y}_+)^T{\bar{D}}({F}_v-{Y}_+))+\frac{1}{2}\eta \mathrm{tr}(({F}_v-{Y}_-)^T{\bar{D}}({F}_v-{Y}_-))\\
+&+\frac{1}{2}\mathrm{tr}({F}_v^T(\bar{L}-\eta {\bar{D}}){F}_v), 
+\end{split}
+\label{eq4:obj2}
+\end{equation}
+其中$\bar{L} = \bar{D} - \bar{W}$。通过令目标函数关于$F_v$的导数等于零求解该优化问题，能够获得公式（\ref{eq3:sol-v}）形式相似的竖直方向传播结果矩阵$F_v$:
+\begin{equation}
+\begin{split}
+        & \alpha\eta \bar{D} (F_v - Y_+) + \eta\bar{D} (F_v - Y_-)+(\bar{L}-\eta\bar{D})F_v = 0\\
+% \Rightarrow  \;           & (\alpha+1)\eta \bar{D} F_v - \eta\bar{D}(\alpha Y_+ + Y_-) + (\bar{L}-\eta\bar{D})F_v = 0\\
+\Rightarrow   \;          & (\bar{L}+\alpha\eta\bar{D})F_v = \eta\bar{D}(\alpha Y_++Y_-)\\
+\Rightarrow   \;          & {F}_v = \eta(\bar{L}+\alpha\eta{\bar{D}})^{-1}{\bar{D}}(\alpha {Y}_++{Y}_-),
+\end{split}
+\end{equation}
+同样的方法也能够求得水平方向传播结果$F_h$。此后，通过合并竖直和水平方向的传播结果可以得到最终的传播结果矩阵$F$:
+\begin{equation}
+{ F} = \eta^2(\bar{L}+\alpha\eta{\bar{D}})^{-1}{\bar{D}}(\alpha {Y}_++{Y}_-){\bar{D}}(\bar{L}+\alpha\eta{\bar{D}})^{-1}.
+\end{equation}
+
+
+\begin{algorithm}[tb]
+	\SetKwInput{KwIn}{输入}
+    \SetKwInput{KwOut}{输出}
+    \caption{ILMCP算法流程}
+    %	\caption{Instance Level Multi-Modal Constraint Propagation}
+    \label{alg4:ilmcp}
+    \KwIn{稠密 $ k $-NN 相似性矩阵 ${W}_s^{dense}$；约束矩阵 $ {Y} $；聚类数量 $c$；共识矩阵阈值$ \tau $.}
+    \KwOut{Sigmoid 相似性矩阵 $ {W^*}$.}
+    根据公式（\ref{eq4:cons}}为每个模态构建共识相似性矩阵$ {W} ^{cons}_s$；\\
+    根据公式（\ref{eq4:modalcohere}）、（\ref{eq4:cohere}）和（\ref{eq4:Pglu}），分别针对每个模态和每个数据实例计算一致性$ c_{mod}(\mathcal{G}_s)$、$c_s(i) $ 和概率 $ P^\dagger (\mathcal{G}_s|u_i) $；\\
+    通过公式（\ref{eq4:OptSlv}）重构相容条件概率分布；\\
+    Generate unified multi-modal affinity $ \mathbf{W} $ according to Eq. \eqref{eq_uni_aff} and sparsify  $ \mathbf{W} $\;
+    Solve optimization problem Eq. \eqref{obj2} to obtain the balanced propagation result $ \mathbf{F} $\;
+    Normalize $ \mathbf{F} $ to get Sigmoid affinity matrix $ \mathbf{W^*}$  by Eq. \eqref{eq_sig}.
+\end{algorithm}

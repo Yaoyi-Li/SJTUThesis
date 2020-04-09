@@ -2,7 +2,8 @@
 \chapter{基于相似性融合学习的多模态约束传播}
 \section{引言}
 \label{sec3:intro} 
-在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，也称为比然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
+在前一章中，我们研究了无监督情况下的数据相似性学习方法，本章将研究具有成对约束信息的多模态环境下聚类任务中的相似性学习。多模态是对应于单模态的一个概念，多模态表示对于每个被观察物体，都通过不同方式或不同角度对目标物体进行观察，并产生多类不同的描述信息。而成对约束信息，是半监督约束聚类中的一个重要概念。
+在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，表示两个数据是否有被观测到的必然联系，也称为必然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
 
 在过去的十几年的时间里，成对约束已广泛用于约束聚类和度量学习问题中。Wagstaff 等人首先在他们的工作中将成对约束引入聚类问题\cite{wagstaff2000clustering,wagstaff2001constrained}。Xing等人提出了一个具有成对约束的距离度量学习框架\cite{xing2002distance}。度量学习中的一些后续工作也证明了成对约束的作用\cite{weinberger2005distance,davis2007information}。
 
@@ -11,25 +12,25 @@
 上述提到的约束传播方法全部是针对单模态数据集提出的。事实上，我们经常需要分析具有多模态多视图的数据集，例如文本描述和多种类型的图像特征。近年来，多模态数据的融合学习非常普遍，并且在例如多传感器系统、生物医学研究和环境研究等许多领域中有深入研究。不同模态之间的关联将为数据本身引入一种新形式的多样性。这些存在于不同的模态之间的交互信息的现象带来了新的约束类型，这种约束可以减少相应学习过程中的自由度\cite{lahat2015multimodal}。Yu等人指出，具有视觉和用户点击特征的多模态距离度量学习可以改善检索中的图像排序效果\cite{yu2017deep}。文献\parencite{kahou2016emonets}提出了EmoNets方法用于视频中的情绪识别，该EmoNets可以学习多种专家模型，每种模型仅关注一种模态。Poria等人研究了情感计算（affective computing）中的多模太融合，并制定了一种多模态情感分析框架，以实现在视频内容和其他不同模态信息中提取用户的情绪\cite{poria2017review,poria2017ensemble}。Shen等人提出了一种多模态抑郁字典学习（Multimodal Depressive Dictionary Learning，MDL）\cite{shen2017depression}方法，通过利用社交媒体中的情绪特征、用户资料特征及话题级别特征等不同模态的特征信息，以进行抑郁症检测。此外，高度类似于多模式数据融合的多视图数据融合也被广泛应用于许多实际问题的研究中，例如面部识别\cite{kan2016multi}和动作识别\cite{shao2016kernelized}。
 
 近几年，一些以解决多模态约束传播问题的方法被先后提出\cite{fu2011multi,fu2012modalities,lu2013unified,lu2013exhaustive}。但是，这种多模态约束传播方法中大多数都是为特殊情况而设计的，即只有两种不同的模态需要处理，例如Unified Constraint Propagation（UCP）\cite{lu2013unified}算法和Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}算法。经验上，我们经常可能会需要能够处理两种以上模态的算法，而上述方法在这种情况下是不适用的。
-尽管文献\parencite{fu2011multi}中提出的Multi-Modal Constraint Propagation（MMCP）方法对模态的数量没有限制，但是MMCP的学习需要有每种模态的先验知识作为数据输入。这意味着我们需要手动决定每种模式的重要性。当我们有数量比较多的模态需要处理时，这样的手动设置方案几乎是不可行的。但是，MMCP依然为多模态约束传播提供了一个通用的学习框架。文献\parencite{fu2012modalities}中提出的Multi-modal Constraint Propagation（MCMCP）方法是一种更新一些的多模态约束传播方法。MCMCP在约束传播中引入了共识正则器，以迫使不同模态上的约束传播结果保持一致。
+尽管文献\parencite{fu2011multi}中提出的Multi-Modal Constraint Propagation（MMCP）方法对模态的数量没有限制，但是MMCP的学习需要有每种模态的先验知识作为数据输入。这意味着研究人员需要手动决定每种模式的重要性。当有数量比较多的模态需要处理时，这样的手动设置方案几乎是不可行的。但是，MMCP依然为多模态约束传播提供了一个通用的学习框架。文献\parencite{fu2012modalities}中提出的Multi-modal Constraint Propagation（MCMCP）方法是一种更新一些的多模态约束传播方法。MCMCP在约束传播中引入了共识正则器，以迫使不同模态上的约束传播结果保持一致。
 
-多模态学习中普遍存在的一个挑战是如何实现模态融合并有效利用多种数据模态所提供的额外信息。在本章中，我们倾向于将注意力集中在利用数据所提供的很少的监督信息进行融合相似性矩阵的学习。在多模态的标签传播问题中，监督信息是每个对象的标签，需要通过融合不同模态的相似性矩阵，以估计标签扩散的结果。然而在约束传播和标签传播之间有着一定的差异。在多模态约束传播问题中，监督信息和传播得到的结果都是相似性信息，这使得从这些不同模态的成对约束中融合出一个好的相似性矩阵变得更加直观且合理。 因此，我们可以在融合学习中充分利用多模态数据集中的成对约束，同时实现约束的传播和相似性矩阵融合的学习。
+多模态学习中普遍存在的一个挑战是如何实现模态融合并有效利用多种数据模态所提供的额外信息。在本章中，我们将注意力集中在利用数据所提供的很少的监督信息进行融合相似性矩阵的学习。在多模态的标签传播问题中，监督信息是每个对象的标签，需要通过融合不同模态的相似性矩阵，以估计标签扩散的结果。然而在约束传播和标签传播之间有着一定的差异。在多模态约束传播问题中，监督信息和传播得到的结果都是相似性信息，这使得从这些不同模态的成对约束中融合出一个好的相似性矩阵变得更加直观且合理。 因此，可以考虑在融合学习中充分利用多模态数据集中的成对约束，同时实现约束的传播和相似性矩阵融合的学习。
 
-在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法：Multi-modal Fusion Learning（MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，我们将该算法视为基线方法。由于我们通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此我们将其称为松弛权重组合（Relaxed Weight Combination，RWC）。
+在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法：Multi-modal Fusion Learning（MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，该算法被视为基线方法。由于是通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此该方法被称为松弛权重组合（Relaxed Weight Combination，RWC）。
 实验结果表明，RWC方法所学习的融合结果可能会深陷入一些判别性较差的模态而忽视高判别性的模态。
-受RWC方法的进一步启发，我们提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模式融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。我们提出的MFL同时还可以作为模态选择器，NFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
+受RWC方法的进一步启发，本章提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模式融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。所提出的MFL同时还可以作为模态选择器，NFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
 
 \section{约束传播背景知识}
 在本节中我们首先将针对多模态约束传播对所用到的数学符号进行补充说明，然后简要回顾典型的单模态约束传播算法E$^2$CP\cite{lu2010constrained}和多模态约束传播算法MMCP\cite{fu2011multi}。
 \subsection{符号说明}
-在下文中，矩阵将用大写字母表示，向量和标量以写字母表示。给定矩阵$ {A} \in \mathbb{R}^{n\times m}$，$ a_{i,j} $为矩阵$A$在位置$ i,j $的元素。相似地，$ \alpha_{i} $ 为向量 $ \boldsymbol{\alpha} $的第 $ i $个元素。考虑到多模态的情况，在未特殊说明的情况下，我们在矩阵和向量中用下标$s$区分多模态数据集不同的模态，即${A}_s$表示源自模态$s$中的一个矩阵。矩阵$ {A}_s $ 中的第$ i,j $个元素被表示为$a_{i,j,s}$。
+在下文中，矩阵将用大写字母表示，向量和标量以写字母表示。给定矩阵$ {A} \in \mathbb{R}^{n\times m}$，$ a_{i,j} $为矩阵$A$在位置$ i,j $的元素。相似地，$ \alpha_{i} $ 为向量 $ \boldsymbol{\alpha} $的第 $ i $个元素。考虑到多模态的情况，在未特殊说明的情况下，在矩阵和向量中采用下标$s$区分多模态数据集不同的模态，即${A}_s$表示源自模态$s$中的一个矩阵。矩阵$ {A}_s $ 中的第$ i,j $个元素被表示为$a_{i,j,s}$。
 % 此外，对于矩阵$A$和矩阵$D$我们定义$ \|{A}\|_{D} = \mathrm{tr} ({A}^T{D}{A})^{\frac{1}{2}}$ 以保持文中公式的简洁。
 
-我们用大写的花体字母表示集合和图。给定一个数据集合$\mathcal{U} = \{u_1,\dots,u_n \}$，每一个数据实例的数据被表示为$u_i$。$u_i$仅表示第$i$个数据实例本身，不代表任何数据向量或特征向量，更进一步地，我们将数据$u_i$在模态$s$上的数据特征向量表示为$u_{i,s}$。
+我们用大写的花体字母表示集合和图。给定一个数据集合$\mathcal{U} = \{u_1,\dots,u_n \}$，每一个数据实例的数据被表示为$u_i$。$u_i$仅表示第$i$个数据实例本身，不代表任何数据向量或特征向量，更进一步地，将数据$u_i$在模态$s$上的数据特征向量表示为$u_{i,s}$。
 
-对于第$s$个模态，我们可以在全部$n$个数据实例上通过$k$-NN热力核构建相似性矩阵$ {W}_s$:
+对于第$s$个模态，可以在全部$n$个数据实例上通过$k$-NN热力核构建相似性矩阵$ {W}_s$:
 \begin{equation}
-w_{i,j} = \begin{cases} \mathrm{exp}(-\frac{\|u_{i,s}-u_{j,s}\|_{2}}{t}), \; &u_{i,s}\in\mathcal{N}_s(u_{j,s})\;\mathrm{or}\; u_{j,s}\in\mathcal{N}_k(u_{i,s});\\
+w_{i,j} = \begin{cases} \mathrm{exp}(-\frac{\|u_{i,s}-u_{j,s}\|_{2}}{t}), \; &u_{i,s}\in\mathcal{N}_k(u_{j,s})\;\mathrm{or}\; u_{j,s}\in\mathcal{N}_k(u_{i,s});\\
 0,&\mathrm{otherwise,}\end{cases}   
 \label{eq3:GaussKer}                              
 \end{equation}
@@ -40,9 +41,9 @@ $ {D}_s \in \mathbb{R}^{n\times n}$ 通过相似性矩阵 $ {W}_s$ 构建且$ d_
 \begin{equation}
 	\hat{{L}} = {D}^{-1/2}{LD}^{-1/2}.
 \end{equation}
-我们将第$s$个模态的图定义为$\mathcal{G}_s = (\mathcal{U},{W}_s)$，在我们的问题表述里图$\mathcal{G}_s$等价于第$s$个模态的全部信息。
+我们将第$s$个模态的图定义为$\mathcal{G}_s = (\mathcal{U},{W}_s)$，在下文中的问题表述里图$\mathcal{G}_s$等价于第$s$个模态的全部信息。
 
-在约束传播问题中，我们可以将相似性矩阵中的成对约束看作数据点对之间的关系的标签。因此，我们可以对两类不同的约束定义两个集合。必然连接（must-link）集合$ \mathcal{M} = \{(u_i,u_j)\} $包含的数据对中$ u_i $ 和 $ u_j $属于同一个类别中。必然不连接（cannot-link）集合$ \mathcal{C} = \{(u_i,u_j)\}$元素数据对中的两个数据点属于不同标签类别。根据must-link集合和cannot-link集合，我们可以构建约束矩阵$ {Y} \in  \mathbb{R}^{n\times n}$，
+在约束传播问题中，我们可以将相似性矩阵中的成对约束看作数据点对之间的关系的标签。因此，可以对两类不同的约束定义两个集合。必然连接（must-link）集合$ \mathcal{M} = \{(u_i,u_j)\} $包含的数据对中$ u_i $ 和 $ u_j $属于同一个类别中。必然不连接（cannot-link）集合$ \mathcal{C} = \{(u_i,u_j)\}$元素数据对中的两个数据点属于不同标签类别。根据must-link集合和cannot-link集合，构建约束矩阵$ {Y} \in  \mathbb{R}^{n\times n}$，
 \begin{equation}
 y_{i,j} = 
 \begin{cases}
@@ -58,7 +59,7 @@ E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问�
 观测到的约束信息被视为数据点对之间已知的关系二分类标签，其中must-link中元素作为正样本，cannot-link的元素为负样本。
 我们从公式（\ref{eq3:Y}）观察到矩阵$Y$中对应于数据$u_i$的第$i$列或第$i$行与半监督问题的问题设置非常相似。其中$ 1 $ 和 $ -1 $为半监督问题中两个不同类的类标签，大量的$0$代表未观测到的需要预测的标签。利用相似性信息，这样的半监督问题可以通过标签传播\cite{zhou2004learning}解决。
 
-我们进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。如果我们采用矩阵$F_v$表示竖直方向的传播，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
+该方法进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。如果采用矩阵$F_v$表示竖直方向的传播，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
 \begin{equation}
 	\mathop{\mathrm{min}}_{{F}_v}\;\frac{1}{2}\eta\;\mathrm{tr}(({F}_v-{Y})^T({F}_v-{Y}))+\frac{1}{2}\mathrm{tr}({F}_v^T\hat{{L}}{F}_v), 
 \end{equation}
@@ -68,7 +69,7 @@ E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问�
 	{F}_v = \eta(\eta{I}+\hat{{L}})^{-1}{Y}.
 \end{equation}
 
-相似地，如果我们以矩阵$F_h$表示水平传播的结果，我们可以将其闭式解写为
+相似地，如果以矩阵$F_h$表示水平传播的结果，可以将其闭式解写为
 \begin{equation}
 {F}_h = \eta{Y}(\eta{I}+\hat{{L}})^{-1}.
 \end{equation}
@@ -141,7 +142,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \end{equation}
 
 \section{多模态融合}
-在本节中，首先我们将在约束传播中引入松弛权重组合（Relaxed Weight Combination，RWC）作为基线方法，然后展示我们所提出了MFL（Multi-modal Fusion Learning）方法。
+在本节中，首先我们将在约束传播中引入松弛权重组合（Relaxed Weight Combination，RWC）作为基线方法，然后展示所提出了MFL（Multi-modal Fusion Learning）方法。
 \subsection{松弛权重组合}
 \label{sec3:rwc}
 
@@ -168,12 +169,12 @@ s.t. \quad&\sum_s \alpha_s = 1;\\
 \end{split}
 \label{eq3:labelpro}
 \end{equation}
-此处，向量$ {y} \in  \mathbb{R}^{n} $为观测到的类标签信息，向量$ {\alpha} \in  \mathbb{R}^m$为可学习的模态权重（$m$为不同的模态数量），$ {f} \in  \mathbb{R}^{n}$为标签传播的估计结果，$ \gamma > 1$ 和$ \eta $ 是手动设定的参数。拉普拉斯矩阵$ \bar{{L}}_s $ 由公式（\ref{eq3:jointW}）中的 $ \bar{{W}}_s $  及其相应的对角权重矩阵 $ \bar{{D}}_s $生成。在固定$f$的情况下，我们可以忽略公式（\ref{eq3:labelpro}）中的第一项，并通过拉格朗日函数求解$ {\alpha} $
+此处，向量$ {y} \in  \mathbb{R}^{n} $为观测到的类标签信息，向量$ {\alpha} \in  \mathbb{R}^m$为可学习的模态权重（$m$为不同的模态数量），$ {f} \in  \mathbb{R}^{n}$为标签传播的估计结果，$ \gamma > 1$ 和$ \eta $ 是手动设定的参数。拉普拉斯矩阵$ \bar{{L}}_s $ 由公式（\ref{eq3:jointW}）中的 $ \bar{{W}}_s $  及其相应的对角权重矩阵 $ \bar{{D}}_s $生成。在固定$f$的情况下，可以忽略公式（\ref{eq3:labelpro}）中的第一项，并通过拉格朗日函数求解$ {\alpha} $
 \begin{equation}
 L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \alpha_s - 1)-\sum_s \mu_s \alpha_s,
 \label{eq3:labelpro_L}
 \end{equation}
-其中$\lambda$和$\mu_s$为拉格朗日乘子，并且有$ \mu_s \ge 0$，$ \mu_s\alpha_s=0$。令函数（\ref{eq3:labelpro_L}）对$ \alpha_s $的导数为零，我们能够得到
+其中$\lambda$和$\mu_s$为拉格朗日乘子，并且有$ \mu_s \ge 0$，$ \mu_s\alpha_s=0$。令函数（\ref{eq3:labelpro_L}）对$ \alpha_s $的导数为零，能够得到
 \begin{equation}
 \gamma \alpha_s^{\gamma-1}{f}^T {\bar{{L}}}_s{f} =\lambda + \mu_s.
 \label{eq3:labelpro_L_der}
@@ -207,7 +208,7 @@ L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \al
 
 不同于线性组合权重$ \alpha_s$, 模态的权重系数被松弛为指数形式 $ \alpha_s^\gamma $ 以避免求得平凡解使得 $ {\alpha} $中仅有一个元素为 $ 1 $ 其他元素全部为 $ 0 $。
 
-值得注意的是，在约束传播中，存在两个待优化函数。最理想化的方法是将公式（\ref{eq3:sol-v}）中的$ {F}_v $看作是权重系数$\alpha$的一个函数，并用这个函数替换优化问题（\ref{eq3:MMCP-h}）中的约束矩阵$Y$，以求解权重系数$\alpha$的最优解。将计算代价纳入考虑范围后，我们通过优化问题（\ref{eq3:baselinev}）和（\ref{eq3:baselineh}）来近似原优化问题的最小化子（minimizer），在其中我们不通过$F_v$和$F_h$来区分竖直传播和水平传播的结果，统一采用$F$表示传播结果，仅使用目标函数$g_v({F})$和$g_h({F})$来区分竖直传播和水平传播过程。
+值得注意的是，在约束传播中，存在两个待优化函数。最理想化的方法是将公式（\ref{eq3:sol-v}）中的$ {F}_v $看作是权重系数$\alpha$的一个函数，并用这个函数替换优化问题（\ref{eq3:MMCP-h}）中的约束矩阵$Y$，以求解权重系数$\alpha$的最优解。将计算代价纳入考虑范围后，通过优化问题（\ref{eq3:baselinev}）和（\ref{eq3:baselineh}）来近似原优化问题的最小化子（minimizer），在其中我们不通过$F_v$和$F_h$来区分竖直传播和水平传播的结果，统一采用$F$表示传播结果，仅使用目标函数$g_v({F})$和$g_h({F})$来区分竖直传播和水平传播过程。
 
 \begin{equation}
 \mathop{\mathrm{min}}_{{F}}\;g_v({F})=\frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})^T\bar{{D}}({F}-{Y}))+\frac{1}{2}\mathrm{tr}({F}^T \sum_s(\alpha_s^{old})^\gamma\bar{{L}}_s{F}).
@@ -222,7 +223,7 @@ s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \label{eq3:baselineh}
 \end{equation}
 
-我们假设公式（\ref{eq3:baselinev}）中的权重系数为固定的常数向量，用$ {\alpha}^{old} $表示，而只通过优化问题（\ref{eq3:baselineh}）更新权重系数，即$\alpha$。通过将向量$\alpha$的值赋给$ {\alpha}^{old} $，我们可以迭代地求解权重系数和约束传播结果$F$。
+假设公式（\ref{eq3:baselinev}）中的权重系数为固定的常数向量，用$ {\alpha}^{old} $表示，而只通过优化问题（\ref{eq3:baselineh}）更新权重系数，即$\alpha$。通过将向量$\alpha$的值赋给$ {\alpha}^{old} $，可以迭代地求解权重系数和约束传播结果$F$。
 
 在固定$\alpha$的情况下，先求解公式（\ref{eq3:baselinev}）并将其最优解作为$Y$带入公式（\ref{eq3:baselineh}），可求得$F$为
 \begin{equation}
@@ -237,9 +238,9 @@ s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \end{equation}
 并且更新${\alpha}^{old}$：$ {\alpha}^{old} \leftarrow {\alpha}$。由于根据公式（\ref{eq3:bl_F}）计算出的$F$为对称矩阵，因此从竖直传播或水平传播中学习权重系数在结果上是等价的。
 
-从公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}）中，我们可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$\gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，我们选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
+从公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}）中，可以观察到超参数$ \gamma $在RWC方法中起到核心作用。每个模态的权重系数受$ \gamma $控制。 特别地，当$ \gamma \rightarrow \infty$时，该算法将生成全部相等的权重。而当 $ \gamma $趋近于 $ 1 $时，该算法将只选择一个具有最优一致性的模态，即令$  \mathrm{tr}({F} \bar{{L}}_s{F}^T) $最小的模态。我们在Corel 5k数据集和PASCAL VOC' 07数据集上，评估了超参数$\gamma$对在不同的模态数量下对约束聚类效果的影响。图\ref{fig3:rwc}展示了RWC方法在不同的$\gamma$取值情况下的约束聚类性能评估结果。我们可以观察到，当有极多模态数量的情况下，例如16个模态，RWC方法很难针对每个模态生成合适的权重。因而，当有16个模态时，RWC方法在$ \gamma = 2^3 $处取得最佳性能，此时各个模态的权重几乎相等。此外，图\ref{fig3:rwc}还显示$\gamma$的最佳选择在不同的数据集和不同数量的模态的情况下有所不同，很难选择可以广泛使用的$\gamma$值。在第\ref{sec3:exp}节的实验结果评估中，将选择在图\ref{fig3:rwc}中给出最优表现的$ \gamma $值，这一点与许多先前文献中的工作一样。然而，在实际的半监督问题中，这样的超参数选择策略往往是不可行的，因为经常没有足够标注数据可以作为验证集进行参数选择。
 
-我们在图\ref{fig3:cvg}中给出了RWC方法的收敛曲线。我们对优化问题的近似，公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。我们将在第\ref{sec3:opt}中进行更多的收敛性讨论。
+图\ref{fig3:cvg}给出了RWC方法的收敛曲线。可以看出优化问题的近似，公式（\ref{eq3:baselinev}）和公式（\ref{eq3:baselineh}），能够在两到三次迭代后相对收敛。在第\ref{sec3:opt}节将给出更多的收敛性讨论。
 
 \begin{figure}[t]
 	\centering
@@ -249,11 +250,11 @@ s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \end{figure}
 
 \subsection{多模态融合学习的公式化}
-我们所提出的多模态融合学习（Multi-modal Fusion Learning，MFL）方法基于以下假设：在使用完美的权重系数的情况下，我们可以从每种模态的相似性矩阵中以最小的损失重建出观察到的约束。 换句话说，我们可以将数据中的成对约束视为每个模态的相似性的凸组合。而在观察到一部分成对约束的情况下，即已知约束矩阵$Y$，我们可以通过回归的方式来重构其他未观察到的约束。
+所提出的多模态融合学习（Multi-modal Fusion Learning，MFL）方法基于以下假设：在使用完美的权重系数的情况下，可以从每种模态的相似性矩阵中以最小的损失重建出观察到的约束。 换句话说，我们可以将数据中的成对约束视为每个模态的相似性的凸组合。而在观察到一部分成对约束的情况下，即已知约束矩阵$Y$，可以通过回归的方式来重构其他未观察到的约束。
 
 基于这样的假设，我们将重构误差引入多模态约束传播的框架中。
-假设在矩阵$Y$中有$l$个观测到的成对约束，即$Y$中有$l$个非零元素。然后我们可以对这$l$个不同的约束进行编号。定义两个函数$ r(i) $ 和 $ c(i) $，其中$ r(i) $ 的函数值为编号为$i$的约束在矩阵$Y$中的行号，函数$ c(i) $的值为相应的列号（$i \in \{1,\dots,l\}$）。
-则我们可以通过元素$ y_{r(i),c(i)} $对$Y$中的第$i$个约束进行定位和检索。基于这两个函数，我们可以构建约束向量$ {z} \in \mathbb{R}^n$：
+假设在矩阵$Y$中有$l$个观测到的成对约束，即$Y$中有$l$个非零元素。然后可以对这$l$个不同的约束进行编号。定义两个函数$ r(i) $ 和 $ c(i) $，其中$ r(i) $ 的函数值为编号为$i$的约束在矩阵$Y$中的行号，函数$ c(i) $的值为相应的列号（$i \in \{1,\dots,l\}$）。
+则可以通过元素$ y_{r(i),c(i)} $对$Y$中的第$i$个约束进行定位和检索。基于这两个函数，可以构建约束向量$ {z} \in \mathbb{R}^n$：
 \begin{equation}
 z_i = \begin{cases}1,\quad\quad &\text{if}\;\; y_{r(i),c(i)} =1; \\
 0, \quad\quad &\text{otherwise}.
@@ -261,7 +262,7 @@ z_i = \begin{cases}1,\quad\quad &\text{if}\;\; y_{r(i),c(i)} =1; \\
 \end{equation} 
 此处可理解为，must-link在向量$z$中对应$1$，cannot-link对应$0$，为观测到的约束不出现在约束向量$z$中。
 
-同时我们可以根据所有模态的相似性矩阵$ \{{W}_s|s\in\{1,\dots,m\}\} $构建相应的基矩阵$ {S} \in \mathbb{R}^{l\times m}$（$l$为约束的数量，$m$为模态数量），
+同时可以根据所有模态的相似性矩阵$ \{{W}_s|s\in\{1,\dots,m\}\} $构建相应的基矩阵$ {S} \in \mathbb{R}^{l\times m}$（$l$为约束的数量，$m$为模态数量），
 \begin{equation}
  {S}_{i,s} = w_{r(i), c(i), s}.
 \end{equation}
@@ -272,9 +273,9 @@ error = \|{S}{\alpha}-{z}\|_2^2,
 这里 $ {\alpha} $ 为权重系数。
 由于${W}_s$为稀疏的相似性矩阵，所以该重构误差可以理解为，对于相似性为$0$的点对关系应对应于向量$z$中的cannot-link值即$0$，而相似性大于$0$的点对关系对应于向量$z$中的must-link值即$1$。
 
-需要引起注意的是，$z$中的must-link和cannot-link的比例大约为$1:c-1 $，其中$c$为类别数。如果我们从高度稀疏的相似性矩阵中生成矩阵 $S$，则在矩阵 $S$中会存在极大量的零元素，这将使得样本分布不均衡，重构变得很困难。所以与用于构造拉普拉斯矩阵$ \bar{{L}}_s $的高度稀疏的相似性矩阵不同，基矩阵$S$ 由近邻数为$ k=\frac{\#sample}{\#cluster} = \frac{n}{c}$ 的相对密集的相似性矩阵生成。在这种情况下 矩阵$S$ 和 向量$z$中零元素与非零元素的比例大致相似。
+需要引起注意的是，$z$中的must-link和cannot-link的比例大约为$1:c-1 $，其中$c$为类别数。如果从高度稀疏的相似性矩阵中生成矩阵 $S$，则在矩阵 $S$中会存在极大量的零元素，这将使得样本分布不均衡，重构变得很困难。所以与用于构造拉普拉斯矩阵$ \bar{{L}}_s $的高度稀疏的相似性矩阵不同，基矩阵$S$ 由近邻数为$ k=\frac{\#sample}{\#cluster} = \frac{n}{c}$ 的相对密集的相似性矩阵生成。在这种情况下 矩阵$S$ 和 向量$z$中零元素与非零元素的比例大致相似。
 
-将重构误差纳入考虑范围后，我们可以设计一个优化问题以同时最小化传播误差和重构误差。与RWC方法中的近似方式相似，我们仅从水平方向的约束传播学习权重系数，从而可以得出以下优化问题：
+将重构误差纳入考虑范围后，可以设计出一个优化问题以同时最小化传播误差和重构误差。与RWC方法中的近似方式相似，我们仅从水平方向的约束传播学习权重系数，从而可以得出以下优化问题：
 
 \begin{equation}
 \mathop{\mathrm{min}}_{{F}}\;g_v({F})=\frac{1}{2}\eta \;\mathrm{tr}(({F}-{Y})^T\bar{{D}}({F}-{Y}))+\frac{1}{2}\mathrm{tr}({F}^T \sum_s\alpha_s^{old}\bar{{L}}_s{F}),
@@ -289,9 +290,9 @@ s.t. \quad\;& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \label{eq3:MFL}
 \end{equation}
 
-在公式（\ref{eq3:MFL}）中，我们采用了与E$^2$CP\cite{lu2010constrained} 和MMCP\cite{fu2011multi}方法中相同的$ \eta $取值，即$ \eta = 0.25 $，并且我们将竖直方向的传播问题（\ref{eq3:MFL_v}）的最优解作为水平方向传播约束矩阵 $ {Y} $。至于参数 $ \zeta $，我们认为在重构误差中的元素应该与$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $中的元素具有相似的重要性。 如果我们将$ \sum_s\alpha_s\bar{{L}}_s $ 看作一个距离度量矩阵，则$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $ 可以认为时投影后的$ {F}^T $的Frobenius 范数的平方，即是$\#sample^2=n^2$个元素的平方和。同时，重构误差也可以被看作是一个Frobenius范数平方的特例，其中包含了$ \#constraint = l $ 个元素。所以我们选择 $ \zeta = \frac{\#sample^2}{\#constraint}=\frac{n^2}{l} $使这两项处于同一重要性级别。
+在公式（\ref{eq3:MFL}）中，我们采用了与E$^2$CP\cite{lu2010constrained} 和MMCP\cite{fu2011multi}方法中相同的$ \eta $取值，即$ \eta = 0.25 $，并且将竖直方向的传播问题（\ref{eq3:MFL_v}）的最优解作为水平方向传播约束矩阵 $ {Y} $。至于参数 $ \zeta $，我们认为在重构误差中的元素应该与$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $中的元素具有相似的重要性。 如果将$ \sum_s\alpha_s\bar{{L}}_s $ 看作一个距离度量矩阵，则$ \mathrm{tr}({F} \sum_s\alpha_s\bar{{L}}_s{F}^T) $ 可以认为时投影后的$ {F}^T $的Frobenius 范数的平方，即是$\#sample^2=n^2$个元素的平方和。同时，重构误差也可以被看作是一个Frobenius范数平方的特例，其中包含了$ \#constraint = l $ 个元素。所以选择 $ \zeta = \frac{\#sample^2}{\#constraint}=\frac{n^2}{l} $使这两项处于同一重要性级别。
 
-公式（\ref{eq3:MFL}）可以利用观察到的成对约束来学习权重系数，而不是仅仅从与约束传播相同的优化目标函数中学习一个比率。使用更多的观察到的信息将能够提高我们提出的方法的鲁棒性。通过组合重构误差和约束传播误差，多模态约束传播的目标函数不再是单模态约束传播目标函数的简单组合，并且不会出现我们在第\ref{sec3:rwc}节中提到的平凡解，因此也不需要采用指数形式对权重系数进行松弛。
+公式（\ref{eq3:MFL}）可以利用观察到的成对约束来学习权重系数，而不是仅仅从与约束传播相同的优化目标函数中学习一个比率。使用更多的观察到的信息将能够提高所提出的方法的鲁棒性。通过组合重构误差和约束传播误差，多模态约束传播的目标函数不再是单模态约束传播目标函数的简单组合，并且不会出现第\ref{sec3:rwc}节中提到的平凡解，因此也不需要采用指数形式对权重系数进行松弛。
 
 \subsection{多模态融合学习的优化}
 \label{sec3:opt}
@@ -358,17 +359,17 @@ s.t.\quad &\alpha_s \ge 0.
 \end{split}
 \label{eq3:MFL_L}
 \end{equation}
-我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。我们在算法\ref{alg3:MFL}中对我们所提出的方法以及后处理进行了总结。
+我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。算法\ref{alg3:MFL}对所提出的方法以及后处理进行了总结。
 
-我们在图\ref{fig3:cvg}中展示了MFL方法的收敛曲线。我们可以发现，一旦我们在RWC方法和MFL方法将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，我们仅需要考虑更新传播结果$F$和系数$\alpha$。下文中我们将简要论述该迭代算法的收敛性。
+图\ref{fig3:cvg}展示了MFL方法的收敛曲线。可以发现，一旦在RWC方法和MFL方法中将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，仅需要考虑更新传播结果$F$和系数$\alpha$。下文将简要论述该迭代算法的收敛性。
 
-由于对角权重矩阵$ \bar{{D}}_s $和拉普拉斯矩阵$\bar{L}_s$都为半正定矩阵，其凸组合$ \sum_s\alpha_s\bar{{L}}_s $也为半正定矩阵。因此，公式（\ref{eq3:MFL}）的目标函数中三项皆为为负值，且有$ g_h({F}, {\alpha}) \ge 0 $。我们可以通过任意可行解$F_0$对$F$的解集进行定界，以得到一个$(F, \alpha)$的紧致解集。例如，我们在原优化问题基础上增加一个辅助约束：
+由于对角权重矩阵$ \bar{{D}}_s $和拉普拉斯矩阵$\bar{L}_s$都为半正定矩阵，其凸组合$ \sum_s\alpha_s\bar{{L}}_s $也为半正定矩阵。因此，公式（\ref{eq3:MFL}）的目标函数中三项皆为为负值，且有$ g_h({F}, {\alpha}) \ge 0 $。我们可以通过任意可行解$F_0$对$F$的解集进行定界，以得到一个$(F, \alpha)$的紧致解集。例如，在原优化问题基础上增加一个辅助约束：
 \begin{equation}
         \frac{1}{2}\eta\;\mathrm{tr}(({F}-{Y})\bar{{D}}({F}-{Y})^T)  \le g_h({F}_0, {\alpha}),
 \end{equation}
 并且优化问题（\ref{eq3:MFL}）的最优解恒满足此辅助约束条件。极值定理（extreme value theorem）保证了从非空紧空间到一个实数子集的连续映射函数$ g_h({F}, {\alpha})$必然存在最优解$({F}^*, {\alpha}^*) $使得函数取得最小值。
 
-更进一步地，原目标函数为分别关于$F$和$\alpha$的凸函数。对于一个迭代序列集合$ \{({F}^{(t)}, {\alpha}^{(t)})\} $，我们有
+更进一步地，原目标函数为分别关于$F$和$\alpha$的凸函数。对于一个迭代序列集合$ \{({F}^{(t)}, {\alpha}^{(t)})\} $，有
 \begin{equation}
     g_h({F}^{(t)}, {\alpha}^{(t)}) \ge \mathop{\mathrm{min}}_{{F}} g_h({F}, {\alpha}^{(t)}) = g_h({F}^{(t+1)}, {\alpha}^{(t)}) \ge \mathop{\mathrm{min}}_ {{\alpha}} g_h({F}^{(t+1)}, {\alpha}) =g_h({F}^{(t+1)}, {\alpha}^{(t+1)}).
 \end{equation}
@@ -499,7 +500,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 
 \begin{table}[t]
 	\bicaption{在PASCAL VOC'07数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on PASCAL VOC'07.}
-	\label{tab:modal_voc}
+	\label{tab3:modal_voc}
 	\centering
 	\setlength{\tabcolsep}{8pt}
 	\begin{tabular}{lcccccc}
@@ -582,7 +583,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 \subsection{性能评估与比较}
 在本节中，我们报告并讨论了所提出的的MFL和RWC方法以及对照算法的聚类性能。为了将我们的方法与专门针对两种模态所设计的方法进行比较，我们设计了两种模态下的聚类实验。我们选择\textit{DenseSift}和\textit{tags}两种模态，并在表\ref{tab3:2modal}中展示了不同算法的聚类性能。我们选取成对约束总数的$0.08\%$作为观测到的承兑约束信息，即在Corel 5k数据集上观察到的成对约束的数量为20,000对，在PASCAL VOC'07上观察到的约束的数量是80,000对。在以下实验中，我们采用相同数量的成对约束。从表\ref{tab3:2modal}中我们可以观察到，在Corel 5k数据集上，MFL和RWC表现出了相似的性能，并且胜过其他方法，而在PASCAL VOC'07上，SW方法的结果取得了最佳性能。这是由于\textit{DenseSift}和\textit{tags}两中特征的理想权重可能近似相等。但是，MFL和RWC方法的评估指标仍可与SW相媲美。此外，我们所提出的MFL并非专门针对两种模态情况设计，它旨在解决具有任何数量模态的权重学习问题。MFL仅为每个模态提供一个粗略的先验权重估计，权重估计的质量在很大程度上取决于观察到的约束矩阵$ {Y} $的质量。由于MFL是从约束矩阵$ {Y} $和稀疏相似性矩阵${W}_s $中学习先验权重，因此较少的模态将导致基矩阵$ {S} $存在大量的全零行，观察到的约束信息无法得到充分利用。如果我们有更多的模态或更多观察到的约束，则权重系数的预测将更加准确。
 
-此外，我们在更多的模态上进行了的实验，并选择了三种不同的情况：3、8和16种模态。 在3种模态的情况下，我们将\textit{Lab}特征添加到前文所述的2种模态情况下。在8种模态的实验中，我们采用的特征为：\textit{DenseSift，Lab，tags，Hsv，Gist，RgbV3H1，HsvV3H1，HarrisSiftV3H1}。在16种模态的情况下，我们使用了INRIA特征数据集中的所有描述子。在表\ref{tab3:modal_voc}中我们展示了在Corel 5k数据集上的聚类结果，表\ref{tab3:modal_voc}显示了PASCAL VOC'07数据集上相应的聚类结果。从表\ref{tab3:modal_voc}和表\ref{tab3:modal_voc}中可以看出，随着模态数量的增加，提出的MFL算法的优越性变得愈加明显。当考虑到8或16种模态时，绝大多数对照方法都无法处理如此数量众多的模态。因此，我们能看出它们的性能出现明显的下降。
+此外，我们在更多的模态上进行了的实验，并选择了三种不同的情况：3、8和16种模态。 在3种模态的情况下，我们将\textit{Lab}特征添加到前文所述的2种模态情况下。在8种模态的实验中，我们采用的特征为：\textit{DenseSift，Lab，tags，Hsv，Gist，RgbV3H1，HsvV3H1，HarrisSiftV3H1}。在16种模态的情况下，我们使用了INRIA特征数据集中的所有描述子。在表\ref{tab3:modal_corel}中我们展示了在Corel 5k数据集上的聚类结果，表\ref{tab3:modal_voc}显示了PASCAL VOC'07数据集上相应的聚类结果。从表\ref{tab3:modal_corel}和表\ref{tab3:modal_voc}中可以看出，随着模态数量的增加，提出的MFL算法的优越性变得愈加明显。当考虑到8或16种模态时，绝大多数对照方法都无法处理如此数量众多的模态。因此，我们能看出它们的性能出现明显的下降。
 
 \begin{figure}[t]
     \centering
@@ -627,9 +628,9 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
     \label{fig3:1_16_more}
 \end{figure}
 
-正如在第\ref{sec3:dis}中所论述的，我们在图\ref{fig3:1_16}中研究了所提出的MFL算法的模态选择能力。在本实验中，我们将每种模态依次增添到MFL方法，以测试在不同数量模态的情况下MFL的聚类性能。选择的顺序为\textit{DenseSift，Lab，tags，Hsv，Gist，RgbV3H1，HsvV3H1，HarrisSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseSiftV3H1，DenseHue，HarrisSift，HarrisHue，HarrisHueV3H1，Rgb}。我们可以注意到，当\textit{tags}特征被添加到MFL方法中时，聚类性能会显著地提高，然后效果近似达到饱和状态。这是因为文本描述特征本身包含了更多的具有判别性能力的信息，并且在\textit{tags}之后添加的特征只能提供一些冗余的信息。值得注意的是，每个模态都包含一些判别性信息以及噪声信息。如果新的模态无法提供非冗余信息，则额外引入的噪声将导致聚类性能下降。这也可以解释为什么大多数对照算法无法处理极其多种模态。与之相反的是，在MFL中，当我们不断增加模态数量时，权重的稀疏性将消除冗余的和不具有判别力的模态，从而保持鲁棒性。
+正如在第\ref{sec3:dis}中所论述的，我们在图\ref{fig3:1_16}中研究了所提出的MFL算法的模态选择能力。在本实验中，通过将每种模态依次增添到MFL方法，以测试在不同数量模态的情况下MFL的聚类性能。选择的顺序为\textit{DenseSift，Lab，tags，Hsv，Gist，RgbV3H1，HsvV3H1，HarrisSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseSiftV3H1，DenseHue，HarrisSift，HarrisHue，HarrisHueV3H1，Rgb}。可以注意到，当\textit{tags}特征被添加到MFL方法中时，聚类性能会显著地提高，然后效果近似达到饱和状态。这是因为文本描述特征本身包含了更多的具有判别性能力的信息，并且在\textit{tags}之后添加的特征只能提供一些冗余的信息。值得注意的是，每个模态都包含一些判别性信息以及噪声信息。如果新的模态无法提供非冗余信息，则额外引入的噪声将导致聚类性能下降。这也可以解释为什么大多数对照算法无法处理极其多种模态。与之相反的是，在MFL中，当不断增加模态数量时，权重的稀疏性将消除冗余的和不具有判别力的模态，从而保持鲁棒性。
 
-为了进一步证明MFL算法可以帮助进行模态选择，仿照图\ref{fig3:1_16}的实验设置，我们以图\ref{fig3:1_16_more}来展示所提出的MFL在Corel 5k数据集上对于四种不同添加顺序的模态序列的聚类结果。图\ref{fig3:1_16_acc_nmi_4}所展示的模态添加顺序为\textit{tags，HarrisHueV3H1，Gist，DenseSiftV3H1，RgbV3H1，HsvV3H1，LabV3H1，DenseHueV3H1，HarrisSiftH3V1，Hsv，HarrisHue，DenseSift，HarrisSift，Lab，DenseHue，Rgb}。图\ref{fig3:1_16_acc_nmi_5}显示了图\ref{fig3:1_16_acc_nmi_4}中添加顺序的逆序的聚类结果，该序列以\textit{HarrisHueV3H1}和\textit{tags}作为结尾。图\ref{fig3:1_16_acc_nmi_6}的模态顺序为\textit{tags，DenseSift，Gist，LabV3H1，RgbV3H1，HsvV3H1，DenseSiftV3H1，DenseHueV3H1，HarrisSiftV3H1，Hsv，HarrisHue，HarrisHueV3H1，DenseHue，Rgb，HarrisSift，Lab}。图\ref{fig3:1_16_acc_nmi_7}显示了图\ref{fig3:1_16_acc_nmi_6}中添加顺序的逆序的聚类结果，该序列以\textit{DenseSift}和\textit{tags}结尾。我们可以注意到，在以\textit{tags}起始的图\ref{fig3:1_16_acc_nmi_4}和图\ref{fig3:1_16_acc_nmi_6}中，仅使用一种或两种模态信息，所取得的聚类性能已经非常出色。这是因为\textit{tags}是文本描述信息，比视觉描述更具有判别性。在向序列中添加更多的模态后，由于来自视觉描述特征的附加信息，我们得到了$2\%$的性能改进。而在多数实际应用中，文本描述是一种从用户处收集代价较高的特征。我们更进一步地在图\ref{fig3:1_16_acc_nmi_5}和图\ref{fig3:1_16_acc_nmi_7}中展示以\textit{tags}作为结束地模态序列的聚类效果。尽管\textit{tags}能够产生可观的性能改进，但是聚类性能依然收益于持续增加的视觉特征数量。如果没有文本描述，在仅使15种模态的情况下，所提出的MFL算法在仅用利用一种或两种模态的基础上，大约可提高$10\%$的聚类性能。
+为了进一步证明MFL算法可以帮助进行模态选择，仿照图\ref{fig3:1_16}的实验设置，以图\ref{fig3:1_16_more}来展示所提出的MFL在Corel 5k数据集上对于四种不同添加顺序的模态序列的聚类结果。图\ref{fig3:1_16_acc_nmi_4}所展示的模态添加顺序为\textit{tags，HarrisHueV3H1，Gist，DenseSiftV3H1，RgbV3H1，HsvV3H1，LabV3H1，DenseHueV3H1，HarrisSiftH3V1，Hsv，HarrisHue，DenseSift，HarrisSift，Lab，DenseHue，Rgb}。图\ref{fig3:1_16_acc_nmi_5}显示了图\ref{fig3:1_16_acc_nmi_4}中添加顺序的逆序的聚类结果，该序列以\textit{HarrisHueV3H1}和\textit{tags}作为结尾。图\ref{fig3:1_16_acc_nmi_6}的模态顺序为\textit{tags，DenseSift，Gist，LabV3H1，RgbV3H1，HsvV3H1，DenseSiftV3H1，DenseHueV3H1，HarrisSiftV3H1，Hsv，HarrisHue，HarrisHueV3H1，DenseHue，Rgb，HarrisSift，Lab}。图\ref{fig3:1_16_acc_nmi_7}显示了图\ref{fig3:1_16_acc_nmi_6}中添加顺序的逆序的聚类结果，该序列以\textit{DenseSift}和\textit{tags}结尾。可以注意到，在以\textit{tags}起始的图\ref{fig3:1_16_acc_nmi_4}和图\ref{fig3:1_16_acc_nmi_6}中，仅使用一种或两种模态信息，所取得的聚类性能已经非常出色。这是因为\textit{tags}是文本描述信息，比视觉描述更具有判别性。在向序列中添加更多的模态后，由于来自视觉描述特征的附加信息，实验结果得到了$2\%$的性能改进。而在多数实际应用中，文本描述是一种从用户处收集代价较高的特征。我们更进一步地在图\ref{fig3:1_16_acc_nmi_5}和图\ref{fig3:1_16_acc_nmi_7}中展示以\textit{tags}作为结束地模态序列的聚类效果。尽管\textit{tags}能够产生可观的性能改进，但是聚类性能依然收益于持续增加的视觉特征数量。如果没有文本描述，在仅使15种模态的情况下，所提出的MFL算法在仅用利用一种或两种模态的基础上，大约可提高$10\%$的聚类性能。
 
 \section{本章小结}
-在本章中，我们将多标签传播中广泛使用的RWC方法通过近似的方式引入了多模态约束传播问题。更进一步地，我们提出了一种在多模态约束传播中的新颖的融合学习方法，称为多模态融合学习（Multi-modal Fusion Learning，MFL）。MFL方法从所观察到的成对约束的重建损失以及传播过程中学习模态的相似性融合。我们讨论了不同的算法在极多数量的模态下的承压能力，并通过大量实验结果证明了所提出方法的优越性。
+在本章中，我们将多标签传播中广泛使用的RWC方法通过近似的方式引入了多模态约束传播问题。更进一步地，本章提出了一种在多模态约束传播中的新颖的融合学习方法，称为多模态融合学习（Multi-modal Fusion Learning，MFL）。MFL方法从所观察到的成对约束的重建损失以及传播过程中学习模态的相似性融合。此外，本章还讨论了不同的算法在极多数量的模态下的承压能力，并通过大量实验结果证明了所提出方法的优越性。
