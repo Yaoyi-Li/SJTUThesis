@@ -36,7 +36,7 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
     \end{equation}
     给定商矩阵$Q$的第$s$行，则能够通过求$s$行与$\frac{P(x_t)}{P(x_s)}$的乘积确定商矩阵$Q$的第$t$行元素。这导致了$Q$为一个秩$1$矩阵。且通过公式（\ref{eq4:q}）可以得到
     \begin{equation}
-    \sum_j\frac{1}{\sum_i {q}_{i,j}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1  
+    \sum_j\frac{1}{\sum_i {q}_{i,j}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1.
     \end{equation}
 
     相反地，假设$Q$为一个秩$1$矩阵成立且。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{i,j} ={ m}_i{n}_j$ 带入 $\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
@@ -230,7 +230,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
     \label{alg4:ilmcp}
     \KwIn{稠密 $ k $-NN 相似性矩阵 ${W}_s^{dense}$；约束矩阵 $ {Y} $；聚类数量 $c$；共识矩阵阈值$ \tau $.}
     \KwOut{Sigmoid 相似性矩阵 $ {W^*}$.}
-    根据公式（\ref{eq4:cons}}为每个模态构建共识相似性矩阵$ {W} ^{cons}_s$；\\
+    根据公式（\ref{eq4:cons}）为每个模态构建共识相似性矩阵$ {W} ^{cons}_s$；\\
     根据公式（\ref{eq4:modalcohere}）、（\ref{eq4:cohere}）和（\ref{eq4:Pglu}），分别针对每个模态和每个数据实例计算一致性$ c_{mod}(\mathcal{G}_s)$、$c_s(i) $ 和概率 $ P^\dagger (\mathcal{G}_s|u_i) $；\\
     通过公式（\ref{eq4:OptSlv}）重构相容条件概率分布；\\
     基于公式（\ref{eq4:uni_aff}）生成并稀疏化相似性矩阵 $ {W} $ ；\\
@@ -252,3 +252,246 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 其中$\sigma$为$F$所有元素绝对值的均值。需要注意的是，算法中所用来平衡正负约束数量的代价敏感加权过程是针对该Sigmoid相似性所设计的。至于先前工作中广泛采用的调整方法，由于高度依赖与原始相似性矩阵，数据均衡处理并不能有效改善聚类效果。
 
 最终，我们在矩阵$W^*$上通过谱聚类方法进行聚类\cite{von2007tutorial}，以产生用于评估的结果。算法\ref{alg4:ilmcp}对ILMCP算法的整体流程进行了总结。
+
+\begin{table}[t]
+    %		\small
+    \bicaption{在Corel 5k和PASCAL VOC'07数据集上使用2个模态（\textit{DenseSift} 和 \textit{tags}）情况下的聚类性能}{Clustering performance in the particular case of 2 modalities (\textit{DenseSift} and \textit{tags})  on Corel 5k and PASCAL VOC'07 with 20000 constraints.}
+    \label{tab4:2case}
+    \centering
+    \begin{tabular}{lcccc}
+        \toprule
+        &\multicolumn{2}{c}{Corel 5k} & \multicolumn{2}{c}{Pascal Voc'07} \\
+        \cmidrule(lr){2-3}
+        \cmidrule(lr){4-5}
+        & ACC\% & NMI\% & ACC\% & NMI\% \\
+        \midrule
+        NCuts & 40.23 & 50.68 & 34.11 & 36.06 \\ 
+        E$^2$CP & 49.76 & 59.05 & 46.84 & 45.26 \\ 
+        MCMCP & 50.20 & 60.42 & 46.00 & 44.13 \\
+        UCP-tags & 49.40 & 59.79 & 51.35 & 48.56 \\ 
+        UCP-DenseSift & 19.57 & 28.31 & 27.34 & 24.35 \\ 
+        MSCP-tags & 51.01 & 61.21 & 55.03 & \textbf{52.09} \\ 
+        MSCP-DenseSift & 29.04 & 37.16 & 32.04 & 28.87 \\ 
+        MMCP & 51.59 & 60.72 & 52.50 & 48.54 \\ 
+        MMCP-SW & 43.22 & 53.10 & 51.42 & 46.99 \\  
+        MFL & 54.87 & 62.32 & 55.07 & 48.55 \\ 
+        ILMCP & \textbf{58.31} & \textbf{64.67} & \textbf{56.03} & 47.79 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[h]
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上使用与表\ref{tab4:2case}中不同的2个模态（\textit{DenseSift} 和 \textit{Gist}）情况下的聚类性能}{Clustering performance in the particular case of 2 modalities (\textit{DenseSift} and \textit{Gist}) different from Table \ref{tab4:2case} on Corel 5k and PASCAL VOC'07 with 20000 constraints}
+	\label{tab4:2modal_notag}
+	
+	\centering
+	\begin{tabular}{lcccc}
+		\toprule
+		&\multicolumn{2}{c}{Corel 5k} & \multicolumn{2}{c}{Pascal Voc'07} \\
+		\cmidrule(lr){2-3}
+		\cmidrule(lr){4-5}
+		& ACC\% & NMI\% & ACC\% & NMI\% \\
+		\midrule
+		NCuts & 17.58 & 26.97 & 24.67 & 22.53 \\ 
+		E$^2$CP & 17.63 & 27.27 & 25.88 & 23.84 \\ 
+		UCP-Gist & 12.85 & 21.95 & 23.72 & 17.39 \\ 
+		UCP-DenseSift & 18.75 & 27.55 & 26.90 & 23.77 \\ 
+		MSCP-Gist & 13.86 & 23.25 & 24.42 & 18.34 \\ 
+		MSCP-DenseSift & 18.67 & 28.08 & 28.72 & 24.84 \\ 
+		MMCP & 13.53 & 22.96 & 24.40 & 18.91 \\ 
+		MMCP-SW & 17.83 & 27.45 & 26.24 & 24.81 \\ 
+		MFL & 19.66 & 28.63 & 29.48 & 28.44 \\ 
+		ILMCP & \textbf{20.51} & \textbf{29.21} & \textbf{32.14} & \textbf{28.60} \\ 
+		\bottomrule
+	\end{tabular}
+\end{table}
+
+\section{实验结果}
+在本节中我们采用与前章相同的INRIA特征数据集\cite{guillaumin2009tagprop}Corel 5k和PASCAL VOC'07进行了大量的实验，以验证所提出的ILMCP在两个基准数据集上的性能。 我们将ILMCP与最先进的方法进行比较。不同算法聚类性的比较结果能的表明了我们所提出ILMCP方法的优势。在本节中，我们对比了MFL方法、MMCP\cite{fu2011multi}方法，以及单模态输入的E$^2$CP\cite{lu2010constrained}方法的实验结果。此外，我们依然如上一章所述，采用没有约束传播过程的Normalized Cuts（NCuts）\cite{shi2000normalized}方法作为本节对比中的基线方法。除上述算法外，还有大量特定为2模态情况所设计的多模态约束传播算法，例如上一章中所介绍过的UCP\cite{lu2013unified}方法及MSCP\cite{lu2013exhaustive}也被用于本节中的聚类性能比较。
+
+\subsection{实验设置}
+
+\begin{figure}[t]
+	\centering
+	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
+					{ACC on  Corel 5k}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap4/corel5k_cn_acc_3.pdf}}
+                    \label{fig4:3viewacc1}
+	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
+					{NMI on  Corel 5k}
+                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap4/corel5k_cn_nmi_3.pdf}}
+                    \label{fig4:3viewnmi1}
+                    
+	\centering
+	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
+					{ACC on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap4/voc_cn_acc_3.pdf}}
+                    \label{fig4:3viewacc2}
+	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
+					{NMI on  PASCAL VOC'07}
+					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap4/voc_cn_nmi_3.pdf}}
+                    \label{fig4:3viewnmi2}
+	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用3个模态的聚类的ACC和NMI结果，需注意Y轴的尺度不相同}{Clustering result ACC and NMI on 3-modalities of Corel 5k and PASCAL VOC'07 with different numbers of pairwise constraints. Note the different Y-axis scales}
+	\label{fig4:3view}
+\end{figure} 
+
+
+\begin{table}[t]
+    \bicaption{在Corel 5k数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on Corel 5k with 20000 constraints}
+    \label{tab4:modal}
+    \centering
+    %	\setlength{\tabcolsep}{8pt}
+    \begin{tabular}{l*{6}{c}}
+        \toprule
+        &\multicolumn{2}{c}{3 modalities} & \multicolumn{2}{c}{8 modalities} & \multicolumn{2}{c}{16 modalities}\\
+        \cmidrule(lr){2-3}
+        \cmidrule(lr){4-5}
+        \cmidrule(lr){6-7}
+        & ACC\% & NMI\% & ACC\% & NMI\% & ACC\% & NMI\% \\
+        \midrule
+        NCuts & 44.98 & 54.33 & 38.61 & 49.27 & 32.07 & 42.11 \\ 
+        E$^2$CP & 52.64 & 61.14 & 40.19 & 50.17 & 28.80 & 39.17 \\ 
+        MCMCP & 49.15 & 59.90 & 36.72 & 51.56 & 36.24 & 51.12 \\ 
+        MMCP & 53.49 & 62.79 & - & - & - & - \\ 
+        MMCP-SW & 48.50 & 56.58 & 37.82 & 48.33 & 32.98 & 43.63 \\ 
+        MFL & {56.36} & {63.99} & {57.04} & {64.11} & {56.67} &{ 64.09}\\
+        ILMCP & \textbf{60.47} & \textbf{66.26} & \textbf{60.06} & \textbf{66.45 } & \textbf{62.12} &\textbf{ 67.67} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+\begin{table}[t]
+    \bicaption{在PASCAL VOC'07数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on PASCAL VOC'07  with 20000 constraints}
+    \label{tab:modal2}
+    \centering
+    %	\setlength{\tabcolsep}{8pt}
+    \begin{tabular}{l*{6}{c}}
+        \toprule
+        &\multicolumn{2}{c}{3 modalities} & \multicolumn{2}{c}{8 modalities} & \multicolumn{2}{c}{16 modalities}\\
+        \cmidrule(lr){2-3}
+        \cmidrule(lr){4-5}
+        \cmidrule(lr){6-7}
+        & ACC\% & NMI\% & ACC\% & NMI\% & ACC\% & NMI\%  \\
+        \midrule
+        NCuts  & 26.76 & 25.04 & 23.07 & 21.26 & 22.31 & 18.40  \\ 
+        E$^2$CP  & 40.46 & 39.50 & 29.39 & 26.40 & 25.66 & 21.29 \\ 
+        MCMCP & 34.85 & 27.34 & 29.36 & 24.79 & 29.80 & 24.98  \\ 
+        MMCP  & 48.42 & 41.80 & - & - & - & - \\ 
+        MMCP-SW & 38.29 & 36.14 & 29.04 & 26.40 & 27.85 & 24.90 \\ 
+        MFL  & {56.66} & \textbf{49.98} & {54.95} & {49.06} & {56.35} & 
+        ILMCP & \textbf{57.51} & {49.38} & \textbf{57.63} & \textbf{49.49} & \textbf{57.93} & \textbf{49.88} \\{49.86}\\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+在聚类效果评估的实验中，我们依然设计了四种情况来评估我们的方法（2种模态、3种模态、8种模态和16种模态）。在2种模态的情况下，我们将所提出的方法与专门为2模态设计的一些方法（UCP方法和MSCP方法）进行了比较。我们使用3种和3种以上的模态进行实验来确认所提出的方法可以受益于更多的模态信息。我们采用8种模态和16种模态这两类情况进行实验，以证明ILMCP具有处理极多种不同模态的能力，并能保持聚类鲁棒性。此外，本节进行了模态选择实验以揭示ILMCP能够剔除部分噪声数据大于判别性信息的冗余模态，并通过模态选择提高聚类性能。
+
+在2种模态的情况下，我们设计了两种选择方式不同的子实验，分别从INRIA特征数据集中选择\textit{DenseSift/tags}模态数据和\textit{DenseSift/Gist}模态数据。在3模态情况下，实验采用了\textit{DenseSift}、\textit{Lab} 和 \textit{tags}特征。8种模态采用了\textit{DenseSift、Lab、tags、Gist、Hsv、HarrisSiftV3H1、HsvV3H1、RgbV3H1}。而在16个模态情况中采用了全部的特征信息。在模态选择的实验当中，我们同样采用了16个模态的全部信息作为初始化。所有图像特征均用零均值归一化并缩放到区间$[-1,1] $内。
+
+我们对于图像类的描述特征使用公式（\ref{eq3:GaussKer}）中的$k$-NN热力核构造原始相似性矩阵，而文本描述特征则通过$cosine$距离构造相似性信息。需要注意的是，PASCAL VOC'07数据集中约三分之一的数据不存在任何文本描述信息。为防止空白特征，我们在这些数据实例的文本特征的每个特征维度上叠加了一个极小的随机噪声。该预处理基于的假设是所有没有文本描述特征的数据实例都存在多个潜在的标签描述，这使得文本描述不再是0-1特征描述。
+
+在本节的实验中，由于没有验证集可供在聚类实验中进行参数搜索，我们采用与MFL相同的固定参数选择标准。$k$-NN近邻数量被设为$ k = \mathrm{Round}(\mathrm{log}_2(\frac{n}{c}))$，其中$ n $为数据点数量，$ c $为聚类的数量。实验中采用传播参数$\eta = 0.25$。
+我们对谱聚类的特征投影结果进行$k$-means聚类，将30次$k$-means聚类作为一轮，并选择类内和最小的聚类作为结果。在评估中，我们对每个算法随机生成了5个约束矩阵，对每个约束矩阵的约束传播的结果进行了5轮聚类，并在实验结果中报告了平均的聚类评估结果。
+
+\subsection{性能评估与比较}
+在本节中，我们进行了五个实验以实现对所提出算法的聚类性能评估。
+
+为与专为2种模态情况设计的算法进行比较，我们在2种模态的情况下测试了ILMCP方法，并在表\ref{tab4:2case}中对比了不同算法的性能。由于MSCP和UCP方法使用约束传播结果来对每个模态的相似性矩阵进行分别调整，因此没有像ILMCP中${W^*}$矩阵这样的统一的相似性矩阵作为最终结果。我们对这两种算法分别在每个模态的相似性上聚类并给出了评估结果，这两种算法都在传播调整过的文本描述特征上取得了各自的最优表现。可以注意到，在所有对照方法中所提出的ILMCP具有最佳的聚类性能。
+由于从是文本描述中提取的特征，模态\textit{tags}在聚类中显示出压倒性的优势。基于这点观察结果，我们针对不使用文本描述信息的2种模态情况进行了更多的实验。表\ref{tab4:2modal_notag}报告了不使用\textit{tags}特征，而采用\textit{DenseSift} 和 \textit{Gist}作为2种模态信息的情况下的聚类性能对照结果。
+
+\begin{table}[t]
+    %		\small
+    \centering
+    \bicaption{E$^2$CP和ILMCP方法在Corel 5k 和 PASCAL VOC'07数据集上的聚类性能表现（ACC和NMI）}{Clustering performance (ACC and NMI) on of E$^2$CP and ILMCP on Corel 5k and PASCAL VOC'07.}
+    %\begin{sc}
+    \begin{tabular}{lcccccc}
+        \toprule
+        &\multicolumn{2}{c}{Corel 5k} & \multicolumn{2}{c}{Pascal Voc'07} \\
+        \cmidrule(lr){2-3}
+        \cmidrule(lr){4-5}
+        & ACC\% & NMI\% & ACC\% & NMI\% \\
+        \midrule
+        E$^2$CP: &&&&\\
+        DenseSift & 24.40 & 36.44 & 25.34 & 22.80 \\ 
+        Lab & 18.39 & 27.10 & 16.56 & 9.11 \\ 
+        tags & 51.44 & 60.30 & 51.92 & 44.98 \\ 
+        Hsv & 25.83 & 35.61 & 16.86 & 8.42 \\ 
+        Gist & 12.99 & 22.04 & 22.32 & 16.22 \\ 
+        RgbV3H1 & 20.79 & 31.03 & 18.37 & 11.14 \\ 
+        HarrisSiftV3H1 & 9.00 & 13.75 & 23.53 & 17.43 \\ 
+        HsvV3H1 & 25.54 & 35.01 & 17.22 & 9.06 \\ 
+        HarrisSift & 12.01 & 18.09 & 24.68 & 19.04 \\ 
+        DenseHueV3H1 & 18.38 & 27.92 & 16.09 & 8.68 \\ 
+        DenseSiftV3H1 & 18.33 & 27.64 & 28.51 & 27.10 \\ 
+        DenseHue & 17.24 & 27.54 & 16.63 & 8.84 \\ 
+        LabV3H1 & 22.97 & 36.55 & 18.02 & 9.58 \\ 
+        HarrisHue & 15.72 & 26.17 & 16.38 & 9.04 \\ 
+        HarrisHueV3H1 & 15.58 & 25.93 & 17.05 & 9.05 \\ 
+        Rgb & 19.69 & 30.33 & 16.77 & 9.12 \\ 
+        \midrule
+        ILMCP: &&&&\\
+        3-modalities         & {60.47} & {66.26}  & {57.51} & {49.38} \\ 
+        16-modalities         &\textbf{62.12} &\textbf{ 67.67}   & \textbf{57.93} & \textbf{49.88}   \\	
+        \bottomrule
+    \end{tabular}
+    \label{tab4:e2cp}
+\end{table}
+
+3种模态情况下不同约束数量对应的聚类结果如图\ref{fig4:3view}中所示。
+所采样出的用于传播的约束数量是Corel 5k和PASCAL VOC'07数据集中所有约束总数的$0.01\%$至$0.08\%$，间隔为$0.01\%$。我们在3种模态的实验中同样考虑了两种不同版本的MMCP方法。一种是原始的MMCP，其中我们依据文献\parencite{fu2011multi}中提出的3种模态的先验概率，将其设置为0.2、0.05和0.75。由于在实际情况中很难确定每个模态的重要性，所以另一个版本是采用相同权重的MMCP（MMCP-SW），在其中每个模态被分配了相同的先验概率。
+在对E$^2$CP的实验中我们分别对每一个模态独立地进行约束传播，然后通过线性组合将传播后的相似性矩阵进行融合。通过图\ref{fig4:3view}可以看到，在同时利用3种模态地情况下，所提出的ILMCP聚类性能明显超过其他对照算法。
+
+表\ref{tab4:modal}和表\ref{tab4:modal2}显示了不同模态数量情况下的更详细的聚类评估结果。当具有8种或16种模态时，通过手工方式确定每种模态的重要性变得几乎无法实现。 因此，在MMCP中我们令每个模态都具有相同的先验图概率$1/16$，而忽略掉了后缀-SW。从定量结果可以看出，随着模态数量的增加，聚类的任务由于没有监督信息反而变得更加困难。同时ILMCP的优势也更加明显。
+
+我们将所提出的方法与每种模态独立进行约束传播的结果进行比较。如表\ref{tab4:e2cp}所示，我们对具有$0.08\%$的成对约束的16种模态的相似性分别采用E$^2$CP算法进行约束传播。同时表\ref{tab4:e2cp}也给出了3种模态情况和16种模态情况下的ILMCP聚类结果，以供对照参考，这些结果与图\ref{fig4:3view}、表\ref{tab4:modal}和表\ref{tab4:modal2}中所展示的数据结果相同。
+可以看出，在两个数据集中，采用文本描述特征作为唯一模态均具有最佳性能。但是，在实际应用中由于不存在监督数据，因此并不能明确哪个模态下的特征信息能取得更令人满意的结果。
+
+表\ref{tab4:path}展示了所提出方法不同部分对应的消融实验的实验结果。可以发现，所提出的相容条件概率分布重构（CCDR），即不同模态边缘概率的学习部分，提供了$21.79\%$的NMI提升，和$23.35\%$的ACC提升，起到了最主要作用。
+ILMCP所包含的相容条件概率分布重构（CCDR）、约束数据均衡（Balance）和整流Sigmoid函数（Re-Sig）三个部分均对最终结果有提升效果。
+\begin{table}[t]
+    %		\small
+    \centering
+    \bicaption{从MMCP方法到ILMCP方法的消融实验（Corel 5k数据集中的16个模态）}{The path from MMCP to ILMCP (on Corel 5k with 16-modalities)}
+    %	\footnotesize
+    \label{tab4:path}
+    %\begin{sc}
+    %	\begin{tabular}{c| p{30pt}<{\centering}  p{30pt}<{\centering}  p{30pt}<{\centering} |p{20pt}<{\centering}  p{20pt}<{\centering} }
+    
+    \begin{tabular}{lccccc}
+        \toprule
+        
+        & CCDR? & { Balance?}& {Re-Sig?}& ACC\%&NMI\% \\		 
+        \midrule
+        MMCP-SW&&&&32.98 & 43.63\\
+        \midrule
+        &&& & 33.32 & 43.14 \\ 
+        &&&\checkmark & 35.19 & 43.28 \\ 
+        &&\checkmark& & 34.01 & 44.01 \\ 
+        interim&&\checkmark&\checkmark& 35.76 & 43.79 \\ 
+        methods&\checkmark&&& 56.67 & 64.93 \\ 
+        &\checkmark&&\checkmark& 59.44 & 66.06 \\ 
+        &\checkmark&\checkmark&& 57.18 & 65.96 \\ 
+        \midrule
+        ILMCP&\checkmark&\checkmark&\checkmark& \textbf{62.12} & \textbf{67.67} \\ 
+        \bottomrule
+    \end{tabular}
+    %\end{sc}
+\end{table}
+
+
+\begin{figure}[t]
+    \centering
+    \includegraphics[width=0.49\textwidth]{chap4/corel5k_voc_1_16_acc.pdf}
+    \includegraphics[width=0.49\textwidth]{chap4/corel5k_voc_1_16_nmi.pdf}
+	\bicaption{Corel 5k 和 PASCAL VOC'07数据集上的模态选择结果}{Modality selection results on Corel 5k and PASCAL VOC'07}
+	\label{fig4:corel5k_1_10}
+\end{figure} 
+
+\subsection{模态选择}
+由于所提出的方法可以用于衡量每个模态的重要性，我们可以将ILMCP视为模态选择的一个可行的引导信息。在该方法中，可以直接生成每个图的边缘概率$ P(\mathcal{G}_s)$。通过对没个模态对应的图的边缘概率进行排序，即可以剔除具有最小概率的模态。按照上述策略，我们可以对所有模态进行一一消除，并测试每一步后的聚类效果。图\ref{fig4:corel5k_1_10}显示了进行了模态选择后的聚类性能，其中我们根据图的边缘概率从小到大的顺序逐渐删除了16个模态中的15个。当我们开始根据其低边缘概率去除一些噪声较多的模态时，在数据集PASCAL VOC'07上的聚类性能会略有提高，但基本保持稳定，这是由于所提出的算法策略可会赋予噪声高的模态更低的概率，以免受噪声影响整体效果。当我们继续消除更多的模态时，某些包含判别性信息较多的模态将被删除，性能将会开始下降，逐渐失去多模态学习的优势。 图\ref{fig4:corel5k_1_10}中的结果说明了所提出的方法在大多数情况下均能达到预期的结果。
+
+\section{本章小结}
+在本章中，我们提出了一种新颖的多模态约束传播方法，称为实例级多模态约束传播（ILMCP）。在所提出的方法通过从实例级的相容条件概率分布中学习多模态数据集下的统一的数据相似性，并且缓解了约束传播中的成对约束数据量不均衡的问题。
+大量实验证明了该方法的优越性。由于多模态融合在结构学习中是一个流行的趋势。利用基本的CCDR问题来进行基于深度神经网络的多模态相似性传播，并将传播结果用于结构嵌入学习是未来值得研究的工作之一。
