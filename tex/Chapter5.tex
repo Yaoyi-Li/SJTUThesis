@@ -1,0 +1,48 @@
+% !TEX root = ../thesis.tex
+\chapter{基于自适应相似性的深度抠图方法}
+\section{引言}
+在前几章中，我们分别研究了数据驱动的相似性学习在无监督的度量学习和半监督的约束聚类中的应用情况，本章将着重研究相似性学习在具有监督信息的自然图像抠图问题中的算法应用。
+
+自然图像抠图（natural image matting）是计算机视觉中的重要任务之一。它在图像或视频编辑、合成和电影后期制作方面具有大量应用\cite{wang2008image，aksoy2017designing，lutz2018alphagan，xu2017deep，samplenet}。抠图问题已引起学术界的极大兴趣，并且在过去十年中被广泛地研究。
+自然图像抠图是将前景对象与背景图相分离的问题并估计它们之间的过渡取值的问题。数字图像抠图将输入的自然图像视为前景图和背景图的合成图像，旨在估计前景图像的不透明度。其预测结果是alpha半透明遮罩（alpha matte），表示每个像素在前景和背景之间的过渡取值\cite{wang2008image}。
+
+在数学形式上，观察到的RGB图像$ I $被建模为前景图像$ F $和背景图像$ B $的凸组合的形式\cite{chuang2001bayesian,wang2008image}：
+\begin{equation}
+I_p = \alpha_pF_p + (1-\alpha_p)B_p, \quad \alpha_p \in [0,1],
+\label{eq5:matting}
+\end{equation}
+其中$ \alpha_p $表示要在像素位置$ p $所估计的alpha遮罩值。如果$ \alpha_p $的取值不是$0$或者$1$，则在像素位置$p$的图像像素值即是由前景和背景混合而成。由于前景颜色$ F_p $、背景颜色$ B_p $和alpha取值$ \alpha_p $都是未知的，所以图像抠图的原始数学定义是一个欠定问题。因此，大多数先前的传统抠图算法都会在抠图问题中引入一个比较强的归纳偏置（inductive bias）。同时，在大多数抠图任务中，都将trimap图像作为粗略标注提供给算法，trimap图像上标注有已知的前景和背景区域以及需要预测的未知区域。
+
+在基于相似性和基于采样的算法中广泛采用的基本思想之一是从具有相似外观的图像区域中借用信息。通常，传统的基于相似性的方法\cite{levin2008closed,he2010fast,chen2013knn,aksoy2017designing}通过参考输入图像中不同区块间的外观相似性，将不透明度或透明度在像素之间进行传播，以生成alpha遮罩值。基于采样的算法\cite{wang2007optimized,gastal2010shared,he2011global,feng2016cluster}一般从前景和背景中借用一对采样区块，以基于某些特定假设来估计未知区域中每个像素的alpha值。
+先前基于相似性和基于采样的方法的一个不足点是，它们无法处理trimap中仅存在背景区域和未知区域标注的情况。这是因为这些方法必须同时利用前景和背景信息来估计alpha取值，在没有前景标注的情况下，这些算法无法正常计算。
+
+受益于Adobe Image Matting数据集\cite{xu2017deep}，近年来出现了更多基于学习的图像抠图方法 \cite{xu2017deep,lutz2018alphagan,lu2019indices,samplenet,cai2019disentangled,hou2019context}。大多数基于学习的方法都使用神经网络先验作为归纳偏置并直接预测Alpha遮罩值。
+
+部分基于深度学习的抠图方法\cite{samplenet,cai2019disentangled}更是潜在地利用了相似外观的图像区域具有相似alpha遮罩值这一假设作为归纳偏置，从而改进了其抠图效果。
+SampleNet\cite{samplenet}通过其方法中采用的图像补全（image inpainting）网络\cite{yu2018generative}实现传播，以进行前景和背景估计，再通过采样方法预测alpha值，而不是通过传播不透明度直接进行预测。此外，图像补全网络中的传播行为仅作用在具有强语义的少部分特征上，而不是在高分辨率特征上进行。在AdaMatting\cite{cai2019disentangled}中，作者将卷积长短时记忆（Convolutional LSTM，ConvLSTM）网络\cite{xingjian2015convolutional}引入了它们的网络中，作为网络最后的传播阶段。其中，信息传播是基于ConvLSTM中的卷积和记忆存储部分实现的。
+ConvLSTM和直接传播之间并不能看作是等价的计算模块，两者的区别可以类比于LSTM\cite{hochreiter1997long}和transformer\cite{vaswani2017attention}之间的区别。
+
+在本章中，我们提出了一种新颖的层次化不透明度传播（Hierarchical Opacity Propagation，HOP）方法，其中，不透明消息可以在不同语义级别的特征间进行传播。近几年信息传播在神经网络框架中被广泛地采纳，从自然语言处理\cite{vaswani2017attention,yang2019xlnet}，数据挖掘\cite{kipf2016semi,velivckovic2017graph}到计算机视觉\cite{yu2018generative,wang2018non}都有大量工作通过信息传播的方式改进算法性能。所提出的结构主要由全局HOP模块和局部HOP模块两种传播模块构成。HOP模块基于所提出的引导上下文注意力（Guided Contextual Attention，GCA）机制实现，该机制可以在全卷积神经网络中模拟基于相似性的传统抠图算法的传播过程。在GCA中，低级语义特征被用来作为传播过程的引导信息，根据引导信息，该机制对alpha特征进行传播。已知区块和未知区块中的信息被传播到未知区域中具有相似外观的特征区块中。
+
+本章中所提出的图像抠图方法可以从两个不同的角度进行解释。 一方面，可以将引导上下文注意力机制解释为一种具有神经网络先验的基于相似性进行alpha值传播的抠图方法。在低级图像特征间相似度的引导下，未知区域中的区块相互之间对具有高级语义的alpha特征进行共享。
+另一方面，所提出的方法也可以看作是引导性的图像补全任务。在这个角度下，根据输入图像的引导，图像抠图任务可以被视为是在alpha遮罩图像上的补全任务。未知区域类比于要在图像补全中待填充的孔洞部分。与通常情况下，从同一图像的背景借用像素的补全方法不同的是，图像抠图在原始RGB图像的引导下在alpha遮罩图像中的已知区域借像素值$ 0 $或$ 1 $来填充未知区域。
+
+\section{相关工作}
+大多数自然图像抠图方法可以粗略分为基于相似性的方法\cite{levin2008closed,he2010fast,lee2011nonlocal,chen2013knn,aksoy2017designing}，基于采样的方法\cite{wang2007optimized,gastal2010shared,he2011global,feng2016cluster}和基于学习的方法\cite{xu2017deep,lutz2018alphagan,lu2019indices,samplenet,hou2019context,cai2019disentangled}三类。在本节中，我们将回顾一些与该章节相关度较高的基于深度学习的抠图算法。
+
+一般基于深度学习的方法利用深度神经网络通过给定图像和trimap图直接预测alpha遮罩值。
+Cho等人\cite{cho2019deep}最先在抠图任务中使用了端到端卷积神经网络（Convolutional Neural Network，CNN），该网络从Closed-form Matting\cite{levin2008closed}和KNN Matting\cite{chen2013knn}中获取alpha值以及归一化的RGB图像作为输入，以更好地利用局部和非局部（nonlocal）结构信息对不同算法生成的alpha值进行融合。
+文献\parencite{xu2017deep}中提出了Deep Matting方法作为一个两阶段网络来预测alpha遮罩。在第一阶段中，算法向深层卷积编码器/解码器网络输入图像和相应的trimap，得到粗略预测结果。在第二阶段，通过浅层网络对粗略预测的alpha值进行细化。
+Lutz等人\cite{lutz2018alphagan}将生成对抗网络（Generative Adversarial Networks，GAN）引入了图像抠图问题，并使用膨胀卷积来捕获全局上下文信息。
+Tang等人\cite{tang2019very}提出了一个名为VDRN的神经网络，该网络包含一个深度残差（residual）编码器和一个复杂的解码器。
+AdaMatting\cite{cai2019disentangled}方法将抠图问题分为两个任务，trimap自适应和alpha估计，并使用具有两个不同解码器分支的CNN模型以多任务学习方式处理。
+IndexNet Matting\cite{lu2019indices}方法将池化（pooling）操作中的索引作为特征图的函数，并提出了一种通过索引引导的编码器/解码器网络，该网络通过由学习得到的索引信息进行的索引池化和上采样。
+Hou和Liu\cite{hou2019context}提出了一个上下文感知（context-aware）网络来预测前景和alpha遮罩值。Context-aware Matting使用两种编码器，一种用于局部特征，另一种用于上下文信息。 
+
+一些方法表明，不对alpha进行直接预测，而更改问题的自由度可以改善网络的性能。
+Tang等人\cite{samplenet}提出了SampleNet来逐步地估计前景、背景和alpha遮罩，而不是同时对其进行预测。
+Zhang等人\cite{Zhang2019ALF}使用两个解码器分支分别估计前景和背景，然后使用融合分支获得最终预测结果。
+
+上面提到的绝大多数方法都严重依赖trimap作为输入，以减小解空间。然而最近，对于特定的实际问题，一些利用图像语义信息可以在没有任何trimap图输入的情况下具有良好抠图效果的方法被陆续提出。
+Shen等人\cite{shen2016deep}将端到端CNN与Closed-form Matting\cite{levin2008closed}结合起来，自动生成人像的trimap图，然后获得所需的alpha遮罩值。
+Chen等人\cite{chen2018semantic}提出了一种语义人体抠图（Semantic Human Matting，SHM）方法，将语义分割网络与抠图网络集成在一起以自动提取人体的alpha遮罩。

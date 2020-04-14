@@ -253,6 +253,40 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 
 最终，我们在矩阵$W^*$上通过谱聚类方法进行聚类\cite{von2007tutorial}，以产生用于评估的结果。算法\ref{alg4:ilmcp}对ILMCP算法的整体流程进行了总结。
 
+
+\begin{table}[t]
+	\bicaption{基准数据集Corel 5k和PASCAL VOC'07的统计量描述}{Statistics of benchmark data sets Corel 5k and PASCAL VOC'07}
+	\label{tab4:Data}
+	\centering
+	\setlength{\tabcolsep}{15pt}
+	\begin{tabular}{l l c c}
+		\toprule
+		& & Corel 5k & PASCAL VOC'07\\
+		\midrule
+		&DenseSift&  1,000 & 1,000 \\
+		&Lab&  4,096 & 4,096 \\
+		&tags&  260& 804 \\
+		&Hsv&  4,096 & 4,096 \\
+		&Gist&  512 & 512 \\
+		&RgbV3H1&  5,184 & 5,184\\
+		&HarrisSiftV3H1&  3,000 & 3,000 \\
+		特征维度&HsvV3H1& 5,184 & 5,184\\
+		&HarrisSift&  1,000 & 1,000 \\
+		&DenseHueV3H1&  300 & 300 \\
+		&DenseSiftV3H1&  300 & 300 \\
+		&DenseHue&  100 & 100 \\
+		&LabV3H1&  5,184 & 5,184 \\
+		&HarrisHue&  100 & 100 \\
+		&HarrisHueV3H1&  300 & 300 \\
+		&Rgb&  4,096 & 4,096 \\
+		\midrule
+		实例数目 &&4999 & 9963 \\
+		类别数目 &&50 & 20 \\
+		\bottomrule
+	\end{tabular}
+		%\end{sc}
+\end{table}
+
 \begin{table}[t]
     %		\small
     \bicaption{在Corel 5k和PASCAL VOC'07数据集上使用2个模态（\textit{DenseSift} 和 \textit{tags}）情况下的聚类性能}{Clustering performance in the particular case of 2 modalities (\textit{DenseSift} and \textit{tags})  on Corel 5k and PASCAL VOC'07 with 20000 constraints.}
@@ -310,7 +344,10 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 \end{table}
 
 \section{实验结果}
-在本节中我们采用与前章相同的INRIA特征数据集\cite{guillaumin2009tagprop}Corel 5k和PASCAL VOC'07进行了大量的实验，以验证所提出的ILMCP在两个基准数据集上的性能。 我们将ILMCP与最先进的方法进行比较。不同算法聚类性的比较结果能的表明了我们所提出ILMCP方法的优势。在本节中，我们对比了MFL方法、MMCP\cite{fu2011multi}方法，以及单模态输入的E$^2$CP\cite{lu2010constrained}方法的实验结果。此外，我们依然如上一章所述，采用没有约束传播过程的Normalized Cuts（NCuts）\cite{shi2000normalized}方法作为本节对比中的基线方法。除上述算法外，还有大量特定为2模态情况所设计的多模态约束传播算法，例如上一章中所介绍过的UCP\cite{lu2013unified}方法及MSCP\cite{lu2013exhaustive}也被用于本节中的聚类性能比较。
+ 在本节中，我们在两个公开数据集上设计了大量的实验，并将ILMCP与最先进的对照方法进行了比较。不同算法聚类性的比较结果能的表明了我们所提出ILMCP方法的优势。在本节中，我们对比了MFL方法、MMCP\cite{fu2011multi}方法，以及单模态输入的E$^2$CP\cite{lu2010constrained}方法的实验结果。此外，我们依然如上一章所述，采用没有约束传播过程的Normalized Cuts（NCuts）\cite{shi2000normalized}方法作为本节对比中的基线方法。除上述算法外，还有大量特定为2模态情况所设计的多模态约束传播算法，例如上一章中所介绍过的UCP\cite{lu2013unified}方法及MSCP\cite{lu2013exhaustive}也被用于本节中的聚类性能比较。
+
+\subsection{数据集描述}
+在本节中我们延续与前章中MFL方法相同的数据集选择，采用INRIA特征数据\cite{guillaumin2009tagprop}中的Corel 5k和PASCAL VOC'07数据集进行实验，以验证所提出的ILMCP在两个基准数据集上的性能。Corel 5k和PASCAL VOC'07数据集各自包含15种图像描述特征及1种文本描述特征，由于不同的图像描述特征的生成方式及提取到的语义信息等级差距极大，在本实验将该多模态多视图特征数据视为16种不同的独立模态进行处理。在本实验中，两个数据集中的训练集和测试集将分别被合并为一个整体数据集合用于约束聚类问题。在该情况下，Corel 5k数据集包含4,999个数据实例，PASCAL VOC'07数据集包含9,963个数据实例。在表格\ref{tab4:Data}中，我们总结了两个个基准数据集的统计量描述。
 
 \subsection{实验设置}
 
