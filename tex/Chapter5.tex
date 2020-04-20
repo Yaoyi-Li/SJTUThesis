@@ -1,7 +1,7 @@
 % !TEX root = ../thesis.tex
 \chapter{基于相似性学习的深度图像抠图方法}
 \section{引言}
-在前几章中，我们分别研究了数据驱动的相似性学习在无监督的度量学习和半监督的约束聚类中的应用情况，本章将着重研究相似性学习在具有监督信息的自然图像抠图问题中的算法应用。
+在前几章中，我们分别研究了数据驱动的相似性学习在无监督的度量学习和半监督的约束聚类中的应用情况，本章将着重研究相似性学习在具有监督信息的自然图像抠图问题中的算法应用。与前几章中不同的是，在本章中我们将着重关注如何通过数据驱动的网络模型学习相似性的生成方式，而不是直接学习相似性的数值。
 
 自然图像抠图（natural image matting）是计算机视觉中的重要任务之一。它在图像或视频编辑、合成和电影后期制作方面具有大量应用\cite{wang2008image,aksoy2017designing,lutz2018alphagan,xu2017deep,samplenet}。抠图问题已引起学术界的极大兴趣，并且在过去十年中被广泛地研究。
 自然图像抠图是将前景对象与背景图相分离的问题并估计它们之间的过渡取值的问题。数字图像抠图将输入的自然图像视为前景图和背景图的合成图像，旨在估计前景图像的不透明度。其预测结果是alpha半透明遮罩（alpha matte），表示每个像素在前景和背景之间的过渡取值\cite{wang2008image}。
@@ -22,7 +22,7 @@ I_p = \alpha_pF_p + (1-\alpha_p)B_p, \quad \alpha_p \in [0,1],
 SampleNet\cite{samplenet}通过其方法中采用的图像补全（image inpainting）网络\cite{yu2018generative}实现传播，以进行前景和背景估计，再通过采样方法预测alpha值，而不是通过传播不透明度直接进行预测。此外，图像补全网络中的传播行为仅作用在具有强语义的少部分特征上，而不是在高分辨率特征上进行。在AdaMatting\cite{cai2019disentangled}中，作者将卷积长短时记忆（Convolutional LSTM，ConvLSTM）网络\cite{xingjian2015convolutional}引入了它们的网络中，作为网络最后的传播阶段。其中，信息传播是基于ConvLSTM中的卷积和记忆存储部分实现的。
 ConvLSTM和直接传播之间并不能看作是等价的计算模块，两者的区别可以类比于LSTM\cite{hochreiter1997long}和Transformer\cite{vaswani2017attention}之间的区别。
 
-在本章中，我们将先后提出两种基于相似性的深度抠图方法。首先将提出基本的引导上下文注意力抠图（Guided Contextual Attention Matting，GCA Matting）模型，以在深度神经网络中实现基本的信息传播功能。然后在此基础上提出了一种新颖的层次化不透明度传播（Hierarchical Opacity Propagation，HOP）方法，其中，不透明消息可以在不同语义级别的特征间进行传播。近几年信息传播在神经网络框架中被广泛地采纳，从自然语言处理\cite{vaswani2017attention,yang2019xlnet}，数据挖掘\cite{kipf2016semi,velivckovic2017graph}到计算机视觉\cite{yu2018generative,wang2018non}都有大量工作通过信息传播的方式改进算法性能。所提出的结构主要由全局HOP模块和局部HOP模块两种传播模块构成。HOP模块基于所提出的引导上下文注意力（Guided Contextual Attention，GCA）机制实现，该机制可以在全卷积神经网络中模拟基于相似性的传统抠图算法的传播过程。在GCA机制中，低级语义特征被用来作为传播过程的引导信息，根据引导信息，该机制对alpha特征进行传播。已知区块和未知区块中的信息被传播到未知区域中具有相似外观的特征区块中。
+本章将先后提出两种基于相似性的深度抠图方法，所提出方法通过数据驱动的监督训练学习基于图像外观信息的像素相似性生成方式，以实现不透明度的信息传播。近几年信息传播在神经网络框架中被广泛地采纳，从自然语言处理\cite{vaswani2017attention,yang2019xlnet}、数据挖掘\cite{kipf2016semi,velivckovic2017graph}到计算机视觉\cite{yu2018generative,wang2018non}都有大量工作通过信息传播的方式改进算法性能。在本章中，我们首先将提出基本的引导上下文注意力抠图（Guided Contextual Attention Matting，GCA Matting）模型，以在深度神经网络中实现基本的信息传播功能。然后在此基础上提出了一种新颖的层次化不透明度传播抠图（Hierarchical Opacity Propagation Matting，HOP Matting）方法，其中，不透明度信息可以在不同语义级别的特征间进行传播。HOP Matting模型中所提出的结构主要由全局HOP模块和局部HOP模块两种传播模块构成。HOP模块基于所提出的引导上下文注意力（Guided Contextual Attention，GCA）机制实现，该机制可以在全卷积神经网络中模拟基于相似性的传统抠图算法的传播过程。在GCA机制中，低级语义特征被用来作为传播过程的引导信息，根据引导信息，该机制对alpha特征进行传播。已知区块和未知区块中的信息被传播到未知区域中具有相似外观的特征区块中。
 
 本章中所提出的图像抠图方法可以从两个不同的角度进行解释。 一方面，可以将引导上下文注意力机制解释为一种具有神经网络先验的基于相似性进行alpha值传播的抠图方法。在低级图像特征间相似度的引导下，未知区域中的区块相互之间对具有高级语义的alpha特征进行共享。
 另一方面，所提出的方法也可以看作是引导性的图像补全任务。在这个角度下，根据输入图像的引导，图像抠图任务可以被视为是在alpha遮罩图像上的补全任务。未知区域类比于要在图像补全中待填充的孔洞部分。与通常情况下，从同一图像的背景借用像素的补全方法不同的是，图像抠图在原始RGB图像的引导下在alpha遮罩图像中的已知区域借像素值$ 0 $或$ 1 $来填充未知区域。
@@ -258,22 +258,22 @@ g_{(i,j)} = &W_{out}(\sum_{(x,y)\in\mathcal{N}((i,j), s)}a_{(i,j),(x,y)}f^O_{(x,
 \begin{figure}[t]
 	\subfloat{
 		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-scale.pdf}
+		\includegraphics[width=.22\linewidth]{chap5/pos-scale.pdf}\\
 		\centering SI-PE
 	}	
 	\subfloat{
 		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-relate.pdf}
+		\includegraphics[width=.22\linewidth]{chap5/pos-relate.pdf}\\
 		\centering R-PE
 	}	
 	\subfloat{
 		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-abs.pdf}
+		\includegraphics[width=.22\linewidth]{chap5/pos-abs.pdf}\\
 		\centering A-PE
 	}	
 	\subfloat{
 		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-local.pdf}
+		\includegraphics[width=.22\linewidth]{chap5/pos-local.pdf}\\
 		\centering LR-PE
 	}
 	\bicaption{不同的位置编码示意图。蓝色方框表示查询点的位置。每个特征点上的有序数对表示（行偏移，列偏移）。SI-PE：尺度不敏感位置编码；R-PE：相对位置编码；A-PE：绝对位置编码；LR-PE：局部相对位置编码}{The illustration of different positional encoding methods. The blue rectangle indicates the position of query. The ordered pair in each feature point is (row offset, column offset). SI-PE: scale-insensitive positional encoding; R-PE: relative positional encoding; A-PE: absolute positional encoding; LR-PE: local relative positional encoding}
@@ -300,6 +300,16 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 与先前工作中所用的位置编码\cite{vaswani2017attention,dai2019transformer,ramachandran2019stand}形成对比，我们的图像抠图方法采用的位置编码都是具有方向不变性的，这意味着编码仅与查询和键之间的绝对距离有关，而和两者之间相对的方向位置无关。这种特性源自于自然图像抠图属于语义层次较低的低级视觉问题，所以应该具有旋转不变性（rotation-invariant）。
 
 \subsection{神经网络实现细节}
+
+在该网络模型的训练中，我们依然延续了基线网络模型的训练设定。损失函数采用了公式（\ref{eq5:loss}）中的alpha预测损失，仅在trimap图标注的位置区域对预测结果和真实标注计算平均$\ell_1$损失。对于不透明度编码器，我们使用了在ImageNet数据集\cite{russakovsky2015imagenet}上预训练的ResNet-34网络\cite{he2016deep}的前11个模块。而对于图像外观编码器，我们只选择了步长为2的卷积层进行堆叠，以抽取尽可能低级的图像特征。
+网络模型使用Adobe Image Matting数据集\cite{xu2017deep}的前景图片和MS COCO数据集中的背景图片进行训练\cite{lin2014microsoft}。在基本数据增广部分延续了第\ref{sec5:aug}节中描述的数据增广方式，在基本增广部分之外还引入了有效的随即插值（Random Interpolation，RI）增广方式，我们将在第\ref{sec5:RI}节中对该数据增广方式及其有效性进行详细讨论。在训练时同时使用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}对训练过程进行归一化操作。采用Adam优化器\cite{kingma2014adam}实现网络参数优化。同时参考文献\parencite{he2019bag}，采用FP16半精度方式进行网络的训练以节约显存空间。在学习率方面，采用了学习率预热\cite{goyal2017accurate}及余弦衰减\cite{loshchilov2016sgdr}策略。
+
+
+
+
+\section{实验结果}
+为证明所提出方法的有效性，在本节中对所提出的两种方法进行了大量的实验，并针对HOP Matting方法设计了大量的消融实验。我们在两个被广泛使用的数据集上报告了所提出算法的评测结果：Composition-1k测试集\cite{xu2017deep}和alphamatting.com数据集\cite{rhemann2009perceptually}。在评估测度方面遵循文献\parencite{rhemann2009perceptually}的建议，采用均方误差（Mean Square Error，MSE）、总绝对差（Sum of Absolute Difference，SAD）、梯度误差（Gradient error，Grad）和连通误差（Connectivity error，Conn）对实验结果进行评估。为方便理解网络模型信息传播部分的作用，本节中将对所提两种模型的注意力机制部分进行可视化。
+
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{15pt}
@@ -330,8 +340,18 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 	\label{tab5:RI}
 \end{table}
 
-在该网络模型的训练中，我们依然延续了基线网络模型的训练设定。损失函数采用了公式（\ref{eq5:loss}）中的alpha预测损失，仅在trimap图标注的位置区域对预测结果和真实标注计算平均$\ell_1$损失。对于不透明度编码器，我们使用了在ImageNet数据集\cite{russakovsky2015imagenet}上预训练的ResNet-34网络\cite{he2016deep}的前11个模块。而对于图像外观编码器，我们只选择了步长为2的卷积层进行堆叠，以抽取尽可能低级的图像特征。
-网络模型使用Adobe Image Matting数据集\cite{xu2017deep}的前景图片和MS COCO数据集中的背景图片进行训练\cite{lin2014microsoft}。在基本数据增广部分延续了第\ref{sec5:aug}节中描述的数据增广方式，在基本增广部分之外还引入了有效的随即插值（Random Interpolation，RI）增广方式，我们将在第\ref{sec5:RI}节中对该数据增广方式及其有效性进行详细讨论。在训练时同时使用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}对训练过程进行归一化操作。采用Adam优化器\cite{kingma2014adam}实现网络参数优化。同时参考文献\parencite{he2019bag}，采用FP16半精度方式进行网络的训练以节约显存空间。在学习率方面，采用了学习率预热\cite{goyal2017accurate}及余弦衰减\cite{loshchilov2016sgdr}策略。
+\subsection{随机插值增广}
+\label{sec5:RI}
+经验上，深度图像抠图方法的实际性能对输入图像的缩放非常敏感。这是因为典型的自然图像抠图方法会关注图像中的细节纹理信息，而缩放操作可能会使图像边缘或高频信息出现模糊，从而导致性能下降。因此，大多数抠图方法都在原始输入图像上进行测试评估，不进行任何缩放的操作。在Context-aware Matting\cite{hou2019context}中，作者声称不同图像格式的前景和背景图片会将细微人工合成痕迹引入到合成的训练图像中，这些人工合成痕迹可以帮助网络简单地区分前景和背景。类似地，在本节中，我们将展示一些新的观察结果，即基于深度神经网络的抠图方法对不同的插值算法具有敏感性，同时对所提出的HOP Matting方法中使用的随机插值（Random Interpolation，RI）增广进行介绍。
+
+我们在Composition-1k测试集\cite{xu2017deep}设计了一个经验性实验来支撑所描述的观察结论。首先，通过一个选定的插值算法对RGB图像进行缩放系数为1.5的上采样，然后通过相同的插值算法对放大图像进行下采样使其回到原尺寸。具体地说，假设原输入RGB图像为$800 \times 800$，并且所选的测试用插值算法为双线性插值。则通过双线性插值将输入RGB图像的大小调整为$1200 \times 1200$，然后再通过双线性插值将缩放后图像的尺寸重新调整为$800\times 800$。最后，将缩放回原尺寸的RGB图像输入网络进行alpha遮罩值预测，并评估预测值与原始真实标注之间的误差。值得注意的是，本实验并不是先进行下采样再进行上采样操作，因为先进行下采样必然会导致大量的信息丢失，而先进行上采样在理想情况下可以不产生任何信息损失。
+
+
+表\ref{tab5:RI}展示了该经验性实验的评估结果。在该实验中，我们提供\textit{ground-truth}方法作为对照参考。\textit{ground-truth}方法表示直接对真实标注进行上采样和下采样，而不通过缩放后的输入图像进行任何alpha遮罩估计，然后计算缩放回原尺寸的真实标注和未经过缩放操作的真实标注之间的误差。这些结果揭示了插值操作本身所引入的误差，可以将其视为这些评估结果的理想下界。\textit{HOP-5x5}方法将作为HOP Matting方法的基本模型出现在本节的实验中。\textit{HOP-5x5}表示在局部HOP模块中采用$5\times 5$的空间邻域，并且在所有HOP模块中没有使用位置编码或trimap编码。同时我们还提供了IndexNet Matting\cite{lu2019indices}方法的评估结果作为对照。
+
+从表\ref{tab5:RI}中可以注意到，不同测试时插值算法之间的果差距大多数结都大于\textit{ground-truth}下限之间的差距。换句话说，与插值缩放操作本身相比，作用在输入图像上的不同插值算法会在预测中引入更多误差。同时还可以看到\textit{HOP-5x5}方法的双线性插值和三次样条插值结果之间的差距大于IndexNet Matting\cite{lu2019indices}方法所给出的结果。我们对此的解释是，在训练集的数据增广中，HOP Matting方法遵循Deep Matting\cite{xu2017deep}所提出的数据合成方式，通过三次样条插值将背景图像缩放为与前景相同的大小然后合成。这种固定算法的插值增广方式使HOP Matting的模型更适合处理三次样条插值生成的数据。
+
+基于上述经验观察结果，我们将随机插值增广方式引入所提出的HOP Matting方法。在训练阶段的数据预处理中对于任何缩放操作，都依相同的概率在不同的插值算法中进行采样，并通过采样到的插值算法实现缩放。因此，在每一个批量（mini-batch）中的合成训练图可能是由不同的插值算法生成的。此外，在合成训练图之前，可以使用不同的插值算法对前景、背景和alpha遮罩图进行缩放。如表\ref{tab5:RI}所示，使用随机插值所进行的训练不仅可以提高整体性能，而且可以减小双线性插值和三次样条插值之间误差的差距。
 
 \begin{figure}[t]
 	\centering
@@ -339,8 +359,6 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 	\bicaption{在Composition-1k测试集\cite{xu2017deep}上的视觉效果对比结果}{The visual comparison results on Composition-1k testing set \cite{xu2017deep}}
 	\label{fig5:adobe}
 \end{figure}
-
-
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{8pt}
@@ -376,36 +394,14 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 		\bottomrule
 	\end{tabular}
 	\label{tab5:adobe}
-	\end{table}
+\end{table}
 	
-	
-	\begin{table}[t]
-	% \setlength{\tabcolsep}{2pt}
-	\bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark.}
-	% \scriptsize
-	\centering
-	\begin{tabular}{l|c|ccc|c|ccc|c|ccc}
-		\toprule
-		%		& \multicolumn{4}{c}{Average Rank}\\
-		\multirow{2}{*}{Average Rank} & \multicolumn{4}{c|}{SAD}& \multicolumn{4}{c|}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
-		& Overall&S&L&U& Overall&S&L&U& Overall&S&L&U\\
-		\midrule
-		%mse
-		HOP Matting&	\textbf{5.3}&	\textbf{5.8}	&\textbf{4}&	\textbf{6}&	\textbf{7}&	6.9&\textbf{5.4}	&8.6&\textbf{5.4}	&6.4&	\textbf{4.6}&	\textbf{5.1} \\		
-		AdaMatting\cite{cai2019disentangled} &7&	6.1	&6.1&	8.8 &8&	\textbf{5.8}	&7.4&	10.8&7.6&	\textbf{4.5}&	5.3&	13\\		
-		SampleNet Matting\cite{samplenet} &	7.8&5.9&	7.4&	10 &	9.1	&5.9&	9.1	&12.3&	9.1	&5.3&	6.9	&15.1\\		
-		GCA Matting	&8.5&	9.3	&6.1&	10.3&9.3	&9.3&	8.3	&10.5&7.3&	7.3&	6.1&	8.5	 \\		
-		Deep Matting\cite{xu2017deep}&10.1&	11.4&	9.4	&9.5&13	&11.6&	11.8&	15.6	&17.5&	14.5&	14.1&	24\\		
-		Information-flow matting \cite{aksoy2017designing}&12.2&	13.3&	12.9&	10.4&13.8&	16.3&	13&	12&	20.1&	23	&18.8&	18.6\\		
-		IndexNet Matting\cite{lu2019indices}&13.3&	15.5&	11.9&	12.4	&16.9&	19.4&	15.4&	15.9	&12.5&	11.4&	11&	15.3	\\		
-		AlphaGAN\cite{cai2019disentangled}&14.8&	15.5&	15&	13.8&18&	18.3&	19&	16.6&17.2&	16.1&	15&	20.5\\
-		Context-aware Matting\cite{hou2019context}&	17.1&	21&	15&	15.4&11.5&	14.8&	12.8	&\textbf{6.9}&8.7&	9.8&	9.4	&7	\\	
-		\bottomrule
-	\end{tabular}
-	\label{tab5:alphamatting}
-	\end{table}
 
-	
+\subsection{Composition-1k测试集实验结果}
+Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成的1,000张合成测试图。如表\ref{tab5:adobe}所示，本节对所提出的方法与当前最先进的自然图像抠图方法进行了定量比较。变体方法\textit{Baseline + RI}表示没有任何GCA模块或HOP模块的基线网络经过随机插值增广所训练出的网络模型。可以看出变体方法中的大多数都优于当前最先进的方法。在图\ref{fig5:adobe}中显示了Composition-1k测试集中一些测试结果的视觉效果对比。其中Deep Matting\cite{xu2017deep}的结果通过IndexNet Matting\cite{lu2019indices}中所提供的源代码和预训练模型生成。
+
+此外，表\ref{tab5:eff}比较了一些最新方法的参数数量和模型效率。通过在具有11G显存的单个NVIDIA RTX 2080 Ti GPU上对Composition-1k测试集进行测试，该实验评估了每张测试图像的平均推理时间。值得注意的是，Context-aware Matting\cite{hou2019context}和Deep Matting\cite{xu2017deep}需要超过11G的显存或使用CPU计算，才能对Composition-1k测试集中的高分辨率图像估计其alpha遮罩值。因此，对于这两种方法，我们以缩放系数0.8对输入图像进行下采样后再进行测试。
+
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{15pt}
@@ -428,26 +424,42 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 	\label{tab5:eff}
 \end{table}
 
-\section{实验结果}
-为证明所提出方法的有效性，在本节中对所提出的两种方法进行了大量的实验，并针对HOP Matting方法设计了大量的消融实验。我们在两个被广泛使用的数据集上报告了所提出算法的评测结果：Composition-1k测试集\cite{xu2017deep}和alphamatting.com数据集\cite{rhemann2009perceptually}。在评估测度方面遵循文献\parencite{rhemann2009perceptually}的建议，采用均方误差（Mean Square Error，MSE）、总绝对差（Sum of Absolute Difference，SAD）、梯度误差（Gradient error，Grad）和连通误差（Connectivity error，Conn）对实验结果进行评估。为方便理解网络模型信息传播部分的作用，本节中将对所提两种模型的注意力机制部分进行可视化。
+\subsection{Alphamatting.com数据集实验结果}
+alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包含8张测试图片。每张测试图包含三种不同类型的trimap图，即小范围、大范围和用户标注。该排行榜首先对共计24个测试样例分别进行测试排名，然后再对每个类型trimap图下的8个测试样例排名取平均数，作为该类trimap图下的排名值，最后对所有测试样例的排名求取平均数，作为每个评测指标下的总排名成绩。表\ref{tab5:alphamatting}展示了所提出的两种方法在alphamatting.com排行榜中的平均排名值。每一个评估测度下的\textit{Overall}排名表示在三种类型trimap图上的所有排名名次的平均值。如表\ref{tab5:alphamatting}中排名结果所示，本章所提出的HOP Matting在不同评估测度下的表现均优于其他最先进方法，GCA Matting方法也优于多数最先进的抠图方法。
 
-\subsection{随机插值增广}
-\label{sec5:RI}
-经验上，深度图像抠图方法的实际性能对输入图像的缩放非常敏感。这是因为典型的自然图像抠图方法会关注图像中的细节纹理信息，而缩放操作可能会使图像边缘或高频信息出现模糊，从而导致性能下降。因此，大多数抠图方法都在原始输入图像上进行测试评估，不进行任何缩放的操作。在Context-aware Matting\cite{hou2019context}中，作者声称不同图像格式的前景和背景图片会将细微人工合成痕迹引入到合成的训练图像中，这些人工合成痕迹可以帮助网络简单地区分前景和背景。类似地，在本节中，我们将展示一些新的观察结果，即基于深度神经网络的抠图方法对不同的插值算法具有敏感性，同时对所提出的HOP Matting方法中使用的随机插值（Random Interpolation，RI）增广进行介绍。
+\begin{table}[t]
+% \setlength{\tabcolsep}{2pt}
+\bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark.}
+\small
+\centering
+\begin{tabular}{l|c|ccc|c|ccc|c|ccc}
+	\toprule
+	%		& \multicolumn{4}{c}{Average Rank}\\
+	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c|}{SAD}& \multicolumn{4}{c|}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
+	& Overall&S&L&U& Overall&S&L&U& Overall&S&L&U\\
+	\midrule
+	%mse
+	HOP Matting&	\textbf{5.3}&	\textbf{5.8}	&\textbf{4}&	\textbf{6}&	\textbf{7}&	6.9&\textbf{5.4}	&8.6&\textbf{5.4}	&6.4&	\textbf{4.6}&	\textbf{5.1} \\		
+	AdaMatting\cite{cai2019disentangled} &7&	6.1	&6.1&	8.8 &8&	\textbf{5.8}	&7.4&	10.8&7.6&	\textbf{4.5}&	5.3&	13\\		
+	SampleNet Matting\cite{samplenet} &	7.8&5.9&	7.4&	10 &	9.1	&5.9&	9.1	&12.3&	9.1	&5.3&	6.9	&15.1\\		
+	GCA Matting	&8.5&	9.3	&6.1&	10.3&9.3	&9.3&	8.3	&10.5&7.3&	7.3&	6.1&	8.5	 \\		
+	Deep Matting\cite{xu2017deep}&10.1&	11.4&	9.4	&9.5&13	&11.6&	11.8&	15.6	&17.5&	14.5&	14.1&	24\\		
+	Information-flow matting \cite{aksoy2017designing}&12.2&	13.3&	12.9&	10.4&13.8&	16.3&	13&	12&	20.1&	23	&18.8&	18.6\\		
+	IndexNet Matting\cite{lu2019indices}&13.3&	15.5&	11.9&	12.4	&16.9&	19.4&	15.4&	15.9	&12.5&	11.4&	11&	15.3	\\		
+	AlphaGAN\cite{cai2019disentangled}&14.8&	15.5&	15&	13.8&18&	18.3&	19&	16.6&17.2&	16.1&	15&	20.5\\
+	Context-aware Matting\cite{hou2019context}&	17.1&	21&	15&	15.4&11.5&	14.8&	12.8	&\textbf{6.9}&8.7&	9.8&	9.4	&7	\\	
+	\bottomrule
+\end{tabular}
+\label{tab5:alphamatting}
+\end{table}
 
-我们在Composition-1k测试集\cite{xu2017deep}设计了一个经验性实验来支撑所描述的观察结论。首先，通过一个选定的插值算法对RGB图像进行缩放系数为1.5的上采样，然后通过相同的插值算法对放大图像进行下采样使其回到原尺寸。具体地说，假设原输入RGB图像为$800 \times 800$，并且所选的测试用插值算法为双线性插值。则通过双线性插值将输入RGB图像的大小调整为$1200 \times 1200$，然后再通过双线性插值将缩放后图像的尺寸重新调整为$800\times 800$。最后，将缩放回原尺寸的RGB图像输入网络进行alpha遮罩值预测，并评估预测值与原始真实标注之间的误差。值得注意的是，本实验并不是先进行下采样再进行上采样操作，因为先进行下采样必然会导致大量的信息丢失，而先进行上采样在理想情况下可以不产生任何信息损失。
 
+所提出的方法在大范围和用户标注两类trimap图下的评估结果明显优于绝大多数其他的最先进方法。 随着trimap图中未知区域面积变大，图像抠图也变得更加困难。因此，可以说本章所提出的方法对于未知区域面积的变化更加鲁棒。整体而言，本章所提出的自然图像抠图方法可以认为是目前此在线排行榜数据集上性能最佳的方法之一。
 
-表\ref{tab5:RI}展示了该经验性实验的评估结果。在该实验中，我们提供\textit{ground-truth}方法作为对照参考。\textit{ground-truth}方法表示直接对真实标注进行上采样和下采样，而不通过缩放后的输入图像进行任何alpha遮罩估计，然后计算缩放回原尺寸的真实标注和未经过缩放操作的真实标注之间的误差。这些结果揭示了插值操作本身所引入的误差，可以将其视为这些评估结果的理想下界。\textit{HOP-5x5}方法将作为HOP Matting方法的基本模型出现在本节的实验中。\textit{HOP-5x5}表示在局部HOP模块中采用$5\times 5$的空间邻域，并且在所有HOP模块中没有使用位置编码或trimap编码。同时我们还提供了IndexNet Matting\cite{lu2019indices}方法的评估结果作为对照。
+\subsection{消融实验}
+为了验证每种成分在HOP Matting方法中的作用，本节将在Composition-1k测试集中进行三个不同的实验。
+首先通过删除不同的HOP模块来对\textit{HOP-5x5}模型的效果进行评估。从表\ref{tab5:block}中报告的结果中，可以注意到层次化不透明度传播结构能够明显改善网络在图像抠图中的性能，每一个层级的HOP模块都对整体的预测效果具有明显的贡献。方法\textit{Global}\＆\textit{Local Self-attention}表示将\textit{HOP-5x5}中的全局HOP模块替换为全局自注意力，并将局部HOP模块替换为局部自注意力。
 
-从表\ref{tab5:RI}中可以注意到，不同测试时插值算法之间的果差距大多数结都大于\textit{ground-truth}下限之间的差距。换句话说，与插值缩放操作本身相比，作用在输入图像上的不同插值算法会在预测中引入更多误差。同时还可以看到\textit{HOP-5x5}方法的双线性插值和三次样条插值结果之间的差距大于IndexNet Matting\cite{lu2019indices}方法所给出的结果。我们对此的解释是，在训练集的数据增广中，HOP Matting方法遵循Deep Matting\cite{xu2017deep}所提出的数据合成方式，通过三次样条插值将背景图像缩放为与前景相同的大小然后合成。这种固定算法的插值增广方式使HOP Matting的模型更适合处理三次样条插值生成的数据。
-
-基于上述经验观察结果，我们将随机插值增广方式引入所提出的HOP Matting方法。在训练阶段的数据预处理中对于任何缩放操作，都依相同的概率在不同的插值算法中进行采样，并通过采样到的插值算法实现缩放。因此，在每一个批量（mini-batch）中的合成训练图可能是由不同的插值算法生成的。此外，在合成训练图之前，可以使用不同的插值算法对前景、背景和alpha遮罩图进行缩放。如表\ref{tab5:RI}所示，使用随机插值所进行的训练不仅可以提高整体性能，而且可以减小双线性插值和三次样条插值之间误差的差距。
-
-\subsection{Composition-1k测试集实验结果}
-Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成的1,000张合成测试图。如表\ref{tab5:adobe}所示，本节对所提出的方法与当前最先进的自然图像抠图方法进行了定量比较。变体方法\textit{Baseline + RI}表示没有任何GCA模块或HOP模块的基线网络经过随机插值增广所训练出的网络模型。可以看出变体方法中的大多数都优于当前最先进的方法。在图\ref{fig5:adobe}中显示了Composition-1k测试集中一些测试结果的视觉效果对比。其中Deep Matting\cite{xu2017deep}的结果通过IndexNet Matting\cite{lu2019indices}中所提供的源代码和预训练模型生成。
-
-此外，表\ref{tab5:eff}比较了一些最新方法的参数数量和模型效率。通过在具有11G显存的单个NVIDIA RTX 2080 Ti GPU上对Composition-1k测试集进行测试，该实验评估了每张测试图像的平均推理时间。值得注意的是，Context-aware Matting\cite{hou2019context}和Deep Matting\cite{xu2017deep}需要超过11G的显存或使用CPU计算，才能对Composition-1k测试集中的高分辨率图像估计其alpha遮罩值。因此，对于这两种方法，我们以缩放系数0.8对输入图像进行下采样后再进行测试。
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{8pt}
@@ -469,6 +481,11 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 	\label{tab5:block}
 \end{table}
 
+在第二项消融实验中，我们揭示了将位置编码、trimap编码和随机插值增广引入所提出的方法中所带来的增益效果。表\ref{tab5:emb}中提供了在Composition-1k测试集\cite{xu2017deep}评估的定量结果。可以发现，位置编码和随机插值增广的加入都会起到显著的增益效果。
+
+为研究局部HOP模块中的邻域窗口大小如何影响所提出的方法性能，第三项消融实验在\textit{HOP-5x5}网络模型的基础上使用不同的邻域窗口大小对网络的进行了微调（fine-tune）。评估结果在表\ref{tab5:winsize}中给出。显然，更大的邻域会带来更好的测试性能。但是，如表\ref{tab5:eff}所示，局部HOP模块中较大的邻域窗口大小会导致更长的网络前馈时间，以及更多的内存消耗。
+
+
 
 \begin{table}[t]	
 	\setlength{\tabcolsep}{8pt}
@@ -485,23 +502,19 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 		&\checkmark&\checkmark&\checkmark & \textbf{28.12}& \textbf{5.8} & \textbf{11.36}& \textbf{24.13}\\
 		\bottomrule
 	\end{tabular}
-	\label{tab:emb}
+	\label{tab5:emb}
 \end{table}
 
-\subsection{Alphamatting.com数据集实验结果}
-alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包含8张测试图片。每张测试图包含三种不同类型的trimap图，即小范围、大范围和用户标注。该排行榜首先对共计24个测试样例分别进行测试排名，然后再对每个类型trimap图下的8个测试样例排名取平均数，作为该类trimap图下的排名值，最后对所有测试样例的排名求取平均数，作为每个评测指标下的总排名成绩。表\ref{tab5:alphamatting}展示了所提出的两种方法在alphamatting.com排行榜中的平均排名值。每一个评估测度下的\textit{Overall}排名表示在三种类型trimap图上的所有排名名次的平均值。如表\ref{tab5:alphamatting}中排名结果所示，本章所提出的HOP Matting在不同评估测度下的表现均优于其他最先进方法，GCA Matting方法也优于多数最先进的抠图方法。
+\subsection{不透明度传播效果的可视化}
+本节我们分别对具有单一层次不透明度传播模块的GCA Matting模型和具有多层次传播模块的HOP Matting模型中的传播效果进行可视化。
 
-所提出的方法在大范围和用户标注两类trimap图下的评估结果明显优于绝大多数其他的最先进方法。 随着trimap图中未知区域面积变大，图像抠图也变得更加困难。因此，可以说本章所提出的方法对于未知区域面积的变化更加鲁棒。整体而言，本章所提出的自然图像抠图方法可以认为是目前此在线排行榜数据集上性能最佳的方法之一。
+对于GCA Matting方法，本节实验通过展示具有最大注意力得分的像素位置来可视化GCA模块中所学习到的注意力图。与广泛应用于光流估计\cite{FlowNet,LiteFlowNet,PWC-Net}和图像补全\cite{yu2018generative}中，表示每个像素相对位移的偏移图（offset map）不同，此处采用的注意力图显示了在每个像素与其他像素点的相似性中具有最大相似度的相应像素的绝对位置。通过这个注意力图，可以轻松地确定每个特征像素的不透明度信息主要是从何处传播而来。如图\ref{fig5:offset}所示，在已知区域中没有信息流，已知区域都被表示为平滑连续的色域，并且未知区域中的特征区块倾向于从具有相似外观的区块中借用信息。
+图\ref{fig5:offset}揭示了在输入图片上所提出的GCA模块实际关注到的的位置。
+由于在从图像外观特征上抽取区块之前，GCA模块中存在用于特征对齐的卷积层，因此卷积层的参数不同导致源自两个注意力模块的注意力图并不完全相同。已知和未知部分的权重显示在注意力图的左上角。
+从图\ref{fig5:offset}中的注意力偏移图中，可以轻松地识别出筛子中透出的汽车。筛子中央的浅粉红色区块表示这些特征是从汽车的左半部分中的已知区域传播来的。蓝色区块显示了从右侧和下侧道路借用来的特征。这些传播后的特征将有助于在随后的卷积层中辨别前景和背景。
 
-\subsection{消融实验}
-为了验证每种成分在HOP Matting方法中的作用，本节将在Composition-1k测试集中进行三个不同的实验。
-首先通过删除不同的HOP模块来对\textit{HOP-5x5}模型的效果进行评估。从表\ref{tab5:block}中报告的结果中，可以注意到层次化不透明度传播结构能够明显改善网络在图像抠图中的性能，每一个层级的HOP模块都对整体的预测效果具有明显的贡献。方法\textit{Global}\＆\textit{Local Self-attention}表示将\textit{HOP-5x5}中的全局HOP模块替换为全局自注意力，并将局部HOP模块替换为局部自注意力。
-
-在第二项消融实验中，我们揭示了将位置编码、trimap编码和随机插值增广引入所提出的方法中所带来的增益效果。表\ref{tab5:emb}中提供了在Composition-1k测试集\cite{xu2017deep}评估的定量结果。可以发现，位置编码和随机插值增广的加入都会起到显著的增益效果。
-
-为研究局部HOP模块中的邻域窗口大小如何影响所提出的方法性能，第三项消融实验在\textit{HOP-5x5}网络模型的基础上使用不同的邻域窗口大小对网络的进行了微调（fine-tune）。评估结果在表\ref{tab5:winsize}中给出。显然，更大的邻域会带来更好的测试性能。但是，如表\ref{tab5:eff}所示，局部HOP模块中较大的邻域窗口大小会导致更长的网络前馈时间，以及更多的内存消耗。
 \begin{table}[t]	
-	\setlength{\tabcolsep}{8pt}
+	\setlength{\tabcolsep}{15pt}
 	\bicaption{在Composition-1k测试集上，局部HOP模块中不同的邻域窗口大小对应的数值评估结果}{The quantitative results of different neighborhood window sizes in local HOP block on the Composition-1k testing set. }
 	\centering
 	\small
@@ -516,16 +529,13 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 		9 x 9 &\textbf{33.44}&\textbf{8.2}& \textbf{15.62}&\textbf{30.44}  \\  % & 42.53  & 40.84  
 		\bottomrule
 	\end{tabular}
-	\label{tab:winsize}
+	\label{tab5:winsize}
 \end{table}
 
-\subsection{不透明度传播效果的可视化}
-本节我们分别对具有单一层次不透明度传播模块的GCA Matting模型和具有多层次传播模块的HOP Matting模型中的传播效果进行可视化。
+对于HOP Matting方法，仅通过注意力偏移图并不能同时展示其局部与全局信息传播的层次化效果。为此，本实验通过展示输入图像上的梯度图来可视化模型所关注的像素位置。
+我们从预测出的alpha遮罩值中随机选择未知区域中的一个像素点。然后，构造一个监督信息给该像素点赋予一个较大的预测损失，并假设预测出的其他alpha值完全正确的而将其他损失设为零。再后，执行反向传播，将梯度反向传播到输入图像。梯度图揭示了输入图像的每个像素与随机选择出的alpha预测像素的相关程度。我们在图\ref{fig5:vis}中显示了Composition-1k测试集\cite{xu2017deep}中测试图像及其梯度图。无HOP模块的结果是通过表\ref{tab5:block}中所训练的无HOP模块模型中生成的。
+虽然由于模型中大量卷积的影响，梯度图并不像注意力偏移图一样边缘清晰。但从图\ref{fig5:vis}可以看到，具有HOP模块的模型能够在整个输入图像上聚合信息，并更加关注外观相似的区域，而没有HOP模块的模型则相反，其更多地关注所选像素点周围的局部信息。
 
-对于GCA Matting方法，本节实验通过展示具有最大注意力得分的像素位置来可视化GCA模块中所学习到的注意力图。与广泛应用于光流估计\cite{FlowNet,LiteFlowNet,PWC-Net}和图像补全\cite{yu2018generative}中，表示每个像素相对位移的偏移图（offset map）不同，此处采用的注意力图显示了在每个像素与其他像素点的相似性中具有最大相似度的相应像素的绝对位置。通过这个注意力图，可以轻松地确定每个特征像素的不透明度信息主要是从何处传播而来。如图\ref{fig5:offset}所示，在已知区域中没有信息流，已知区域都被表示为平滑连续的色域，并且未知区域中的特征区块倾向于从具有相似外观的区块中借用信息。
-图\ref{fig5:offset}揭示了在输入图片上所提出的GCA模块实际关注到的的位置。
-由于在从图像外观特征上抽取区块之前，GCA模块中存在用于特征对齐的卷积层，因此卷积层的参数不同导致源自两个注意力模块的注意力图并不完全相同。已知和未知部分的权重显示在注意力图的左上角。
-从图\ref{fig5:offset}中的注意力偏移图中，可以轻松地识别出筛子中透出的汽车。筛子中央的浅粉红色区块表示这些特征是从汽车的左半部分中的已知区域传播来的。蓝色区块显示了从右侧和下侧道路借用来的特征。这些传播后的特征将有助于在随后的卷积层中辨别前景和背景。
 
 \begin{figure}[t]
 	\centering
@@ -535,13 +545,15 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 \end{figure}
 
 
-对于HOP Matting方法，仅通过注意力偏移图并不能同时展示其局部与全局信息传播的层次化效果。为此，本实验通过展示输入图像上的梯度图来可视化模型所关注的像素位置。
-我们从预测出的alpha遮罩值中随机选择未知区域中的一个像素点。然后，构造一个监督信息给该像素点赋予一个较大的预测损失，并假设预测出的其他alpha值完全正确的而将其他损失设为零。再后，执行反向传播，将梯度反向传播到输入图像。梯度图揭示了输入图像的每个像素与随机选择出的alpha预测像素的相关程度。我们在图\ref{fig5:vis}中显示了Composition-1k测试集\cite{xu2017deep}中测试图像及其梯度图。无HOP模块的结果是通过表\ref{tab5:block}中所训练的无HOP模块模型中生成的。
-虽然由于模型中大量卷积的影响，梯度图并不像注意力偏移图一样边缘清晰。但从图\ref{fig5:vis}可以看到，具有HOP模块的模型能够在整个输入图像上聚合信息，并更加关注外观相似的区域，而没有HOP模块的模型则相反，其更多地关注所选像素点周围的局部信息。
-
 \begin{figure}[t]
 	\centering
 	\includegraphics[width = 0.95\columnwidth]{chap5/vis.pdf}
 	\bicaption{HOP结构注意力在输入图像上的可视化}{The visualization of attention in our HOP structure on input images}
 	\label{fig5:vis}
 \end{figure}
+
+
+\section{本章小结}
+在本章中，我们提出了两种基于相似性学习的端到端深度图像抠图方法。所提出的引导上下文注意力抠图方法，以全卷积的方式实现了传统基于相似性的抠图算法中的信息传播过程。其中的引导上下文注意力模块通过借助图像外观信息的引导，实现alpha特征之间的不透明度传播。而所提出的层次化不透明度传播抠图方法，则利用全局和局部模块以实现不同语义级别上的层次化信息传播。
+所提出的两种方法，都通过数据驱动的训练，以网络模型的形式学习图像像素间相似性的计算方式。并依据网络模型计算出的相似性，实现不透明度信息的传播。
+大量的定量实验和消融实验证明了本章所提出的抠图方法及其中的模块、数据增广方式的有效性和优越性。
