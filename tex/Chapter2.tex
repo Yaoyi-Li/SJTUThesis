@@ -286,7 +286,7 @@
 \begin{itemize}
 	\item \textbf{Con-$k$NN}。Consensus $k$-NNs（Cons-$k$NN）算法\cite{premachandran2013consensus}的目标在于选取更鲁棒的数据点近邻集合。Cons-$k$NN方法通过收集多轮$k$-NN相似性计算中的共识信息，来为数据点近邻集合的选择提供判断标准。
 	\item \textbf{DN}。Dominant Neighborhoods（DN）算法\cite{pavan2007dominant}通过在已构建出的相似性图中迭代地选取最大团的方法，实现对相似性矩阵中存在的噪声边的过滤。
-	\item \textbf{ClustRF-Bi}。ClustRF-Bi算法\cite{criminisi2012decision,pei2013unsupervised}是ClustRF-Strct \cite{zhu2014constructing}算法的一个计算量较小的特例。由于原始ClustRF-Strct算法在仅有数千个数据实例的情况就需要极大量的计算机内存，我们在本章的实验中采用了这个计算量和内存需求相对可行的特例。ClustRF-Strct提出了一种具有结构感知能力的相似性推断模型，该模型通过利用随机森林进行聚类从而构建数据的相似性图。ClustRF-Bi作为一个特例仅通过随机森林聚类构建二值化的相似性矩阵。
+	\item \textbf{ClustRF-Bi}。ClustRF-Bi算法\cite{criminisi2012decision,pei2013unsupervised,zhu2014constructing}是ClustRF-Strct\cite{zhu2014constructing}算法的一个计算量较小的特例。由于原始ClustRF-Strct算法在仅有数千个数据实例的情况就需要极大量的计算机内存，我们在本章的实验中采用了这个计算量和内存需求相对可行的特例。ClustRF-Strct提出了一种具有结构感知能力的相似性推断模型，该模型通过利用随机森林进行聚类从而构建数据的相似性图。ClustRF-Bi作为一个特例仅通过随机森林聚类构建二值化的相似性矩阵。
 	\item \textbf{PCAN}。文献\parencite{nie2014clustering}提出了Projected Clustering with Adaptive Neighbors（PCAN）方法。由于PCAN是一种可以同时生成线性投影和聚类的算法，所以在结果展示中，我们将PCAN的投影和$k$-means聚类的组合方法表示为PCAN-$k$Means方法，并在表格\ref{tab2:Acc}中显示仅采用PCAN算法生成的聚类结果以供对照参考。
 	\item \textbf{$k$-NN}。我们还将所提出的方法与采用$k$-NN热力核相似性矩阵直接进行线性投影的效果进行比较，即采用$k$-NN热力核的LPP算法。我们在后续实验中使用$k$-NN表示这种典型的方法。
 \end{itemize}
@@ -311,7 +311,7 @@
 		%\begin{sc}
 		\begin{tabular}{llccccccc}
 			\toprule
-			& &$k$-NN &Cons-$k$NN &DN &ClustRF-Bi &PCAN-$k$Means &PCAN& AdaAM
+			& &$k$-NN\cite{niyogi2004locality} &Cons-$k$NN\cite{premachandran2013consensus} &DN\cite{pavan2007dominant} &ClustRF-Bi\cite{zhu2014constructing} &PCAN-$k$Means\cite{nie2014clustering} &PCAN\cite{nie2014clustering}& AdaAM
 			\\
 			\midrule
 			\multirow{2}{*}{UMIST} & Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\

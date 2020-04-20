@@ -300,15 +300,15 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
         \cmidrule(lr){4-5}
         & ACC\% & NMI\% & ACC\% & NMI\% \\
         \midrule
-        NCuts & 40.23 & 50.68 & 34.11 & 36.06 \\ 
-        E$^2$CP & 49.76 & 59.05 & 46.84 & 45.26 \\ 
-        MCMCP & 50.20 & 60.42 & 46.00 & 44.13 \\
-        UCP-tags & 49.40 & 59.79 & 51.35 & 48.56 \\ 
-        UCP-DenseSift & 19.57 & 28.31 & 27.34 & 24.35 \\ 
-        MSCP-tags & 51.01 & 61.21 & 55.03 & \textbf{52.09} \\ 
-        MSCP-DenseSift & 29.04 & 37.16 & 32.04 & 28.87 \\ 
-        MMCP & 51.59 & 60.72 & 52.50 & 48.54 \\ 
-        MMCP-SW & 43.22 & 53.10 & 51.42 & 46.99 \\  
+        NCuts\cite{shi2000normalized} & 40.23 & 50.68 & 34.11 & 36.06 \\ 
+        E$^2$CP\cite{lu2010constrained} & 49.76 & 59.05 & 46.84 & 45.26 \\ 
+        MCMCP\cite{fu2012modalities} & 50.20 & 60.42 & 46.00 & 44.13 \\
+        UCP-tags\cite{lu2013unified} & 49.40 & 59.79 & 51.35 & 48.56 \\ 
+        UCP-DenseSift\cite{lu2013unified} & 19.57 & 28.31 & 27.34 & 24.35 \\ 
+        MSCP-tags\cite{lu2013exhaustive} & 51.01 & 61.21 & 55.03 & \textbf{52.09} \\ 
+        MSCP-DenseSift\cite{lu2013exhaustive} & 29.04 & 37.16 & 32.04 & 28.87 \\ 
+        MMCP\cite{fu2011multi} & 51.59 & 60.72 & 52.50 & 48.54 \\ 
+        MMCP-SW\cite{fu2011multi} & 43.22 & 53.10 & 51.42 & 46.99 \\  
         MFL & 54.87 & 62.32 & 55.07 & 48.55 \\ 
         ILMCP & \textbf{58.31} & \textbf{64.67} & \textbf{56.03} & 47.79 \\
         \bottomrule
@@ -329,14 +329,14 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 		\cmidrule(lr){4-5}
 		& ACC\% & NMI\% & ACC\% & NMI\% \\
 		\midrule
-		NCuts & 17.58 & 26.97 & 24.67 & 22.53 \\ 
-		E$^2$CP & 17.63 & 27.27 & 25.88 & 23.84 \\ 
-		UCP-Gist & 12.85 & 21.95 & 23.72 & 17.39 \\ 
-		UCP-DenseSift & 18.75 & 27.55 & 26.90 & 23.77 \\ 
-		MSCP-Gist & 13.86 & 23.25 & 24.42 & 18.34 \\ 
-		MSCP-DenseSift & 18.67 & 28.08 & 28.72 & 24.84 \\ 
-		MMCP & 13.53 & 22.96 & 24.40 & 18.91 \\ 
-		MMCP-SW & 17.83 & 27.45 & 26.24 & 24.81 \\ 
+		NCuts\cite{shi2000normalized} & 17.58 & 26.97 & 24.67 & 22.53 \\ 
+		E$^2$CP\cite{lu2010constrained} & 17.63 & 27.27 & 25.88 & 23.84 \\ 
+		UCP-Gist\cite{lu2013unified} & 12.85 & 21.95 & 23.72 & 17.39 \\ 
+		UCP-DenseSift\cite{lu2013unified} & 18.75 & 27.55 & 26.90 & 23.77 \\ 
+		MSCP-Gist\cite{lu2013exhaustive} & 13.86 & 23.25 & 24.42 & 18.34 \\ 
+		MSCP-DenseSift\cite{lu2013exhaustive} & 18.67 & 28.08 & 28.72 & 24.84 \\ 
+		MMCP\cite{fu2011multi} & 13.53 & 22.96 & 24.40 & 18.91 \\ 
+		MMCP-SW\cite{fu2011multi} & 17.83 & 27.45 & 26.24 & 24.81 \\ 
 		MFL & 19.66 & 28.63 & 29.48 & 28.44 \\ 
 		ILMCP & \textbf{20.51} & \textbf{29.21} & \textbf{32.14} & \textbf{28.60} \\ 
 		\bottomrule
@@ -425,11 +425,11 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
         \cmidrule(lr){6-7}
         & ACC\% & NMI\% & ACC\% & NMI\% & ACC\% & NMI\% \\
         \midrule
-        NCuts & 44.98 & 54.33 & 38.61 & 49.27 & 32.07 & 42.11 \\ 
-        E$^2$CP & 52.64 & 61.14 & 40.19 & 50.17 & 28.80 & 39.17 \\ 
-        MCMCP & 49.15 & 59.90 & 36.72 & 51.56 & 36.24 & 51.12 \\ 
-        MMCP & 53.49 & 62.79 & - & - & - & - \\ 
-        MMCP-SW & 48.50 & 56.58 & 37.82 & 48.33 & 32.98 & 43.63 \\ 
+        NCuts\cite{shi2000normalized} & 44.98 & 54.33 & 38.61 & 49.27 & 32.07 & 42.11 \\ 
+        E$^2$CP\cite{lu2010constrained} & 52.64 & 61.14 & 40.19 & 50.17 & 28.80 & 39.17 \\ 
+        MCMCP\cite{fu2012modalities} & 49.15 & 59.90 & 36.72 & 51.56 & 36.24 & 51.12 \\ 
+        MMCP\cite{fu2011multi} & 53.49 & 62.79 & - & - & - & - \\ 
+        MMCP-SW\cite{fu2011multi} & 48.50 & 56.58 & 37.82 & 48.33 & 32.98 & 43.63 \\ 
         MFL & {56.36} & {63.99} & {57.04} & {64.11} & {56.67} &{ 64.09}\\
         ILMCP & \textbf{60.47} & \textbf{66.26} & \textbf{60.06} & \textbf{66.45 } & \textbf{62.12} &\textbf{ 67.67} \\
         \bottomrule
@@ -450,11 +450,11 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
         \cmidrule(lr){6-7}
         & ACC\% & NMI\% & ACC\% & NMI\% & ACC\% & NMI\%  \\
         \midrule
-        NCuts  & 26.76 & 25.04 & 23.07 & 21.26 & 22.31 & 18.40  \\ 
-        E$^2$CP  & 40.46 & 39.50 & 29.39 & 26.40 & 25.66 & 21.29 \\ 
-        MCMCP & 34.85 & 27.34 & 29.36 & 24.79 & 29.80 & 24.98  \\ 
-        MMCP  & 48.42 & 41.80 & - & - & - & - \\ 
-        MMCP-SW & 38.29 & 36.14 & 29.04 & 26.40 & 27.85 & 24.90 \\ 
+        NCuts\cite{shi2000normalized}  & 26.76 & 25.04 & 23.07 & 21.26 & 22.31 & 18.40  \\ 
+        E$^2$CP\cite{lu2010constrained}  & 40.46 & 39.50 & 29.39 & 26.40 & 25.66 & 21.29 \\ 
+        MCMCP\cite{fu2012modalities} & 34.85 & 27.34 & 29.36 & 24.79 & 29.80 & 24.98  \\ 
+        MMCP\cite{fu2011multi}  & 48.42 & 41.80 & - & - & - & - \\ 
+        MMCP-SW\cite{fu2011multi} & 38.29 & 36.14 & 29.04 & 26.40 & 27.85 & 24.90 \\ 
         MFL  & {56.66} & \textbf{49.98} & {54.95} & {49.06} & {56.35} &{49.86}\\
         ILMCP & \textbf{57.51} & {49.38} & \textbf{57.63} & \textbf{49.49} & \textbf{57.93} & \textbf{49.88} \\
         \bottomrule
@@ -480,7 +480,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
         \cmidrule(lr){4-5}
         & ACC\% & NMI\% & ACC\% & NMI\% \\
         \midrule
-        E$^2$CP: &&&&\\
+        E$^2$CP\cite{lu2010constrained}: &&&&\\
         DenseSift & 24.40 & 36.44 & 25.34 & 22.80 \\ 
         Lab & 18.39 & 27.10 & 16.56 & 9.11 \\ 
         tags & 51.44 & 60.30 & 51.92 & 44.98 \\ 
@@ -532,7 +532,7 @@ ILMCP所包含的相容条件概率分布重构（CCDR）、约束数据均衡�
         
         & CCDR? & { Balance?}& {Re-Sig?}& ACC\%&NMI\% \\		 
         \midrule
-        MMCP-SW&&&&32.98 & 43.63\\
+        MMCP-SW\cite{fu2011multi}&&&&32.98 & 43.63\\
         \midrule
         &&& & 33.32 & 43.14 \\ 
         &&&\checkmark & 35.19 & 43.28 \\ 
