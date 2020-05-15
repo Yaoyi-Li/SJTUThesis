@@ -48,12 +48,13 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 \section{归纳引导滤波器方法}
 归纳引导滤波器方法将建立一个高效的、以弱标注分割掩码为输入的图像抠图网络模型。为此，我们采用了引导滤波器\cite{he2010guided}中的线性模型假设，而引导滤波器正由于其具有的保梯度先验，得以稳定且高效地实现其滤波器功能。
 借鉴文献\parencite{lutz2018alphagan}的设计，我们在模型中采用生成对抗网络\cite{goodfellow2014generative}结构。图\ref{fig6:archtecture}中粗略说明了所提出方法的网络架构，图\ref{fig6:generator}中详细介绍了所提出的生成器。
+
 \subsection{归纳引导滤波器的公式化}
 在引导滤波器\cite{he2010guided}对于图像抠图问题的建模中的基本假设为，输出alpha遮罩图为引导图像$I$在中心点为像素$k$的邻域$\omega_k$内的线性变换：
 \begin{equation}
 \alpha_i = A_{k}I_{i} + B_{k}, \forall i \in \omega_k,
 \end{equation}
-其中$ A_{k} $ 和 $ B_{k} $为待优化的线性系数。该线性假设同样被用于Closed-form Matting\cite{levin2008closed}方法中。在弱标注掩码作为输入的情况下，引导滤波器中的优化目标为在对$A_{k}$进行$\ell_2$正则化下最小化输出$\alpha_i$与其在弱标注掩码$ M $上相对应的像素值$M_i$的平方误差。在图像抠图的设定下，引导滤波器对每对输入图像和分割掩码分别求解优化问题，以获得从输入图像$I$到尽可能相似于掩码$M$的预测值$\alpha$的线性变换。该线性变换要求了alpha遮罩图需要具有与输入图像近似相同的梯度方向，即$ \nabla \alpha_i=A_k \nabla I_i $。该等式可以被看作为隐含的保梯度先验。
+其中$ A_{k} $ 和 $ B_{k} $为待优化的线性系数。该线性假设同样被用于Closed-form Matting\cite{levin2008closed}方法中。在弱标注掩码作为输入的情况下，引导滤波器中的优化目标为在对$A_{k}$进行L2正则化下最小化输出$\alpha_i$与其在弱标注掩码$ M $上相对应的像素值$M_i$的平方误差。在图像抠图的设定下，引导滤波器对每对输入图像和分割掩码分别求解优化问题，以获得从输入图像$I$到尽可能相似于掩码$M$的预测值$\alpha$的线性变换。该线性变换要求了alpha遮罩图需要具有与输入图像近似相同的梯度方向，即$ \nabla \alpha_i=A_k \nabla I_i $。该等式可以被看作为隐含的保梯度先验。
 
 尽管引导滤波器可以作为一种对具有弱标注输入的图像抠图任务的快速且有效的方法，但其受限于最优alpha遮罩与弱标注掩码之间的差异应充分小这一约束。 从经验上讲，来自语义分割方法或用户交互的分割掩码与真实标注的alpha遮罩值会有较大的差异。
 
@@ -68,12 +69,98 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 由于 $ \phi_{A} $ 与 $ \phi_{B} $为卷积网络且最后一层为上采样层，从低分辨率特征图中经过上采样得到的$ A $ 和 $ B $，相对较为平滑。因此，线性变换系数图$ A $ 和 $ B $的梯度充分小，可以满足 $ \nabla \alpha \approx A \circ \nabla I $。
 由于这一特性，所提出的网络结构可以内在地保持图像本身的梯度方向。
 
-文献\parencite{zhu2017fast}中也提及了相似的思想方法。
+文献\parencite{zhu2017fast}中也提及了相似的思想方法。归纳引导滤波器与其主要区别在于，文献\parencite{zhu2017fast}参考引导滤波器的闭式解公式对其网络中的羽化模块进行定义，该定义丢失了输入图像本身的梯度信息，而仅保留了输入的分割掩码的边缘和梯度信息。
+其羽化模块被定义为：
+\begin{equation}
+\alpha_i = A_k M^F_i + B_k M^B_i + C_k, \forall i \in \omega_k,
+\label{eq6:mobilematitng}
+\end{equation}
+其中$ M^F $ 和$M^B$ 分别为前景和背景的分割掩码，$ A_k$、$B_k $和$ C_k $ 为由神经网络生成的系数图。根据公式（\ref{eq6:mobilematitng}）可以推导出此羽化模块仅能够保留分割掩码的梯度方向和边缘，而不是输入图像的梯度。这可以被看作是作用于分割掩码上的注意力机制。因此，输入的误差较大的分割掩码可能会造成明显的抠图效果下降。相对应的，归纳引导滤波器可以被看作是输入图像上的注意力机制。这一点与引导滤波器中的线性变换相同，同时也对输入分割掩码中的噪声更加鲁棒。
 
 \subsection{归纳引导滤波器中的相似性学习}
+本节中，我们将从两方面对归纳引导滤波器中数据驱动的相似性学习性质进行讨论。一方面，我们将介绍原始引导滤波器方法中对图像像素间相似性的利用方法，并讨论归纳引导滤波器中数据驱动的学习能力。另一方面，我们将讨论归纳引导滤波器与前文所提出的引导上下文注意力机制的潜在联系。
+
+首先，根据文献\parencite{he2010guided}的推导，引导滤波器的闭式解可以写作约束图的滤波器形式，即：
+\begin{equation}
+	\alpha_i = \sum_j W_{ij}(I)M_j,
+\end{equation}
+其中滤波器核$W_{ij}$的权重可以表示为：
+\begin{equation}
+	W_{ij}(I) = \frac{1}{|\omega|^2} \sum_{(i,j)\in \omega_k}(1+\frac{(I_i-\mu_k)(I_j-\mu_k)}{\sigma^2_k+\epsilon}),
+\end{equation}
+式中$\mu_k$和$\sigma^2_k$分别表示图$I$在$\omega_k$内的均值和方差。该滤波器形式的闭式解，实现了在局部邻域上根据图像像素间的相似性，对约束图（trimap图或分割掩码）的信息传播。
+同时，根据其讨论，引导滤波器与Closed-form Matting\cite{levin2008closed}中的图拉普拉斯矩阵具有密切的联系。一般性抠图问题的优化问题可写为：
+\begin{equation}
+	\mathop{\mathrm{min}}\; (\alpha-M)^T\Lambda(\alpha-M)+\alpha^T L\alpha,
+	\label{eq6:closed}
+\end{equation}
+其中$\alpha$为向量化后的alpha遮罩值，$M$为相应的向量化后的约束图，$L$为用于抠图的拉普拉斯矩阵，$\Lambda$为对角权重矩阵。该优化问题可以通过求解线性系统：
+\begin{equation}
+	(L+\Lambda)\alpha=\Lambda M,
+\end{equation}
+对于Closed-form Matting方法，该优化问题中的拉普拉斯矩阵定义为：
+\begin{equation}
+	L_{ij} = \sum_{(i,j)\in \omega_k}(\delta_{ij}-\frac{1}{|\omega|} (1+\frac{(I_i-\mu_k)(I_j-\mu_k)}{\epsilon+\sigma^2_k})),
+\end{equation}
+式中$\delta_{ij}$为克罗内克$\delta$函数（Kronecker delta）。由此可知，该拉普拉斯矩阵与引导滤波器的滤波器权重间存在等式关系：
+\begin{equation}
+	L_{ij}=|\omega|(\delta_{ij}-W_{ij}).
+\end{equation}
+根据文献\parencite{he2010guided}，在$\Lambda_{ii}=|\omega|W_{ii}$的情况下，引导滤波器的解可以看做优化问题（\ref{eq6:closed}）在一步雅可比迭代（Jacobi iteration）后的近似解。在本章所提出的归纳引导滤波器中，原始引导滤波器中的待优化系数$A$与$B$被参数化为输入图像和分割掩码的函数，即神经网络$ \phi_{A}(I, M) $ 和 $ \phi_{B}(I, M) $。借助大量的有监督信息的训练数据对神经网络$ \phi_{A}(I, M) $ 及 $ \phi_{B}(I, M) $中的权重参数进行学习，根据由数据归纳学习到的网络，对不同的输入图像及掩码，生成其特定的引导滤波器系数。区别于原始引导滤波器中仅根据输入本身生成滤波器算子权重的方式，归纳引导滤波器可以利用在监督数据中学习得出的一般性规则生成相应滤波器。
+
+另一方面，通过将图\ref{fig6:generator}神经网络的最后一层卷积计算及其前一层的空间注意力机制引入公式（\ref{eq6:igf}）中可以近似得到前文所提出的局部的引导上下文注意力机制的传播效果。
+此处，首先假设$ \phi_{A}(I, M) $的输出特征及图像$I$为单通道以保持公式简洁，令$w^A\in \mathbb{R^{m\times n\times l}}$、$w^B\in \mathbb{R^{m\times n\times l}}$分别表示网络$ \phi_{A}(I, M) $与$ \phi_{B}(I, M) $最后一层卷积操作的卷积核，$\omega$表示卷积核的空间位置下标集合，将输入特征通道以向量形式表示则有：
+\begin{equation}
+	\begin{aligned}
+	&\phi_{A}(I, M)_{ij} = \sum_{m,n\in \omega} (w^A_{mn})^T(f_{i+m,j+n}\circ g_{i+m,j+n}), \\&\phi_{B}(I, M)_{ij} = \sum_{m,n\in \omega} (w^B_{mn})^T(f_{i+m,j+n}\circ g_{i+m,j+n}),
+	\end{aligned}
+\end{equation}
+其中$f$为输入图像$I$与弱标注分割掩码$M$通过主干网络生成的深层alpha遮罩特征，$g$表示由分支网络生成的包含有低级图像信息的注意力图，此处省略$(I,M)$以保持公式简洁。将其带入公式（\ref{eq6:igf}）中可得：
+\begin{equation}
+	\begin{aligned}
+	\alpha_{ij} =& \sum_{m,n\in \omega} (I_{ij}w^A_{mn}+w^B_{mn})^T(f_{i+m,j+n}\circ g_{i+m,j+n})\\
+	=& \sum_{m,n\in \omega} (I_{ij}w^A_{mn})^T(g_{i+m,j+n}\circ f_{i+m,j+n}) + \sum_{m,n\in \omega} (w^B_{mn})^T(f_{i+m,j+n}\circ g_{i+m,j+n})\\
+	=& \sum_{m,n\in \omega} (w^A_{mn}\circ g_{i+m,j+n}I_{ij})^Tf_{i+m,j+n} + \sum_{m,n\in \omega} (w^B_{mn})^T(f_{i+m,j+n}\circ g_{i+m,j+n})
+	\end{aligned}
+	\label{eq6:localhop}
+\end{equation}
+则公式（\ref{eq6:localhop}）中等式右侧第一项可以认为是具有低级图像信息的特征$w^A_{mn}\circ g_{i+m,j+n}$中每个空间位置及输入通道分别与图像$I$中$(i,j)$位置的信息计算相似度后，根据相似度对特征$f$进行局部的聚合，实现信息传播效果，其中的$w^A$也可以视为根据位置编码对相似度进行加权的可学习参数。而第二项可以看作对注意力激励后的特征$f\circ g$进行的常规卷积计算操作以起到残差效果。由于包含低级图像特征的$g$具有可学习性，以此该结构可以近似局部HOP模块的效果。
 
 \subsection{生成器设计}
+本节所提出的生成器结构包括了一个轻量级的类Hourglass\cite{newell2016stacked}主干，一个空间注意力机制及一个线性变换。鉴于U-Net\cite{ronneberger2015u} 及Hourglass \cite{newell2016stacked}网络结构被证明可以有效地从高分辨率的网络特征中保留低级图像信息，本生成器的网络主干参考了以上两种结构。同时由于深度可分离卷积（depthwise separable convolution）在轻量级深度神经网络中被广泛采用\cite{chollet2017xception,howard2017mobilenets,zhang2018shufflenet,sandler2018mobilenetv2}，我们使用深度可分离模块构造网络的前两层卷积操作以及跳层连接中的计算模块。需要注意的是，生成器在结构设计上参考了文献\parencite{nekrasov2018real}，仅在具有高分辨率特征映射的卷积层上引入深度可分离卷积操作。上述设计细节的核心动机都集中于降低网络在预测阶段的计算时延。除此之外，由于采用了梯度先验，该生成器网络可以模仿快速引导滤波器\cite{he2015fast}的设计方式，只输出alpha遮罩尺寸四分之一的特征映射，并通过四倍上采样进行最后的线性变换。这一步操作直接地避免了在高分辨率特征上进行密集的运算，可以降低近一半地预测时延。
+
+部分先前的深度图像抠图方法\cite{chen2018semantic,zhu2017fast}在其网络结构中采用了空间注意力机制\cite{xu2015show}，并得到了显著优异的抠图效果。对于本节所提出的生成器结构中的注意力机制，我们通过对输入图像及编码器输出特征进行信息融合，计算出同时具有低级图像信息及高级语义信息的注意力图，并将其作用于解码器中的高分辨特征上。
+
+除了判别器所需要的对抗损失之外，我们在生成器的输出上增加了三个损失进行监督：全局损失、局部损失核Gabor损失。下文中分别用$ \hat{\alpha} $ and $ {\alpha} $表示alpha遮罩预测值和标注值。
+
+\begin{itemize}
+	\item \textbf{全局损失}。为对alpha遮罩预测值进行整体的监督，通过alpha真值与估计值之间的平均L1损失构造的全局损失被加入到损失函数中用于模型训练：
+	\begin{equation}
+	\mathcal{L}_g = \frac{1}{|\alpha|}\|\alpha-\hat{\alpha}\|_1, 
+	\end{equation}
+
+	\item \textbf{局部损失}。当我们在对抠图网络进行训练时，除全局损失之外，我们希望目标函数更加集中在前景物体的边缘部分。局部损失是一个基于误差指示函数$ \Delta(\alpha, M) = \delta(|\alpha - M|>\epsilon) $定义的加权重构损失。该误差指示函数输出一个二值边缘图，其中在alpha标注值和输入的分割掩码具有不同值的位置为$1$，其他位置为$0$。$ \delta $函数使得低于$ \epsilon $误差值在该误差指示函数中被忽略。在损失函数中，我们采用$ \epsilon=0.01 $。则局部损失函数可以被定义为： 
+	\begin{equation}
+	\mathcal{L}_l = \frac{1}{\sum \Delta(\alpha, M)}\|\Delta(\alpha, M) \circ (\alpha-\hat{\alpha})\|_1.
+	\end{equation}
+	在实际实现中，我们对误差指示函数输出的二值边缘图用$ 7\times 7 $的核进行形态学膨胀，以获得更大的边缘区域。
+
+	\item \textbf{Gabor损失}。感知损失（perceptual loss）\cite{johnson2016perceptual}被证明可以在图像转换任务中显著地改进预测图地视觉质量。感知损失使用了VGG网络\cite{simonyan2014very}在具有特定类别的RGB图像上进行分类训练的预训模型构造损失，可以同时评估预测图与真值图之间的纹理及语义区别。而在通用图像抠图任务上，感知损失中的语义部分相对属于冗余信息，而单通道alpha遮罩的的数据分布也区别于RGB图像。因此，我们在图像抠图任务中提出了与感知损失具有相似性的Gabor损失。Gabor损失将感知损失中预训练的多层卷积核替换为单层的Gabor滤波器集合，以提取高频特征。由于Gabor滤波器与神经网络中浅层学习到的卷积核具有一定的相似性，一些先前的工作\cite{ouyang2013joint}将Gabor滤波器作为卷积核或卷积核的初始化引入神经网络中。因此，我们将Gabor损失定义为：
+	\begin{equation}
+	\mathcal{L}_{gb} = \frac{1}{|\alpha||\Phi|}\sum_{\phi_{gb}\in \Phi}\|\phi_{gb}(\alpha)-\phi_{gb}(\hat{\alpha})\|_2^2,
+	\end{equation}
+	其中函数$ \phi_{gb}(\cdot)$ 表示采用Gabor滤波器进行的卷积计算，$ \Phi $为不同的Gabor滤波器集合。在训练中，我们在集合$ \Phi $内设计了16个不同方向的$5\times5$ Gabor滤波器。所有的滤波器均有波长$\lambda=5$，空间纵横比（spatial aspect ratio）$\gamma=0.5$，标准差$\sigma=0.5$。我们在实验中尝试了使用不同的波长及标准差构造更大的滤波器集合，并不会对最终效果产生显著的提升。一些深度抠图方法基于相同的动机在目标函数中引入了梯度损失\cite{levinshtein2018real,chen2019boundary,samplenet}。相对于梯度，Gabor损失可以被看作是梯度损失基础上的扩展版本，可以提取更加全面的高频特征。
+\end{itemize}
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/test_versa.pdf}
+	\bicaption{MAT-2793数据测试集上的视觉对比结果。Trimap图仅用于Deep Matting及IndexNet方法。合成图由所提出方法预测结果与随机背景合成}{The visual comparison results on MAT-2793 testing set. The trimap is only for Deep Matting and IndexNet. The composition is composed with our results and random backgrounds}
+	\label{fig:test-data}
+\end{figure}
+
 \subsection{判别器设计}
+在AlphaGAN\cite{lutz2018alphagan}的生成对抗结构中，算法首先通过生成器预测出的alpha遮罩合成新的合成图像，然后将原始trimap图以及新的合成图像作为判别器输入。由于图像抠图任务几乎不关注语义信息，所以该设计在判断一张合成图是否真实这一点上的定义是模糊的。即使通过一个不完整的或者不正确alpha遮罩图合成图像，也可以认为是一张正常合成的图像，同时可以具有很高的保真度。因此将由真实alpha遮罩合成的图像作为正样本而将由网络预测的alpha遮罩合成的图像作为负样本，本身具有极大的判别难度。为解决这个问题，我们将条件三元组作为判别器的输入，包括原始图像、弱标注分割掩码及alpha遮罩图。这一设计类似于一些采用图像对作为判别器输入的图像生成方法\cite{hu2018pose}。给定一个三元组输入，判别器可以对输入的自洽性（self-consistency）进行判别。具体来说，判别器被设计为在给定原输入图像和分割掩码的条件下，判断一个预测出的alpha遮罩图是否正确，而不是单纯判断alpha遮罩或其合成图像是否真实。
 
 \section{实验结果}
 \subsection{数据集}

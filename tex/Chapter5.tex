@@ -299,7 +299,7 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 
 \subsection{神经网络实现细节}
 
-在该网络模型的训练中，我们依然延续了基线网络模型的训练设定。损失函数采用了公式（\ref{eq5:loss}）中的alpha预测损失，仅在trimap图标注的位置区域对预测结果和真实标注计算平均$\ell_1$损失。对于不透明度编码器，我们使用了在ImageNet数据集\cite{russakovsky2015imagenet}上预训练的ResNet-34网络\cite{he2016deep}的前11个模块。而对于图像外观编码器，我们只选择了步长为2的卷积层进行堆叠，以抽取尽可能低级的图像特征。
+在该网络模型的训练中，我们依然延续了基线网络模型的训练设定。损失函数采用了公式（\ref{eq5:loss}）中的alpha预测损失，仅在trimap图标注的位置区域对预测结果和真实标注计算平均L1损失。对于不透明度编码器，我们使用了在ImageNet数据集\cite{russakovsky2015imagenet}上预训练的ResNet-34网络\cite{he2016deep}的前11个模块。而对于图像外观编码器，我们只选择了步长为2的卷积层进行堆叠，以抽取尽可能低级的图像特征。
 网络模型使用Adobe Image Matting数据集\cite{xu2017deep}的前景图片和MS COCO数据集中的背景图片进行训练\cite{lin2014microsoft}。在基本数据增广部分延续了第\ref{sec5:aug}节中描述的数据增广方式，在基本增广部分之外还引入了有效的随即插值（Random Interpolation，RI）增广方式，我们将在第\ref{sec5:RI}节中对该数据增广方式及其有效性进行详细讨论。在训练时同时使用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}对训练过程进行归一化操作。采用Adam优化器\cite{kingma2014adam}实现网络参数优化。同时参考文献\parencite{he2019bag}，采用FP16半精度方式进行网络的训练以节约显存空间。在学习率方面，采用了学习率预热\cite{goyal2017accurate}及余弦衰减\cite{loshchilov2016sgdr}策略。
 
 
