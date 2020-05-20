@@ -152,21 +152,237 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 	其中函数$ \phi_{gb}(\cdot)$ 表示采用Gabor滤波器进行的卷积计算，$ \Phi $为不同的Gabor滤波器集合。在训练中，我们在集合$ \Phi $内设计了16个不同方向的$5\times5$ Gabor滤波器。所有的滤波器均有波长$\lambda=5$，空间纵横比（spatial aspect ratio）$\gamma=0.5$，标准差$\sigma=0.5$。我们在实验中尝试了使用不同的波长及标准差构造更大的滤波器集合，并不会对最终效果产生显著的提升。一些深度抠图方法基于相同的动机在目标函数中引入了梯度损失\cite{levinshtein2018real,chen2019boundary,samplenet}。相对于梯度，Gabor损失可以被看作是梯度损失基础上的扩展版本，可以提取更加全面的高频特征。
 \end{itemize}
 
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/dataset_foreground.pdf}
+	\bicaption{MAT-2793数据集中部分前景物体样例}{Some foreground object samples from the MAT-2793 dataset}
+	\label{fig6:foreground}
+\end{figure}
+
 \begin{figure}[t]
 	\centering
 	\includegraphics[width = 1\columnwidth]{chap6/test_versa.pdf}
 	\bicaption{MAT-2793数据测试集上的视觉对比结果。Trimap图仅用于Deep Matting及IndexNet方法。合成图由所提出方法预测结果与随机背景合成}{The visual comparison results on MAT-2793 testing set. The trimap is only for Deep Matting and IndexNet. The composition is composed with our results and random backgrounds}
-	\label{fig:test-data}
+	\label{fig6:test-data}
 \end{figure}
 
 \subsection{判别器设计}
 在AlphaGAN\cite{lutz2018alphagan}的生成对抗结构中，算法首先通过生成器预测出的alpha遮罩合成新的合成图像，然后将原始trimap图以及新的合成图像作为判别器输入。由于图像抠图任务几乎不关注语义信息，所以该设计在判断一张合成图是否真实这一点上的定义是模糊的。即使通过一个不完整的或者不正确alpha遮罩图合成图像，也可以认为是一张正常合成的图像，同时可以具有很高的保真度。因此将由真实alpha遮罩合成的图像作为正样本而将由网络预测的alpha遮罩合成的图像作为负样本，本身具有极大的判别难度。为解决这个问题，我们将条件三元组作为判别器的输入，包括原始图像、弱标注分割掩码及alpha遮罩图。这一设计类似于一些采用图像对作为判别器输入的图像生成方法\cite{hu2018pose}。给定一个三元组输入，判别器可以对输入的自洽性（self-consistency）进行判别。具体来说，判别器被设计为在给定原输入图像和分割掩码的条件下，判断一个预测出的alpha遮罩图是否正确，而不是单纯判断alpha遮罩或其合成图像是否真实。
 
+\begin{itemize}
+	\item \textbf{对抗损失}。在判别器方面，我们采用LSGAN\cite{mao2017least}及梯度惩罚\cite{gulrajani2017improved}作为对抗损失。损失函数定义为：
+	\begin{equation}
+	\begin{aligned}
+	\mathcal{L}_{adv} =\; & \mathcal{L}_D + \mathcal{L}_G + \lambda_{gp}  \mathbb{E}_{\tilde{\alpha}}[(\|\nabla_{\tilde{\alpha}}D(\tilde{\alpha}|I, M)\|_2-1)^2]\\
+	\mathcal{L}_D =\; & \mathbb{E}_\alpha[(D(\alpha|I, M)-1)^2] + \mathbb{E}_{\hat{\alpha}}[D(\hat{\alpha}|I, M)^2]\\
+	\mathcal{L}_G =\; & \mathbb{E}_{\hat{\alpha}}[(D(\hat{\alpha}|I, M)-1)^2],
+	\end{aligned}
+	\end{equation}
+	其中，$ \tilde{\alpha} $为$ \alpha $ 与 $ \hat{\alpha} $的凸组合，组合系数随机采样于均匀分布，同时我们采用超参数$ \lambda_{gp} =10 $
+\end{itemize}
+
+\begin{table}[t]
+	\bicaption{在MAT-2793数据测试集上的数值结果}{The quantitative results on the MAT-2793 testing set}
+	\centering
+	\begin{tabular}{l@{\qquad}cccc}  
+		\toprule
+		Methods & MSE & SAD & Grad  &Conn\\
+		\midrule
+		Fast Guided Filter\cite{he2015fast}  & 0.101 & 9.57 & 15.53 & 5.53\\
+		Adobe DIM\cite{xu2017deep}  & 0.148 & 8.54 & 16.53 & 4.42\\
+		Context-aware Matting\cite{hou2019context}  & 0.079 & 5.24  &  12.67 & 2.12 \\
+		IndexNet Matting\cite{lu2019indices}  & 0.036 & 3.01 & \textbf{5.86} & 1.75\\
+		Our method & \textbf{0.028} & \textbf{2.51} & {6.45} & \textbf{1.51}\\      	
+		\bottomrule
+	\end{tabular}
+	\label{tab6:ours}
+\end{table}
+
+本章所提出的归纳引导滤波器的完整损失函数为：
+\begin{equation}
+\mathcal{L} = \lambda_g \mathcal{L}_g + \lambda_l \mathcal{L}_l + \lambda_{gb} \mathcal{L}_{gb} + \lambda_{adv} \mathcal{L}_{adv},
+\end{equation}
+其中，我们选择超参数$ \lambda_g = 10$、$\lambda_l = 1$、$\lambda_{gb} = 200 $ 及$ \lambda_{adv} = 1$。
+
+对于判别器部分，我们在实现中引入了能够对生成图像数据中每个区块分别判定保真度的PatchGAN结构\cite{isola2017image}，以保证所采用的判别器能够充分地注意到生成alpha遮罩图的局部纹理细节。谱归一化被证明在生成的对抗网络的训练中可以显著有效地增加训练稳定性，因此，我们在判别器中引入了谱归一化约束。
+
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/fail_versa.pdf}
+	\bicaption{MAT-2793数据测试集上的两个失败样例}{Two failed cases on MAT-2793 testing set}
+	\label{fig6:failed}
+\end{figure}
+
 \section{实验结果}
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/test_adobe.pdf}
+	\bicaption{在Composition-1k测试集上视觉对比结果。合成图由所提出方法预测结果与随机背景合成}{The visual comparison  on Composition-1k testing set. The composition is composed with our results and random backgrounds}
+	\label{fig6:adobe}
+\end{figure}
+在本节中，我们分别在MAT-2793和Composition-1k\cite{xu2017deep}两个数据集上对所提出的方法进行评估。为验证所提出方法每一部分的有效性，本节进行了大量的消融实验对归纳引导滤波器的每一部分进行了测试，同时我们对所提出方法进行了效率测试并与部分为特定场景设计的实时深度抠图方法进行了效率对比。本节最后我们给出了所提出方法在部分非合成的自然图像上的抠图效果。
 \subsection{数据集}
+\label{sec6:data}
+由于alpha遮罩图标注的难度极大，数据驱动的图像抠图方法一个首要的困境在于训练数据的匮乏。目前已公开的最大的图像抠图训练数据集\cite{xu2017deep}仅包含493张不同的前景物体图。因此，为实现对于弱标注图像抠图任务的训练，我们构造了一个具有2,793张前景物体图像的数据集MAT-2793。数据集中的前景图像及相应的alpha遮罩图采集自互联网，并经过人工筛选，部分前景物体为绘制图像而非自然图像。在图\ref{fig6:foreground}中展示了数据集中部分前景物体图像的样例。我们将数据集划分为具有2,504张前景图的训练集和具有289张前景图的测试集。
+在实验中，我们在数据集SUN\cite{xiao2010sun}及ADE20k\cite{zhou2017scene}中选择了约5,000张高分辨率图像作为合成图像的背景。
+
+在训练数据生成及增广方面，我们首先对每个前景物体进行水平翻转并进行11个不同角度的旋转，以生成22个不同的前景图，然后对每张前景图随机选择背景图像进行合成。为生成弱标注的分割掩码，我们首先将真实的alpha这遮罩图上大于$0.5$的alpha值认为是前景，得到一个初始分割掩码。然后我们在区间$5\times5$ 到 $30\times30$之间随机采样两个核的尺寸，采用随机核同时对分割掩码进行形态学的膨胀与腐蚀。如果生成的分割掩码中前景部分的区域面积比例不足alpha遮罩中前景部分面积的一半，则该训练样本被抛弃。我们将合成图、相应的alpha遮罩图以及分割掩码图的短边都缩放至600像素。为进一步增广训练数据，我们对训练图像进行随即剪裁，并将剪裁结果缩放至$512\times512$。同时，在训练阶段我们在区间$ [-40, 40] $内对图像的色度进行随机扰动。由于我们认为在泛化度较高的图像抠图问题中图像的前景及背景具有一定的可交换性，即我们可以在训练阶段对前景及背景的标注进行互换。因此，我们依概率$0.5$对输入分割掩码的标签进行了随机反转，并采用$1-\alpha$作为真实标注值。在测试阶段，我们采用尺寸为$600\times600$的中心剪裁并将剪裁结果缩放到$512\times512$。
+
+\begin{table}[t]
+	\bicaption{在Composition-1k测试集上采用弱标注输入的定量测试结果}{The quantitative results on the Composition-1k testing set with weakly annotations}
+	%    \small
+	\centering
+	%     \begin{tabular}{lp{3em}<{\centering}p{3em}<{\centering}p{6em}<{\centering}p{6em}<{\centering}}  
+	\begin{tabular}{l@{\qquad}cccc}  
+		\toprule
+		Methods & MSE & SAD & Grad &Conn\\
+		\midrule
+		Fast Guided Filter \cite{he2015fast} &  0.130 & 176.2  & 150.5  & 111.2 \\
+		Deep Matting \cite{xu2017deep} & 0.243 & 105.2 & 55.0 & 56.1\\
+		Context-aware Matting \cite{hou2019context}  & 0.103  & 63.0  & 46.6  & 44.4 \\
+		IndexNet Matting \cite{lu2019indices}  & 0.084 & 52.2 & \textbf{33.2} & \textbf{33.8}\\
+		Our method & \textbf{0.064} & \textbf{46.2} & {42.1} & {35.7}\\        
+		\bottomrule
+	\end{tabular}
+	\label{tab6:adobe}
+\end{table}
+
 \subsection{MAT-2793测试集实验结果}
+为在不同的抠图方法之间进行公平的对比\footnote{在本节的对照实验中采用了第三方实现的项目https://github.com/foamliu/Deep-Image-Matting作为未开源的Deep Matting方法的实现。}，我们根据训练数据中每张合成图的分割掩码生成对应的trimap图作为部分需要trimap的抠图方法的输入数据。为在分割掩码上构造trimap图所需要的不确定区域，我们选用尺寸为$20\times20$分别对分割掩码图进行形态学膨胀和腐蚀，以生成不确定区域。最终的评估误差仅在不确定区域中计算。需要注意的是，由于分割掩码本身具有明显的噪声，因此在自动生成的trimap图中也存在一定的标注错误现象。
+在本节的实验中，我们对快速引导滤波器\cite{he2015fast}进行了实现，并选取降采样系数为4。在实验效果的评价指标方面遵循了文献\parencite{rhemann2009perceptually}的建议，采用了均方误差（Mean Square Error，MSE）、总绝对差（Sum of Absolute Difference，SAD）、梯度误差（Gradient error，Grad）和连通误差（Connectivity error，Conn）四个评估测度。表\ref{tab6:ours}展示了不同抠图算法在MAT-2793测试数据集上的定量评估结果。此外，我们在图\ref{fig6:test-data}中对不同算法在测试集上的估计结果进行了视觉效果的对比。结果表明，我们所提出的方法对输入的分割掩码中的噪声具有一定的鲁棒性，同时相比于其他目前最先进的图像抠图方法具有一定的竞争力。
+
+
+在图\ref{fig6:failed}中，我们展示了两个典型的alpha遮罩预测失败样例。预测失败的原因分为两种主要情况，其一为图\ref{fig6:failed}中第一行所示的抠图算法由于缺少明确的前背景指示信息而导致对前景和背景信息产生混淆，而将前景物体的一部分作为背景进行预测，或将背景中显著部分作为前景。其二为图\ref{fig6:failed}第二行中所示的，由于前景与背景结构复杂且所输入的分割掩码在部分重要区域中与alpha遮罩信息差距过大，从而使得网络无法正确识别到前景物体，导致alpha遮罩预测图的整体性退化。
+
 \subsection{Composition-1k测试集实验结果}
+Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成的1,000张合成测试图。在实验中，我们采用与MAT-2793测试数据集完全相同的方式生成测试数据对应的弱标注分割掩码。在根据弱标注分割掩码生成trimap图阶段，考虑到Composition-1k测试集中侧视图尺寸较大的问题，我们在腐蚀与膨胀操作中选取了尺寸为$50\times50$的核。trimap图生成结束后，所有数据图片被缩放至$512\times512$用于alpha遮罩预测。最后，预测结果被缩放回原图大小，然后在生成的trimap图中的不确定区域内进行误差计算。我们在图\ref{fig6:adobe}中对不同算法在Composition-1k测试集上的预测结果进行了视觉效果上的对比，同时在表\ref{tab6:adobe}中对预测alpha遮罩在不同损失测度下的定量评估结果进行了数值比较。在Composition-1k测试集上的实验结果同样表明了，本章所提出的方法具有处理弱标注输入的能力。
+
+\begin{table}[t]
+	%	\small
+	\centering
+	\bicaption{在MAT-2793数据测试集上消融实验的定量结果}{The quantitative results of ablation study on the MAT-2793 testing set}
+	%     \begin{tabular}{lp{3em}<{\centering}p{3em}<{\centering}p{6em}<{\centering}p{6em}<{\centering}} 
+	\begin{tabular}{lcccc}
+		\toprule
+		Methods & MSE & SAD & Grad &Conn\\
+		\midrule
+		Ours & \textbf{0.028} & \textbf{2.51} & \textbf{6.45} & \textbf{1.51}\\    
+		w/o Atten & 0.037 & 2.95& 8.65 & 1.70\\
+		w/o Gabor & 0.031 & 2.68 & 7.15 & 1.55\\
+		w/o IGF & 0.034 & 2.81 & 8.3 & 1.62\\
+		w/o Adv & 0.042 & 3.33 & 9.1 & 1.87\\
+		w/o IGF w/ FB  & 0.034 & 2.84 & 8.35 & 1.65\\
+		w/o Gabor w/ Grad & 0.030 & 2.68 & 6.96 & 1.57\\
+		w/o Gabor w/ Percep & 0.029 & 2.67 & 6.77 & 1.61\\
+		\bottomrule
+	\end{tabular}
+	\label{tab6:ablation}
+\end{table}
 \subsection{消融实验}
+在本节中，我们通过移除模型中的不同部分然后对所提出模型进行评估，以展示空间注意力机制（Atten）、Gabor损失（Gabor）、对抗损失（Adv）及梯度先验（IGF）各自的有效性。在所提出的方法中移除梯度先验表示我们对网络生成的系数图$A$与$B$拼接后进行逐点卷积（point-wise convolution）以获取最终的alpha遮罩预测，而计算系数$A$与输入图像的乘积。在这种情况下，生成器部分可以被看成是一个通用的自编码器。表\ref{tab6:ablation}报告了消融实验的定量评测结果。此处值得注意的一点在于，尽管空间注意力机制部分对最终预测效果由显著的贡献，但同时也向神经网络中引入了更多的运算量。
+由于本章所提出的梯度先验与文献\parencite{zhu2017fast}中的所提出的羽化模块（FB）具有一定的相似性，故此我们将公式（\ref{eq6:igf}）中的梯度先验替换为公式（\ref{eq6:mobilematitng}）中的羽化模块，并在表\ref{tab6:ablation}对其效果进行了对比，将梯度先验替换为羽化模块的模型以\textit{w/o IGF w/ FB}表示。
+
+此外，在表\ref{tab6:ablation}中我们同样将训练中的Gabor损失替换为梯度损失（Grad）或感知损失（Percep）进行效果对比，以显示Gabor损失在该问题中的有效性。
+
+\begin{table}[t]
+	\bicaption{在CPU及移动设备上的速度评估结果}{The results of speed evaluation on CPU and mobile devices}
+	\centering
+	%	\begin{savenotes}
+	\begin{tabular}{lccc}  
+		\toprule
+		Methods  & Input Size&  Device & Time (ms)   \\
+		\midrule\midrule
+		HairMatteNet\cite{levinshtein2018real}& 224x224& iPad Pro GPU & 30   \\
+		\midrule
+		\multirow{2}{*}{LDN+FB\cite{zhu2017fast}} &\multirow{2}{*}{128x128}  &  Core E5-2660 & 38  \\
+		&&  Adreno 530 & 62  \\
+		\midrule
+		\midrule
+		Fast Guided Filter\cite{he2015fast} &512x512 & Core i5-9400 & 81.1  \\
+%		 & Core i7-7700& 62.0  \\
+		\midrule
+		Deep Matting\cite{xu2017deep}& 512x512& Core i5-9400 & 942.6  \\
+%		  & Core i7-7700 & 4003.2  \\
+		\midrule
+		IndexNet Matting\cite{lu2019indices} &512x512	& Core i5-9400 & 604.2  \\
+		\midrule
+		Context-aware Matting\cite{hou2019context}& 512x512	& Core i5-9400 & 7805.3  \\
+		\midrule
+		\multirow{3}{*}{Ours} &\multirow{3}{*}{512x512}& Core i5-9400 & 13.2  \\
+		&& iPhone Xs   & 15.7  \\
+%		& iPhone X    & 22.3   \\
+		&& iPhone SE  & 25.9   \\
+%		& Core i7-7700 & 13.0  \\
+		\bottomrule
+	\end{tabular}
+	\label{tab6:time_mobie}
+\end{table}
+
 \subsection{效率评估实验结果}
+为验证所提出的抠图模型的推理效率，我们包括CPU及移动设备在内等不同平台上分别对所提出方法进行速度测试和对比。部分在文献中提供了效率测试实验的用于人像（LDN+FB \cite{zhu2017fast}）或头发（HairMatteNet \cite{levinshtein2018real}）的实时抠图算法也同时被加入对比。我们在实验结果中报告了这些算法在原始文献中提供的效率实验的测试数据。在表\ref{tab6:time_mobie}中，我们展示了不同方法在CPU及不同的移动设备上的速度评估结果。我们通过Apple CoreML框架将所提出的模型部署在不同型号的iPhone设备上。可以注意到，在接受$512\times512$的图像作为输入数据的情况下，所提出的方法依然可以在2016年出产的iPhone SE设备上达到实时运算的效果。此外，我们在Nvidia的GPU设备上对不同方法的运行效率进行了评估
+
+\begin{table}[h]
+	\bicaption{在Nvidia GPU设备上的速度评估结果。我们对所提出的方法同时展示了考虑及不考虑GPU I/O情况下的速度结果}{The results of speed evaluation on Nvidia GPU devices. We also display the speed of our method with or without GPU I/O}
+	\small
+	\centering
+	\begin{tabular}{lcccc}  
+		\toprule
+		Methods & Input Size& Device & BatchSize & Time (ms)\\
+		\midrule
+		\midrule
+		BANet-64\cite{chen2019boundary}& 512x512  & 1080 Ti& 1  & 23.3 \\
+		\midrule
+		LDN+FB\cite{zhu2017fast} &128x128 & TITAN X & 1& 13  \\
+		\midrule
+		\midrule
+		Deep Matting& 512x512  &  1080 & 1  & 81.8 \\
+		\midrule
+		IndexNet Matting &512x512  &  1080 & 1  & 38.4 \\
+		\midrule
+		Context-aware Matting& 512x512  &  1080 & 1  & 710.7 \\
+		\midrule
+%		\multirow{2}{*}{Ours w/ I/O (512x512)} & \multirow{2}{*}{ V100} &  1  & 3.48 \\
+%		&&   256 & 1.46  \\
+%		\midrule
+%		\multirow{2}{*}{Ours w/o I/O (512x512)} & \multirow{2}{*}{ V100}  &  1 &  2.19  \\
+%		& & 256  & 0.18 \\
+%		\midrule
+%		\multirow{2}{*}{Ours w/ I/O (512x512)} & \multirow{2}{*}{ 1080Ti} &  1  & 4.20 \\
+%		&&   256 & 1.64  \\
+%		\midrule
+%		\multirow{2}{*}{Ours w/o I/O (512x512)} & \multirow{2}{*}{ V100}  &  1 &  2.19  \\
+%		& & 256  & 0.18 \\
+%		\midrule
+		\multirow{2}{*}{Ours w/ I/O}& \multirow{2}{*}{512x512} & \multirow{2}{*}{ 1080} &  1  & 3.88 \\
+		&&&   256 & 1.68  \\
+		\midrule
+		\multirow{2}{*}{Ours w/o I/O}& \multirow{2}{*}{512x512} & \multirow{2}{*}{ 1080}  &  1 &  2.55  \\
+		& && 256  & 0.54 \\
+		\bottomrule
+	\end{tabular}
+	\label{tab6:time_gpu}
+\end{table}
 \subsection{自然图像抠图效果}
+为进一步评估所提出方法在真实自然图像上的表现，我们采用了DeepLab v3+\cite{chen2018encoder}模型作为分割方法，一心韩式所提出抠图方法在实际应用场景中的表现。在该实验中，我们仅对包含有DeepLab v3+可分割的语义物体的图像进行测试，同时将分割结果直接作为所提出模型的弱标注分割掩码输入到网络中。
+我们首先在PASCAL VOC 2012\cite{everingham2015pascal}语义分割数据的测试集中的部分图像上进行了测试，相应的DeepLab v3+方法分割结果及归纳引导滤波器的抠图结果展示在图\ref{fig6:voc_deeplab}中。同时，部分通过互联网收集的盆栽植物图像以及Supervisely人像分割数据集\cite{Supervise.ly}中图像的抠图结果被展示在图\ref{fig6:plant_sup_deeplab}中。此外，图\ref{fig6:adobe_deeplab}还提供了Composition-1k 测试集\cite{xu2017deep}中部分具有可分割语义物体的图像样本的抠图结果。
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/voc_deeplab.pdf}
+	\bicaption{PASCAL VOC 2012测试集中部分图像抠图结果，分割掩码由DeepLab v3+生成}{Results of some images in PASCAL VOC 2012 testing set. Masks are generated by DeepLab v3+}
+	\label{fig6:voc_deeplab}
+\end{figure}
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/plant_sup_deeplab.pdf}
+	\bicaption{部分盆栽植物以及Supervisely人像数据集中样本的抠图结果，分割掩码由DeepLab v3+生成}{Results of some potted plant images and samples from Supervisely Person dataset. Masks are generated by DeepLab v3+}
+	\label{fig6:plant_sup_deeplab}
+\end{figure}
+\begin{figure}[t]
+	\centering
+	\includegraphics[width = 1\columnwidth]{chap6/adobe_deeplab.pdf}
+	\bicaption{Composition-1k测试集中部分样本的抠图结果，分割掩码由DeepLab v3+生成}{Results of samples from Composition-1k testing set. Masks are generated by DeepLab v3+}
+	\label{fig6:adobe_deeplab}
+\end{figure}
 \section{本章小结}
+在本章中，我们提出了一个借助引导滤波其中所隐含的梯度先验信息，以粗糙的弱标注分割结果替代trimap图的图像抠图方法。所提出的轻量级主干网络模型，使得该方法在移动设备上具有极高推理效率。此外，所提出的Gabor损失可以对抠图结果中的高频细节信息实现有效地监督。在两个测试数据集上的测试结果表明，所提出的方法对弱标注的分割掩码输入具有一定的鲁棒性，同时在图像抠图任务中充分具有提取纹理细节的能力。
