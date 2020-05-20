@@ -254,26 +254,27 @@ g_{(i,j)} = &W_{out}(\sum_{(x,y)\in\mathcal{N}((i,j), s)}a_{(i,j),(x,y)}f^O_{(x,
 在先前的一些工作中，自注意力机制中的位置编码总能带来一定的收益\cite{vaswani2017attention,dai2019transformer,ramachandran2019stand}。在本节中我们将对所提出的方法中加入的位置编码进行描述。我们采用两种不同的位置编码方式：全局HOP模块的尺度不敏感位置编码（scale-insensitive positional encoding）和局部HOP块的局部相对位置编码（local relative position encoding）。图\ref{fig5:PE}对不同的位置编码方法进行了展示。
 
 \begin{figure}[t]
-	\subfloat{
-		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-scale.pdf}\\
-		\centering SI-PE
-	}	
-	\subfloat{
-		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-relate.pdf}\\
-		\centering R-PE
-	}	
-	\subfloat{
-		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-abs.pdf}\\
-		\centering A-PE
-	}	
-	\subfloat{
-		\centering
-		\includegraphics[width=.22\linewidth]{chap5/pos-local.pdf}\\
-		\centering LR-PE
-	}
+	% \subfloat{
+	% 	\centering
+	% 	\includegraphics[width=.22\linewidth]{chap5/pos-scale.pdf}\\
+	% 	\centering SI-PE
+	% }	
+	% \subfloat{
+	% 	\centering
+	% 	\includegraphics[width=.22\linewidth]{chap5/pos-relate.pdf}\\
+	% 	\centering R-PE
+	% }	
+	% \subfloat{
+	% 	\centering
+	% 	\includegraphics[width=.22\linewidth]{chap5/pos-abs.pdf}\\
+	% 	\centering A-PE
+	% }	
+	% \subfloat{
+	% 	\centering
+	% 	\includegraphics[width=.22\linewidth]{chap5/pos-local.pdf}\\
+	% 	\centering LR-PE
+	% }
+	\includegraphics[width = 1\columnwidth]{chap5/pos_enc.pdf}
 	\bicaption{不同的位置编码示意图。蓝色方框表示查询点的位置。每个特征点上的有序数对表示（行偏移，列偏移）。SI-PE：尺度不敏感位置编码；R-PE：相对位置编码；A-PE：绝对位置编码；LR-PE：局部相对位置编码}{The illustration of different positional encoding methods. The blue rectangle indicates the position of query. The ordered pair in each feature point is (row offset, column offset). SI-PE: scale-insensitive positional encoding; R-PE: relative positional encoding; A-PE: absolute positional encoding; LR-PE: local relative positional encoding}
 	\label{fig5:PE}
 \end{figure}
