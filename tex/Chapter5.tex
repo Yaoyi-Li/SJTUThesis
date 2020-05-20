@@ -204,19 +204,19 @@ w(\mathcal{U}, \mathcal{K}, x',y') = \begin{cases}
 
 \begin{figure}[t]
 	\centering
-	\bisubcaptionbox{局部HOP模块}%
+	\bisubcaptionbox{局部HOP模块\label{fig5:blocka}}%
 					{local HOP block}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-local.pdf}\label{fig5:blocka}}
-	\bisubcaptionbox{局部自注意力}%
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-local.pdf}}
+	\bisubcaptionbox{局部自注意力\label{fig5:blockb}}%
 					{local self-attention}
-                    [0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-local.pdf}\label{fig5:blockb}}                  
+                    [0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-local.pdf}}                  
 	\centering
-	\bisubcaptionbox{全局HOP模块}%
+	\bisubcaptionbox{全局HOP模块\label{fig5:blockc}}%
 					{global HOP block}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-global.pdf}\label{fig5:blockc}}
-	\bisubcaptionbox{全局自注意力}%
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-global.pdf}}
+	\bisubcaptionbox{全局自注意力\label{fig5:blockd}}%
 					{global self-attention}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-global.pdf}\label{fig5:blockd}}
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-global.pdf}}
 	\bicaption{局部HOP模块、局部自注意力、全局HOP模块和全局自注意力的细节结构示意图，在两个局部模块示意图上为便于表示，仅展示了一个查询数据点}{The diagrams of detailed structure of local HOP block, local self-attention block, global HOP block and global self-attention block. For these two local blocks, we only show one query data point in the diagrams for the ease of presentation}
 	\label{fig5:block}
 \end{figure}
@@ -434,7 +434,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 \begin{tabular}{@{\;\;}l|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}}
 	\toprule
 	%		& \multicolumn{4}{c}{Average Rank}\\
-	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c|}{SAD}& \multicolumn{4}{c|}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
+	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c@{\;\;}|@{\;\;}}{SAD}& \multicolumn{4}{c@{\;\;}|@{\;\;}}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
 	& Overall&S&L&U& Overall&S&L&U& Overall&S&L&U\\
 	\midrule
 	%mse

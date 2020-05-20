@@ -364,7 +364,7 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 	\label{tab6:time_gpu}
 \end{table}
 \subsection{自然图像抠图效果}
-为进一步评估所提出方法在真实自然图像上的表现，我们采用了DeepLab v3+\cite{chen2018encoder}模型作为分割方法，一心韩式所提出抠图方法在实际应用场景中的表现。在该实验中，我们仅对包含有DeepLab v3+可分割的语义物体的图像进行测试，同时将分割结果直接作为所提出模型的弱标注分割掩码输入到网络中。
+为进一步评估所提出方法在真实自然图像上的表现，我们采用了DeepLab v3+\cite{chen2018encoder}模型作为分割方法，以显示所提出抠图方法在实际应用场景中的表现。在该实验中，我们仅对包含有DeepLab v3+可分割的语义物体的图像进行测试，同时将分割结果直接作为所提出模型的弱标注分割掩码输入到网络中。
 我们首先在PASCAL VOC 2012\cite{everingham2015pascal}语义分割数据的测试集中的部分图像上进行了测试，相应的DeepLab v3+方法分割结果及归纳引导滤波器的抠图结果展示在图\ref{fig6:voc_deeplab}中。同时，部分通过互联网收集的盆栽植物图像以及Supervisely人像分割数据集\cite{Supervise.ly}中图像的抠图结果被展示在图\ref{fig6:plant_sup_deeplab}中。此外，图\ref{fig6:adobe_deeplab}还提供了Composition-1k 测试集\cite{xu2017deep}中部分具有可分割语义物体的图像样本的抠图结果。
 \begin{figure}[h]
 	\centering
