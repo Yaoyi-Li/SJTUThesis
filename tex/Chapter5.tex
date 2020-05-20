@@ -206,17 +206,17 @@ w(\mathcal{U}, \mathcal{K}, x',y') = \begin{cases}
 	\centering
 	\bisubcaptionbox{局部HOP模块}%
 					{local HOP block}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-local.pdf}}\label{fig5:blocka}
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-local.pdf}\label{fig5:blocka}}
 	\bisubcaptionbox{局部自注意力}%
 					{local self-attention}
-                    [0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-local.pdf}}\label{fig5:blockb}                   
+                    [0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-local.pdf}\label{fig5:blockb}}                  
 	\centering
 	\bisubcaptionbox{全局HOP模块}%
 					{global HOP block}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-global.pdf}}\label{fig5:blockc}
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/HOP-global.pdf}\label{fig5:blockc}}
 	\bisubcaptionbox{全局自注意力}%
 					{global self-attention}
-					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-global.pdf}}\label{fig5:blockd}
+					[0.24\textwidth]{\includegraphics[height=.35\textwidth]{chap5/SA-global.pdf}\label{fig5:blockd}}
 	\bicaption{局部HOP模块、局部自注意力、全局HOP模块和全局自注意力的细节结构示意图，在两个局部模块示意图上为便于表示，仅展示了一个查询数据点}{The diagrams of detailed structure of local HOP block, local self-attention block, global HOP block and global self-attention block. For these two local blocks, we only show one query data point in the diagrams for the ease of presentation}
 	\label{fig5:block}
 \end{figure}
@@ -431,7 +431,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 \bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark.}
 \footnotesize
 \centering
-\begin{tabular}{l|c|ccc|c|ccc|c|ccc}
+\begin{tabular}{@{\;\;}l|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}}
 	\toprule
 	%		& \multicolumn{4}{c}{Average Rank}\\
 	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c|}{SAD}& \multicolumn{4}{c|}{MSE}& \multicolumn{4}{c}{Gradient Error}\\

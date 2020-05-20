@@ -194,7 +194,7 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 		Adobe DIM\cite{xu2017deep}  & 0.148 & 8.54 & 16.53 & 4.42\\
 		Context-aware Matting\cite{hou2019context}  & 0.079 & 5.24  &  12.67 & 2.12 \\
 		IndexNet Matting\cite{lu2019indices}  & 0.036 & 3.01 & \textbf{5.86} & 1.75\\
-		Our method & \textbf{0.028} & \textbf{2.51} & {6.45} & \textbf{1.51}\\      	
+		Ours & \textbf{0.028} & \textbf{2.51} & {6.45} & \textbf{1.51}\\      	
 		\bottomrule
 	\end{tabular}
 	\label{tab6:ours}
@@ -223,7 +223,7 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 	\label{fig6:adobe}
 \end{figure}
 在本节中，我们分别在MAT-2793和Composition-1k\cite{xu2017deep}两个数据集上对所提出的方法进行评估。为验证所提出方法每一部分的有效性，本节进行了大量的消融实验对归纳引导滤波器的每一部分进行了测试，同时我们对所提出方法进行了效率测试并与部分为特定场景设计的实时深度抠图方法进行了效率对比。本节最后我们给出了所提出方法在部分非合成的自然图像上的抠图效果。
-\subsection{数据集}
+\subsection{MAT-2793数据集}
 \label{sec6:data}
 由于alpha遮罩图标注的难度极大，数据驱动的图像抠图方法一个首要的困境在于训练数据的匮乏。目前已公开的最大的图像抠图训练数据集\cite{xu2017deep}仅包含493张不同的前景物体图。因此，为实现对于弱标注图像抠图任务的训练，我们构造了一个具有2,793张前景物体图像的数据集MAT-2793。数据集中的前景图像及相应的alpha遮罩图采集自互联网，并经过人工筛选，部分前景物体为绘制图像而非自然图像。在图\ref{fig6:foreground}中展示了数据集中部分前景物体图像的样例。我们将数据集划分为具有2,504张前景图的训练集和具有289张前景图的测试集。
 在实验中，我们在数据集SUN\cite{xiao2010sun}及ADE20k\cite{zhou2017scene}中选择了约5,000张高分辨率图像作为合成图像的背景。
@@ -243,7 +243,7 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 		Deep Matting \cite{xu2017deep} & 0.243 & 105.2 & 55.0 & 56.1\\
 		Context-aware Matting \cite{hou2019context}  & 0.103  & 63.0  & 46.6  & 44.4 \\
 		IndexNet Matting \cite{lu2019indices}  & 0.084 & 52.2 & \textbf{33.2} & \textbf{33.8}\\
-		Our method & \textbf{0.064} & \textbf{46.2} & {42.1} & {35.7}\\        
+		Ours & \textbf{0.064} & \textbf{46.2} & {42.1} & {35.7}\\        
 		\bottomrule
 	\end{tabular}
 	\label{tab6:adobe}
@@ -325,7 +325,6 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 
 \begin{table}[h]
 	\bicaption{在Nvidia GPU设备上的速度评估结果。我们对所提出的方法同时展示了考虑及不考虑GPU I/O情况下的速度结果}{The results of speed evaluation on Nvidia GPU devices. We also display the speed of our method with or without GPU I/O}
-	\small
 	\centering
 	\begin{tabular}{lcccc}  
 		\toprule
@@ -337,11 +336,11 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 		LDN+FB\cite{zhu2017fast} &128x128 & TITAN X & 1& 13  \\
 		\midrule
 		\midrule
-		Deep Matting& 512x512  &  1080 & 1  & 81.8 \\
+		Deep Matting\cite{xu2017deep}& 512x512  &  1080 & 1  & 81.8 \\
 		\midrule
-		IndexNet Matting &512x512  &  1080 & 1  & 38.4 \\
+		IndexNet Matting\cite{lu2019indices} &512x512  &  1080 & 1  & 38.4 \\
 		\midrule
-		Context-aware Matting& 512x512  &  1080 & 1  & 710.7 \\
+		Context-aware Matting\cite{hou2019context}& 512x512  &  1080 & 1  & 710.7 \\
 		\midrule
 %		\multirow{2}{*}{Ours w/ I/O (512x512)} & \multirow{2}{*}{ V100} &  1  & 3.48 \\
 %		&&   256 & 1.46  \\
@@ -367,19 +366,19 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 \subsection{自然图像抠图效果}
 为进一步评估所提出方法在真实自然图像上的表现，我们采用了DeepLab v3+\cite{chen2018encoder}模型作为分割方法，一心韩式所提出抠图方法在实际应用场景中的表现。在该实验中，我们仅对包含有DeepLab v3+可分割的语义物体的图像进行测试，同时将分割结果直接作为所提出模型的弱标注分割掩码输入到网络中。
 我们首先在PASCAL VOC 2012\cite{everingham2015pascal}语义分割数据的测试集中的部分图像上进行了测试，相应的DeepLab v3+方法分割结果及归纳引导滤波器的抠图结果展示在图\ref{fig6:voc_deeplab}中。同时，部分通过互联网收集的盆栽植物图像以及Supervisely人像分割数据集\cite{Supervise.ly}中图像的抠图结果被展示在图\ref{fig6:plant_sup_deeplab}中。此外，图\ref{fig6:adobe_deeplab}还提供了Composition-1k 测试集\cite{xu2017deep}中部分具有可分割语义物体的图像样本的抠图结果。
-\begin{figure}[t]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width = 1\columnwidth]{chap6/voc_deeplab.pdf}
 	\bicaption{PASCAL VOC 2012测试集中部分图像抠图结果，分割掩码由DeepLab v3+生成}{Results of some images in PASCAL VOC 2012 testing set. Masks are generated by DeepLab v3+}
 	\label{fig6:voc_deeplab}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width = 1\columnwidth]{chap6/plant_sup_deeplab.pdf}
 	\bicaption{部分盆栽植物以及Supervisely人像数据集中样本的抠图结果，分割掩码由DeepLab v3+生成}{Results of some potted plant images and samples from Supervisely Person dataset. Masks are generated by DeepLab v3+}
 	\label{fig6:plant_sup_deeplab}
 \end{figure}
-\begin{figure}[t]
+\begin{figure}[h]
 	\centering
 	\includegraphics[width = 0.8\columnwidth]{chap6/adobe_deeplab.pdf}
 	\bicaption{Composition-1k测试集中部分样本的抠图结果，分割掩码由DeepLab v3+生成}{Results of samples from Composition-1k testing set. Masks are generated by DeepLab v3+}
