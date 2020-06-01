@@ -68,8 +68,8 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 \mathop{\mathrm{min}}_{P(x_i|y_j), P(y_j|x_i)} & \quad \frac{1}{2 \alpha^2} \sum_{i,j}(P(x_i|y_j)-P^\dagger(x_i|y_j))^2 \\
 &+ \frac{1}{2 \beta^2} \sum_{i,j}(P(y_j|x_i)-P^\dagger(y_j|x_i))^2\\
 \mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{i,j}\\
-%             &\quad \;\sum_{s}P(u_i|\mathcal{G}_s) = 1\\
-%             &\quad \;\sum_{s}P(G_s|u_i) = 1
+%             &\quad \;\sum_{s}P(x_i|\mathcal{G}_s) = 1\\
+%             &\quad \;\sum_{s}P(G_s|x_i) = 1
 \end{split}
 \label{eq4:Opt}
 \end{equation}
@@ -79,8 +79,8 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 \section{实例级多模态约束传播}
 在本节中我们将对所提出的基于相容条件概率分布重构的实例级多模态约束传播（ILMCP）方法进行介绍，并对部分实现细节进行描述。
 \subsection{模态信息鲁棒性}
-在ILMCP中，我们通过近似Consensus $k$-NNs\cite{premachandran2013consensus}的方法对每个模态的鲁棒性进行近似估计。Consensus $k$-NNs方法通过收集多轮$k$-NN近邻的公式信息提供一个可供进行近邻选择的判别标准，该方法可以被看作是二阶相似性（Second-order Proximity）\cite{tang2015line,wang2016structural}的一种近似。如果数据点对$u_i$ 和 $u_j$同时出现在许多其他数据点的$k$-NN近邻中，则该点对相似的可能性更高。反之，如果两个数据点$u_i$和$u_j$从未同时出现在其他数据实例的近邻中，则即使在该点对上观测到高相似性也有比较大的概率为观测噪声。
-在算法\ref{alg4:consknn}中我们给出了根据Consensus $k$-NNs构建共识矩阵$C$的算法细节。$C$中的元素可以被用于估计任意两个数据点间的相似性的鲁棒程度。此外，通过在Consensus $k$-NNs中设置阈值$\tau$，可以${c}_{i,j}\le\tau$的任意点对$u_i$和$u_j$互相从对方的近邻集合中移除。
+在ILMCP中，我们通过近似Consensus $k$-NNs\cite{premachandran2013consensus}的方法对每个模态的鲁棒性进行近似估计。Consensus $k$-NNs方法通过收集多轮$k$-NN近邻的公式信息提供一个可供进行近邻选择的判别标准，该方法可以被看作是二阶相似性（Second-order Proximity）\cite{tang2015line,wang2016structural}的一种近似。如果数据点对$x_i$ 和 $x_j$同时出现在许多其他数据点的$k$-NN近邻中，则该点对相似的可能性更高。反之，如果两个数据点$x_i$和$x_j$从未同时出现在其他数据实例的近邻中，则即使在该点对上观测到高相似性也有比较大的概率为观测噪声。
+在算法\ref{alg4:consknn}中我们给出了根据Consensus $k$-NNs构建共识矩阵$C$的算法细节。$C$中的元素可以被用于估计任意两个数据点间的相似性的鲁棒程度。此外，通过在Consensus $k$-NNs中设置阈值$\tau$，可以${c}_{i,j}\le\tau$的任意点对$x_i$和$x_j$互相从对方的近邻集合中移除。
 \begin{algorithm}[tb]
     %		\small
             %	\renewcommand{\algorithmicrequire}{\mathbf{Input:}}
@@ -89,7 +89,7 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
             \label{alg4:consknn}
             ${C} = \mathbf{0}$;
             \For {$i = 1:N$}{
-                \ForAll {$u_j, u_k$满足$u_j, u_k \in \mathcal{N}_k(u_i)$}{
+                \ForAll {$x_j, x_k$满足$x_j, x_k \in \mathcal{N}_k(x_i)$}{
                     % 					 \text{ \AND } j\neq k$}
                     ${c}_{j,k} = {c}_{j,k}+1$\;
                     ${c}_{k,j} = {c}_{k,j}+1$\;
@@ -112,9 +112,9 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 inc_s(i) = \sum_j {w}^{dense}_{i,j,s}\;\text{ln}\frac{{w}^{dense}_{i,j,s}}{{w}^{cons}_{i,j,s}}, 
 \label{eq4:incohere}
 \end{equation}
-式中${W}^{dense}_{i,j,s}$为数据点对 $u_i$ 和 $u_j$在图$\mathcal{G}_s$上的$k$-NN相似性，${w}^{cons}_{i,j,s}$为相对应的共识相似性取值。
+式中${W}^{dense}_{i,j,s}$为数据点对 $x_i$ 和 $x_j$在图$\mathcal{G}_s$上的$k$-NN相似性，${w}^{cons}_{i,j,s}$为相对应的共识相似性取值。
 
-实例级不一致性函数$inc_s(i)$是用于估计图$\mathcal{G}_s$上数据点$u_i$和其近邻间相似性值的鲁棒程度的一个测度。不一致性越小，则说明在数据实例上所观测到的近邻关系越稳定。此外，有两个实现中的细节需要关注。一方面相似性矩阵${W}^{dense}_s$为相对稠密的矩阵。另一方面，我们通过在矩阵 ${W}_s^{dense}$ 和 ${W}_s^{cons}$上叠加一个极小值（例如$10^{-8}$）以解决在离散概率中存在的零值问题。
+实例级不一致性函数$inc_s(i)$是用于估计图$\mathcal{G}_s$上数据点$x_i$和其近邻间相似性值的鲁棒程度的一个测度。不一致性越小，则说明在数据实例上所观测到的近邻关系越稳定。此外，有两个实现中的细节需要关注。一方面相似性矩阵${W}^{dense}_s$为相对稠密的矩阵。另一方面，我们通过在矩阵 ${W}_s^{dense}$ 和 ${W}_s^{cons}$上叠加一个极小值（例如$10^{-8}$）以解决在离散概率中存在的零值问题。
 
 更进一步地，根据上一章所提出的MFL方法，我们同时定义模态级一致性$ {c}_{mod} = [c_{mod}(\mathcal{G}_1), c_{mod}(\mathcal{G}_2),...] $来描述全局信息：
 \begin{equation}
@@ -133,39 +133,39 @@ s.t.\quad&\sum_{s} c_{mod}(\mathcal{G}_s) = 1;\\ &\; c_{mod}(\mathcal{G}_s) \ge 
 函数$ r(i) $返回$Y$中第$i$个约束的行数，$ c(i) $返回相应的列数。
 
 \subsection{统一的多模态相似性学习}
-一旦能够求得条件概率$P(\mathcal{G}_s|u_i)$，则可以计算出统一的转移概率$ P(u_i\rightarrow u_j) $。在通过公式（\ref{eq4:modalcohere}）和（\ref{eq4:incohere}）获取到模态级和实例级的鲁棒性信息后，我们首先根据实例级的不一致性对实例级一致性测度 $ c_s(i) $进行定义，然后给定数据实例$u_i$条件下的图$\mathcal{G}_s$的条件概率则可以通过计算模态级一致性和实例级一致性的归一化乘积得到：
+一旦能够求得条件概率$P(\mathcal{G}_s|x_i)$，则可以计算出统一的转移概率$ P(x_i\rightarrow x_j) $。在通过公式（\ref{eq4:modalcohere}）和（\ref{eq4:incohere}）获取到模态级和实例级的鲁棒性信息后，我们首先根据实例级的不一致性对实例级一致性测度 $ c_s(i) $进行定义，然后给定数据实例$x_i$条件下的图$\mathcal{G}_s$的条件概率则可以通过计算模态级一致性和实例级一致性的归一化乘积得到：
 \begin{equation}
 c_s(i) = \frac{1}{inc_s(i)+1}
 \label{eq4:cohere},
 \end{equation}
 \begin{equation}
-P^\dagger (\mathcal{G}_s|u_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(i) c_{mod}(\mathcal{G}_s)}
+P^\dagger (\mathcal{G}_s|x_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(i) c_{mod}(\mathcal{G}_s)}
 \label{eq4:Pglu}.
 \end{equation}
 
-公式（\ref{eq4:cohere}）中的定义可以令人联想到t-SNE\cite{maaten2008visualizing}方法中对联合概率的定义形式。而公式（\ref{eq4:Pglu}）则基于假设：实例$u_i$在不同模态信息下的不一致性能够反映出不同模态的可信度。具有高可信度的模态可能具有更鲁棒的信息，以及更少的噪声。这里需要注意的是，所计算出的可信度只对应于特定的数据实例$u_i$，因此这属于实例级的可信度。基于该假设，我们需要对概率测度$ P(\mathcal{G}_s|u_i) $进行设计。该概率测度应与不一致性成反比，而相应的最简的构造形式为$ 1/inc_s(i) $。从公式（\ref{eq4:Pglu}）中可以发现，在给定模态$s$的情况下，较小的不一致性即隐含了图$\mathcal{G}_s$具有较大的条件概率。在特定情况下，可能出现$ inc_s(i) =0 $的情况，所以我们采用$ inc_s(i) +1 $替代$ inc_s(i)$。因此 $ P(\mathcal{G}_s|u_i) $ 应当正比于 $ (inc_i+1)^{-1} $，而概率公式中的分母项则用于归一化。公式（\ref{eq4:Pglu}）为满足该条件的概率测度的最简形式。相应的条件概率$P^\dagger(u_i|\mathcal{G}_s)$可以采用与公式（\ref{eq3:Pulg}）相同的方式进行计算。
+公式（\ref{eq4:cohere}）中的定义可以令人联想到t-SNE\cite{maaten2008visualizing}方法中对联合概率的定义形式。而公式（\ref{eq4:Pglu}）则基于假设：实例$x_i$在不同模态信息下的不一致性能够反映出不同模态的可信度。具有高可信度的模态可能具有更鲁棒的信息，以及更少的噪声。这里需要注意的是，所计算出的可信度只对应于特定的数据实例$x_i$，因此这属于实例级的可信度。基于该假设，我们需要对概率测度$ P(\mathcal{G}_s|x_i) $进行设计。该概率测度应与不一致性成反比，而相应的最简的构造形式为$ 1/inc_s(i) $。从公式（\ref{eq4:Pglu}）中可以发现，在给定模态$s$的情况下，较小的不一致性即隐含了图$\mathcal{G}_s$具有较大的条件概率。在特定情况下，可能出现$ inc_s(i) =0 $的情况，所以我们采用$ inc_s(i) +1 $替代$ inc_s(i)$。因此 $ P(\mathcal{G}_s|x_i) $ 应当正比于 $ (inc_i+1)^{-1} $，而概率公式中的分母项则用于归一化。公式（\ref{eq4:Pglu}）为满足该条件的概率测度的最简形式。相应的条件概率$P^\dagger(x_i|\mathcal{G}_s)$可以采用与公式（\ref{eq3:Pulg}）相同的方式进行计算。
 
-此处令上文所述的商矩阵中$q_{i,s} = \frac{P^\dagger(u_i|\mathcal{G}_s)}{P^\dagger(\mathcal{G}_s|u_i)}$，通过对矩阵$Q$进行秩$1$近似得到近似矩阵$\hat{Q}$并求解优化问题（\ref{eq4:Opt}），能够得到两个相容条件概率分布的闭式解：
+此处令上文所述的商矩阵中$q_{i,s} = \frac{P^\dagger(x_i|\mathcal{G}_s)}{P^\dagger(\mathcal{G}_s|x_i)}$，通过对矩阵$Q$进行秩$1$近似得到近似矩阵$\hat{Q}$并求解优化问题（\ref{eq4:Opt}），能够得到两个相容条件概率分布的闭式解：
 \begin{equation}
 \begin{split}
-&P(u_i|\mathcal{G}_s) = \frac{\alpha P^\dagger(u_i|\mathcal{G}_s)\hat{{q}}_{i,s}^2+\beta P^\dagger(\mathcal{G}_s|u_i)\hat{{q}}_{i,s}}{\alpha \hat{{q}}_{i,s}^2 + \beta},\\
-%             &\quad(\alpha = \frac{1}{\sum_{i,j}P(u_i|\mathcal{G}_j)^2}, \beta = \frac{1}{\sum_{i,j}P(G_j|u_i)^2})\\
-&P(\mathcal{G}_s|u_i) = \frac{P(u_i|\mathcal{G}_s)}{\hat{{q}}_{i,s}}\;. 
+&P(x_i|\mathcal{G}_s) = \frac{\alpha P^\dagger(x_i|\mathcal{G}_s)\hat{{q}}_{i,s}^2+\beta P^\dagger(\mathcal{G}_s|x_i)\hat{{q}}_{i,s}}{\alpha \hat{{q}}_{i,s}^2 + \beta},\\
+%             &\quad(\alpha = \frac{1}{\sum_{i,j}P(x_i|\mathcal{G}_j)^2}, \beta = \frac{1}{\sum_{i,j}P(G_j|x_i)^2})\\
+&P(\mathcal{G}_s|x_i) = \frac{P(x_i|\mathcal{G}_s)}{\hat{{q}}_{i,s}}\;. 
 \end{split}
 \label{eq4:OptSlv}
 \end{equation}
 
-而由于$\hat{Q}$为近似后的秩$1$商矩阵，边缘概率$P(u_i)$和$P(\mathcal{G}_s)$可以通过分别归一化$\hat{Q}$中的任意一行和任意一列获得，例如：
+而由于$\hat{Q}$为近似后的秩$1$商矩阵，边缘概率$P(x_i)$和$P(\mathcal{G}_s)$可以通过分别归一化$\hat{Q}$中的任意一行和任意一列获得，例如：
 \begin{equation}
-    P(u_i) = \frac{\hat{q}_{i,1}}{\sum_i\hat{q}_{i,1}}, \quad\quad P(\mathcal{G}_s) = \frac{\hat{q}_{1,s}}{\sum_i\hat{q}_{1,s}}.
+    P(x_i) = \frac{\hat{q}_{i,1}}{\sum_i\hat{q}_{i,1}}, \quad\quad P(\mathcal{G}_s) = \frac{\hat{q}_{1,s}}{\sum_s\hat{q}_{1,s}}.
 \end{equation}
-相应的根据$\bar{d}_ii=P(u_i)$可以计算出对角权重矩阵$\bar{D}$。
+相应的根据$\bar{d}_{ii}=P(x_i)$可以计算出对角权重矩阵$\bar{D}$。
 
 我们可以进一步根据公式（\ref{eq3:mmcp_trans}）获得统一的归一化相似性矩阵$\bar{W}$，
 \begin{equation}
 \begin{split}
-\bar{w}_{i,j} &= P(u_i,u_j) \\ &= P(u_i)P(u_i\rightarrow u_j)\\
-&=P(u_i)\sum_s P(u_j|u_i, \mathcal{G}_s)P(\mathcal{G}_s|u_i), 
+\bar{w}_{i,j} &= P(x_i,x_j) \\ &= P(x_i)P(x_i\rightarrow x_j)\\
+&=P(x_i)\sum_s P(x_j|x_i, \mathcal{G}_s)P(\mathcal{G}_s|x_i), 
 \end{split}
 \label{eq4:uni_aff}
 \end{equation}
@@ -231,7 +231,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
     \KwIn{稠密 $ k $-NN 相似性矩阵 ${W}_s^{dense}$；约束矩阵 $ {Y} $；聚类数量 $c$；共识矩阵阈值$ \tau $.}
     \KwOut{Sigmoid 相似性矩阵 $ {W^*}$.}
     根据公式（\ref{eq4:cons}）为每个模态构建共识相似性矩阵$ {W} ^{cons}_s$；\\
-    根据公式（\ref{eq4:modalcohere}）、（\ref{eq4:cohere}）和（\ref{eq4:Pglu}），分别针对每个模态和每个数据实例计算一致性$ c_{mod}(\mathcal{G}_s)$、$c_s(i) $ 和概率 $ P^\dagger (\mathcal{G}_s|u_i) $；\\
+    根据公式（\ref{eq4:modalcohere}）、（\ref{eq4:cohere}）和（\ref{eq4:Pglu}），分别针对每个模态和每个数据实例计算一致性$ c_{mod}(\mathcal{G}_s)$、$c_s(i) $ 和概率 $ P^\dagger (\mathcal{G}_s|x_i) $；\\
     通过公式（\ref{eq4:OptSlv}）重构相容条件概率分布；\\
     基于公式（\ref{eq4:uni_aff}）生成并稀疏化相似性矩阵 $ {W} $ ；\\
     求解优化问题（\ref{eq4:obj2}）以获得两类约束数量均衡的传播结果$ {F} $；\\

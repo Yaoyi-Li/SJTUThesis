@@ -16,39 +16,39 @@
 
 多模态学习中普遍存在的一个挑战是如何实现模态融合并有效利用多种数据模态所提供的额外信息。在本章中，我们将注意力集中在利用数据所提供的很少的监督信息进行融合相似性矩阵的学习。在多模态的标签传播问题中，监督信息是每个对象的标签，需要通过融合不同模态的相似性矩阵，以估计标签扩散的结果。然而在约束传播和标签传播之间有着一定的差异。在多模态约束传播问题中，监督信息和传播得到的结果都是相似性信息，这使得从这些不同模态的成对约束中融合出一个好的相似性矩阵变得更加直观且合理。 因此，可以考虑在融合学习中充分利用多模态数据集中的成对约束，同时实现约束的传播和相似性矩阵融合的学习。
 
-在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法：Multi-modal Fusion Learning（MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，该算法被视为基线方法。由于是通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此该方法被称为松弛权重组合（Relaxed Weight Combination，RWC）。
+在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法（Multi-modal Fusion Learning，MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，该算法被视为基线方法。由于是通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此该方法被称为松弛权重组合（Relaxed Weight Combination，RWC）。
 实验结果表明，RWC方法所学习的融合结果可能会深陷入一些判别性较差的模态而忽视高判别性的模态。
 受RWC方法的进一步启发，本章提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模式融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。所提出的MFL同时还可以作为模态选择器，NFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
 
 \section{约束传播背景知识}
-在本节中我们首先将针对多模态约束传播对所用到的数学符号进行补充说明，然后简要回顾典型的单模态约束传播算法E$^2$CP\cite{lu2010constrained}和多模态约束传播算法MMCP\cite{fu2011multi}。
+在本节中我们首先将针对多模态约束传播对所用到的数学符号在前一章的基础上进行补充说明，然后简要回顾典型的单模态约束传播算法E$^2$CP\cite{lu2010constrained}和多模态约束传播算法MMCP\cite{fu2011multi}。
 \subsection{符号说明}
 在下文中，矩阵将用大写字母表示，向量和标量以写字母表示。给定矩阵$ {A} \in \mathbb{R}^{n\times m}$，$ a_{i,j} $为矩阵$A$在位置$ i,j $的元素。相似地，$ \alpha_{i} $ 为向量 $ \boldsymbol{\alpha} $的第 $ i $个元素。考虑到多模态的情况，在未特殊说明的情况下，在矩阵和向量中采用下标$s$区分多模态数据集不同的模态，即${A}_s$表示源自模态$s$中的一个矩阵。矩阵$ {A}_s $ 中的第$ i,j $个元素被表示为$a_{i,j,s}$。
 % 此外，对于矩阵$A$和矩阵$D$我们定义$ \|{A}\|_{D} = \mathrm{tr} ({A}^T{D}{A})^{\frac{1}{2}}$ 以保持文中公式的简洁。
 
-我们用大写的花体字母表示集合和图。给定一个数据集合$\mathcal{U} = \{u_1,\dots,u_n \}$，每一个数据实例的数据被表示为$u_i$。$u_i$仅表示第$i$个数据实例本身，不代表任何数据向量或特征向量，更进一步地，将数据$u_i$在模态$s$上的数据特征向量表示为$u_{i,s}$。
+我们用大写的花体字母表示集合和图。给定一个数据集合$\mathcal{X} = \{x_1,\dots,x_n \}$，每一个数据实例的数据被表示为$x_i$。$x_i$仅表示第$i$个数据实例本身，不代表任何数据向量或特征向量，更进一步地，将数据$x_i$在模态$s$上的数据特征向量表示为$x_{i,s}$。
 
 对于第$s$个模态，可以在全部$n$个数据实例上通过$k$-NN热力核构建相似性矩阵$ {W}_s$:
 \begin{equation}
-w_{i,j} = \begin{cases} \mathrm{exp}(-\frac{\|u_{i,s}-u_{j,s}\|_{2}}{t}), \; &u_{i,s}\in\mathcal{N}_k(u_{j,s})\;\mathrm{or}\; u_{j,s}\in\mathcal{N}_k(u_{i,s});\\
+w_{i,j} = \begin{cases} \mathrm{exp}(-\frac{\|x_{i,s}-x_{j,s}\|_{2}}{t}), \; &x_{i,s}\in\mathcal{N}_k(x_{j,s})\;\mathrm{or}\; x_{j,s}\in\mathcal{N}_k(x_{i,s});\\
 0,&\mathrm{otherwise,}\end{cases}   
 \label{eq3:GaussKer}                              
 \end{equation}
-其中$\mathcal{N}_k(u_{i,s})$为数据$u_{i,s}$在根据第$s$模态信息得到的$k$个最近邻的集合。
+其中$\mathcal{N}_k(x_{i,s})$为数据$x_{i,s}$在根据第$s$模态信息得到的$k$个最近邻的集合。
 
 模态$s$上的拉普拉斯矩阵$ {L}_s $定义为$ {L}_s={D}_s-{W}_s $，此处对角矩阵
 $ {D}_s \in \mathbb{R}^{n\times n}$ 通过相似性矩阵 $ {W}_s$ 构建且$ d_{i,i,s} =\sum_i w_{i,j,s}$\cite{chung1997spectral}。归一化图拉普拉斯矩阵 $ \hat{{L}} $定义为
 \begin{equation}
 	\hat{{L}} = {D}^{-1/2}{LD}^{-1/2}.
 \end{equation}
-我们将第$s$个模态的图定义为$\mathcal{G}_s = (\mathcal{U},{W}_s)$，在下文中的问题表述里图$\mathcal{G}_s$等价于第$s$个模态的全部信息。
+我们将第$s$个模态的图定义为$\mathcal{G}_s = (\mathcal{X},{W}_s)$，在下文中的问题表述里图$\mathcal{G}_s$等价于第$s$个模态的全部信息。
 
-在约束传播问题中，我们可以将相似性矩阵中的成对约束看作数据点对之间的关系的标签。因此，可以对两类不同的约束定义两个集合。必然连接（must-link）集合$ \mathcal{M} = \{(u_i,u_j)\} $包含的数据对中$ u_i $ 和 $ u_j $属于同一个类别中。必然不连接（cannot-link）集合$ \mathcal{C} = \{(u_i,u_j)\}$元素数据对中的两个数据点属于不同标签类别。根据must-link集合和cannot-link集合，构建约束矩阵$ {Y} \in  \mathbb{R}^{n\times n}$，
+在约束传播问题中，我们可以将相似性矩阵中的成对约束看作数据点对之间的关系的标签。因此，可以对两类不同的约束定义两个集合。必然连接（must-link）集合$ \mathcal{M} = \{(x_i,x_j)\} $包含的数据对中$ x_i $ 和 $ x_j $属于同一个类别中。必然不连接（cannot-link）集合$ \mathcal{C} = \{(x_i,x_j)\}$元素数据对中的两个数据点属于不同标签类别。根据must-link集合和cannot-link集合，构建约束矩阵$ {Y} \in  \mathbb{R}^{n\times n}$，
 \begin{equation}
 y_{i,j} = 
 \begin{cases}
-1, \qquad&(u_i,u_j)\in \mathcal{M};\\
--1, &(u_i,u_j)\in\; \mathcal{C};\\
+1, \qquad&(x_i,x_j)\in \mathcal{M};\\
+-1, &(x_i,x_j)\in\; \mathcal{C};\\
 0, &\text{otherwise}.
 \end{cases}
 \label{eq3:Y}
@@ -57,7 +57,7 @@ y_{i,j} =
 \subsection{单模态约束传播算法E$^2$CP}
 E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问题。
 观测到的约束信息被视为数据点对之间已知的关系二分类标签，其中must-link中元素作为正样本，cannot-link的元素为负样本。
-我们从公式（\ref{eq3:Y}）观察到矩阵$Y$中对应于数据$u_i$的第$i$列或第$i$行与半监督问题的问题设置非常相似。其中$ 1 $ 和 $ -1 $为半监督问题中两个不同类的类标签，大量的$0$代表未观测到的需要预测的标签。利用相似性信息，这样的半监督问题可以通过标签传播\cite{zhou2004learning}解决。
+我们从公式（\ref{eq3:Y}）观察到矩阵$Y$中对应于数据$x_i$的第$i$列或第$i$行与半监督问题的问题设置非常相似。其中$ 1 $ 和 $ -1 $为半监督问题中两个不同类的类标签，大量的$0$代表未观测到的需要预测的标签。利用相似性信息，这样的半监督问题可以通过标签传播\cite{zhou2004learning}解决。
 
 该方法进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。如果采用矩阵$F_v$表示竖直方向的传播，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
 \begin{equation}
@@ -90,27 +90,27 @@ v_s = \sum_i d_{i,i,s} = \sum_{i,j}w_{i,j,s}.
 
 图$\mathcal{G}_s$上的转移概率可以通过条件概率计算得出：
 \begin{equation}
-	P(u_i\rightarrow u_j|\mathcal{G}_s) = P(u_j|u_i,\mathcal{G}_s) = \frac{w_{i,j,s}}{d_{i,i,s}}.
+	P(x_i\rightarrow x_j|\mathcal{G}_s) = P(x_j|x_i,\mathcal{G}_s) = \frac{w_{i,j,s}}{d_{i,i,s}}.
 	\label{eq3:mmcp_trans}
 \end{equation}
-在给定图$\mathcal{G}_s$下数据$u_i$的概率为
+在给定图$\mathcal{G}_s$下数据$x_i$的概率为
 \begin{equation}
-P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
+P(x_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \label{eq3:Pulg}
 \end{equation}
 同时我们可以定义给定模态$\mathcal{G}_s$上的归一化相似性矩阵$\bar{W_s}$：
 \begin{equation}
-    \bar{w}_{i,j,s} = P(u_i, u_j|\mathcal{G}_s) = \frac{{w}_{i,j,s}}{v_s}.
+    \bar{w}_{i,j,s} = P(x_i, x_j|\mathcal{G}_s) = \frac{{w}_{i,j,s}}{v_s}.
     \label{eq3:jointW}
 \end{equation}
 公式（\ref{eq3:jointW}）给出的矩阵$\bar{W}_s$也可以被看作是由公式（\ref{eq3:mmcp_trans}）及（\ref{eq3:Pulg}）计算出的给定条件$\mathcal{G}_s$的联合概率分布表。
 
-假设我们可以第$s$个模态信息的重要性权重，并将其对应的图$\mathcal{G}_s$的先验概率设置为$ P(\mathcal{G}_s) $，则数据$u_i$和$u_j$的联合概率分布可以通过$ \bar{w}_{i,j}= P(u_i, u_j) = \sum_s P(\mathcal{G}_s) P(u_i, u_j|\mathcal{G}_s) $，即可以构建统一的相似性矩阵：
+假设我们可以第$s$个模态信息的重要性权重，并将其对应的图$\mathcal{G}_s$的先验概率设置为$ P(\mathcal{G}_s) $，则数据$x_i$和$x_j$的联合概率分布可以通过$ \bar{w}_{i,j}= P(x_i, x_j) = \sum_s P(\mathcal{G}_s) P(x_i, x_j|\mathcal{G}_s) $，即可以构建统一的相似性矩阵：
 \begin{equation}
 \bar{{W}} = \sum_s P(\mathcal{G}_s)\bar{{W}}_s, 
 \label{eq3:unifiedW}
 \end{equation}
-以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{i,i} = P(u_i) =\sum_i \bar{w}_{i,j}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
+以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{i,i} = P(x_i) =\sum_i \bar{w}_{i,j}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
 
 在该设定下的竖直方向传播的优化问题为
 \begin{equation}
@@ -142,7 +142,7 @@ P(u_i|\mathcal{G}_s) = \frac{d_{i,i,s}}{v_s}.
 \end{equation}
 
 \section{多模态融合}
-在本节中，首先我们将在约束传播中引入松弛权重组合（Relaxed Weight Combination，RWC）作为基线方法，然后展示所提出了MFL（Multi-modal Fusion Learning）方法。
+在本节中，首先我们将在约束传播中引入松弛权重组合（Relaxed Weight Combination，RWC）作为基线方法，然后展示所提出的MFL（Multi-modal Fusion Learning）方法。
 \subsection{松弛权重组合}
 \label{sec3:rwc}
 
@@ -385,7 +385,7 @@ w^*_{i,j} =
 \end{cases}
 \label{eq3:refine}
 \end{equation}
-其中，$ w_{i,j} $ 为数据实例 $ u_i $ 和$ u_j $之间的相似性。
+其中，$ w_{i,j} $ 为数据实例 $ x_i $ 和$ x_j $之间的相似性。
 
 上述通过调整获得最终解的方法有两个不足之处。一方面，传播结果$ {F} $的信息未被充分利用。另一方面，求得的最终结果高度取决于原始相似性矩阵的质量。在我们的RWC和MFL方法中，我们放弃了原始的相似性矩阵，而采用整流Sigmoid激活函数从从$F$中直接生成统一的相似性矩阵：
 \begin{equation}

@@ -136,7 +136,7 @@
 \end{equation}
 由此可知，特性$D_\Delta = \textbf{0}$对于公式（\ref{eq2:XLX}）第二部分的最优解恒成立，并且该最优解属于公式（\ref{eq2:XD}）的解集。所以，公式（\ref{eq2:XLX}）第二部分的最优解同时可以使目标函数（\ref{eq2:XD}）达到最优。完整的优化问题（\ref{eq2:XLX}）的最优解使得
 \begin{equation}
-	D_\Delta={\bf0}。
+	D_\Delta={\bf0}.
 \end{equation}
 \end{proof}
 
@@ -305,7 +305,7 @@
 \begin{table}[t]
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
 	{Clustering accuracy on different image datasets(\%)}
-	\label{tab2:Acc}
+	% \label{tab2:Acc}
 	\small
 	\centering
 	% \begin{small}
@@ -315,20 +315,68 @@
 			& &$k$-NN\cite{niyogi2004locality} &Cons-$k$NN\cite{premachandran2013consensus} &DN\cite{pavan2007dominant} &ClustRF-Bi\cite{zhu2014constructing} &PCAN-$k$Means\cite{nie2014clustering} &PCAN\cite{nie2014clustering}& AdaAM
 			\\
 			\midrule
-			\multirow{2}{*}{UMIST} & Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\
+			\multirow{2}{*}{UMIST} 
+			& Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\
 			& Max& 65.39& 69.22& 66.96& 74.44& 56.52&& \textbf{75.65}\\
 			\midrule
-			\multirow{2}{*}{COIL20} & Avg & 71.89& 75.53& 71.95& \textbf{76.50}& 72.28& \multirow{2}{*}{81.74}& 74.72\\
+			\multirow{2}{*}{COIL20} 
+			& Avg & 71.89& 75.53& 71.95& \textbf{76.50}& 72.28& \multirow{2}{*}{81.74}& 74.72\\
 			& Max& 81.18& 84.31& 82.01& 85.07& 83.75&& \textbf{87.29}\\
 			\midrule
-			\multirow{2}{*}{USPS}  & Avg & 68.25& 68.21& 68.08& 58.74& 64.04& \multirow{2}{*}{64.20}  & \textbf{69.36}\\
+			\multirow{2}{*}{USPS}  
+			& Avg & 68.25& 68.21& 68.08& 58.74& 64.04& \multirow{2}{*}{64.20}  & \textbf{69.36}\\
 			& Max& 68.35& 68.34& 68.31& 65.90& 67.95&& \textbf{69.61}\\
 			\midrule
-			\multirow{2}{*}{MNIST} & Avg & 48.13& 47.88& 49.72& 51.93& 58.93& \multirow{2}{*}{59.83}  & \textbf{60.84}\\
+			\multirow{2}{*}{MNIST} 
+			& Avg & 48.13& 47.88& 49.72& 51.93& 58.93& \multirow{2}{*}{59.83}  & \textbf{60.84}\\
 			& Max& 48.27& 48.00& 49.76& 52.03& 58.98&& \textbf{61.34}\\
 			\midrule
-			\multirow{2}{*}{ExYaleB} & Avg& 24.17& 25.63& 24.21& 23.10& 25.74& \multirow{2}{*}{25.89} & \textbf{54.36}\\
+			\multirow{2}{*}{ExYaleB} 
+			& Avg& 24.17& 25.63& 24.21& 23.10& 25.74& \multirow{2}{*}{25.89} & \textbf{54.36}\\
 			& Max& 26.76& 28.75& 27.42& 26.43& 27.63&& \textbf{57.87}\\
+			\bottomrule
+		\end{tabular}
+		%\end{sc}
+	% \end{small}
+\end{table}
+\begin{table}[t]
+	\bicaption{不同图像数据集上的聚类准确率（\%）}
+	{Clustering accuracy on different image datasets(\%)}
+	\label{tab2:Acc}
+	\centering
+	% \begin{small}
+		%\begin{sc}
+		\begin{tabular}{llccccc}
+			\toprule
+			& &UMIST&COIL20&USPS &MNIST& ExYaleB
+			\\
+			\midrule
+			\multirow{2}{*}{$k$-NN\cite{niyogi2004locality}} 
+			& Avg & 58.16& 71.89& 68.25& 48.13& 24.17\\
+			& Max& 65.39 & 81.18 & 68.35 & 48.27 & 26.76 \\
+			\midrule
+			\multirow{2}{*}{Cons-$k$NN\cite{premachandran2013consensus} } 
+			& Avg & 60.27 & 75.53 & 68.21 & 47.88 & 25.63 \\
+			& Max& 69.22 & 84.31 & 68.34 & 48.00 & 28.75 \\
+			\midrule
+			\multirow{2}{*}{DN\cite{pavan2007dominant}}  
+			& Avg & 59.15 & 71.95 & 68.08 & 49.72 & 24.21 \\
+			& Max& 66.96 & 82.01 & 68.31 & 49.76 &  27.42\\
+			\midrule
+			\multirow{2}{*}{ClustRF-Bi\cite{zhu2014constructing} } 
+			& Avg & 64.63 & \textbf{76.50} & 58.74 & 51.93 & 23.10 \\
+			& Max& 74.44 & 85.07 & 65.90 & 52.03 & 26.43 \\
+			\midrule
+			\multirow{2}{*}{PCAN-$k$Means\cite{nie2014clustering}} 
+			& Avg& 53.79 & 72.28 & 64.04 & 58.93 & 25.74 \\
+			& Max& 56.52 & 83.75 & 67.95 & 58.98 & 27.63 \\
+			\midrule
+			PCAN\cite{nie2014clustering} 
+			& - & 55.30 & 81.74 & 64.20 & 59.83 & 25.89 \\
+			\midrule
+			\multirow{2}{*}{AdaAM} 
+			& Avg& \textbf{66.06} & 74.72 & \textbf{69.36} & \textbf{60.84} & \textbf{54.36} \\
+			& Max& \textbf{75.65} & \textbf{87.29} & \textbf{69.61} & \textbf{61.34} & \textbf{57.87} \\
 			\bottomrule
 		\end{tabular}
 		%\end{sc}
