@@ -308,47 +308,47 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 
 在表\ref{tab5:arch}中我们给出了所提出的HOP Matting网络模型的结构细节。我们在表\ref{tab5:arch}中忽略了全局和局部HOP模块中的线性变换层，以使表格保持简洁。全局和局部HOP模块中的线性变换均采用卷积核为$1\times 1$的卷积层，且输入通道数与输出通道数相等。在除Decoder-Stage-5中最后一个卷积层之外，我们对表\ref{tab5:arch}中所描述的所有卷积层均采用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}处理。在算法\ref{alg5:local}中我们提供了一种可以用于实现局部HOP模块的PyTorch\cite{paszke2017automatic}风格伪代码。在该伪代码中，我们同样地省略了线性变换操作。
 
-% \begin{table}
-% 	\bicaption{所提出的HOP Matting网络的结构细节}{Detailed structure of the proposed HOP Matting network}
-% 	\centering
-% 	\label{tab5:arch}
-% 	\begin{tabular}{|Sc|Sc|Sc|Sc|Sc|Sc|Sc|}
-% 		\hline
-% 		\multirow{15}{*}{Encoder} & \multicolumn{3}{c|}{Opacity Encoder} & \multicolumn{3}{c|}{Appearance Encoder} \\ 
-% 		\cline{2-7} 
-% 		& Stage  & Output Size &  & Stage  & Output Size &  \\ 
-% 		\cline{2-7} 
-% 		& \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & $\text{conv}$, 3$\times$3, 32, stride 2 & \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & \multirow{2}{*}{$\text{conv}$, 3$\times$3, 16} \\ 
-% 		% 		\cline{4-4}
-% 		&  &  & $\text{conv}$, 3$\times$3, 32 &  &  &  \\ \cline{2-7} 
-% 		& \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & $\text{conv}$, 3$\times$3, 64, stride 2 & \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & \multirow{3}{*}{$\text{conv}$, 3$\times$3, 32} \\
-% 		% 		\cline{4-4}
-% 		&  &  & $\begin{bmatrix} \text{conv},& 3\times3,& 64 \\ \text{conv},&3\times3,& 64 \end{bmatrix}\times 3$ &  &  &  \\ \cline{2-7}
-% 		& Stage 3 & 64$\times$64 & $\begin{bmatrix}\text{conv},&3\times3,&128 \\ \text{conv},&3\times3,&128 \end{bmatrix}\times 4$ & Stage 3 & 64$\times$64 &$\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
-% 		& Stage 4 & 32$\times$32 & $\begin{bmatrix} \text{conv},&3\times3,& 256 \\ \text{conv},&3\times3,& 256\end{bmatrix}\times 4$ & Stage 4 & 32$\times$32 & $\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
-% 		& Stage 5 & 16$\times$16 & $\begin{bmatrix} \text{conv},&3\times3,& 512\\ \text{conv},&3\times3,& 512 \end{bmatrix}\times 2$ &  &  &  \\ \hline\hline
-% 		\multirow{25}{*}{Decoder} & \multicolumn{2}{c|}{Stage } & \multicolumn{1}{c|}{Output Size} & \multicolumn{3}{c|}{} \\ \cline{2-7} 
-% 		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 1}} & \multicolumn{1}{c|}{\multirow{4}{*}{32$\times$32}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$} \\ 
-% 		% 		\cline{6-7} 
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$}\\
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{global HOP}\\ \cline{2-7} 
-% 		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 2}} & \multicolumn{1}{c|}{\multirow{4}{*}{64$\times$64}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&128\\ \text{conv},&3\times3,&128\end{bmatrix}$} \\ 
-% 		% 		\cline{6-7} 
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&128\\ \text{conv},&3\times3,&128\end{bmatrix} \times 2$} \\
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
-% 		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 3}} & \multicolumn{1}{c|}{\multirow{4}{*}{128$\times$128}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} $} \\ 
-% 		% 		\cline{6-7} 
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} \times 2 $} \\
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
-% 		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 4}} & \multicolumn{1}{c|}{\multirow{4}{*}{256$\times$256}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\ 
-% 		% 		\cline{6-7} 
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
-% 		& \multicolumn{2}{c|}{\multirow{2}{*}{Stage 5}} & \multicolumn{1}{c|}{\multirow{2}{*}{512$\times$512}} & \multicolumn{3}{Sc|}{$\text{deconv}$,  4$\times$4,  32,  $\text{stride }$2} \\ 
-% 		% 		\cline{6-7} 
-% 		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\text{conv}$,  3$\times$3,  32} \\ \hline
-% 	\end{tabular}
-% \end{table}
+\begin{table}
+	\bicaption{所提出的HOP Matting网络的结构细节}{Detailed structure of the proposed HOP Matting network}
+	\centering
+	\label{tab5:arch}
+	\begin{tabular}{|Sc|Sc|Sc|Sc|Sc|Sc|Sc|}
+		\hline
+		\multirow{15}{*}{Encoder} & \multicolumn{3}{c|}{Opacity Encoder} & \multicolumn{3}{c|}{Appearance Encoder} \\ 
+		\cline{2-7} 
+		& Stage  & Output Size &  & Stage  & Output Size &  \\ 
+		\cline{2-7} 
+		& \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & $\text{conv}$, 3$\times$3, 32, stride 2 & \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & \multirow{2}{*}{$\text{conv}$, 3$\times$3, 16} \\ 
+		% 		\cline{4-4}
+		&  &  & $\text{conv}$, 3$\times$3, 32 &  &  &  \\ \cline{2-7} 
+		& \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & $\text{conv}$, 3$\times$3, 64, stride 2 & \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & \multirow{3}{*}{$\text{conv}$, 3$\times$3, 32} \\
+		% 		\cline{4-4}
+		&  &  & $\begin{bmatrix} \text{conv},& 3\times3,& 64 \\ \text{conv},&3\times3,& 64 \end{bmatrix}\times 3$ &  &  &  \\ \cline{2-7}
+		& Stage 3 & 64$\times$64 & $\begin{bmatrix}\text{conv},&3\times3,&128 \\ \text{conv},&3\times3,&128 \end{bmatrix}\times 4$ & Stage 3 & 64$\times$64 &$\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
+		& Stage 4 & 32$\times$32 & $\begin{bmatrix} \text{conv},&3\times3,& 256 \\ \text{conv},&3\times3,& 256\end{bmatrix}\times 4$ & Stage 4 & 32$\times$32 & $\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
+		& Stage 5 & 16$\times$16 & $\begin{bmatrix} \text{conv},&3\times3,& 512\\ \text{conv},&3\times3,& 512 \end{bmatrix}\times 2$ &  &  &  \\ \hline\hline
+		\multirow{25}{*}{Decoder} & \multicolumn{2}{c|}{Stage } & \multicolumn{1}{c|}{Output Size} & \multicolumn{3}{c|}{} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 1}} & \multicolumn{1}{c|}{\multirow{4}{*}{32$\times$32}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$}\\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{global HOP}\\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 2}} & \multicolumn{1}{c|}{\multirow{4}{*}{64$\times$64}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&128\\ \text{conv},&3\times3,&128\end{bmatrix}$} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&128\\ \text{conv},&3\times3,&128\end{bmatrix} \times 2$} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 3}} & \multicolumn{1}{c|}{\multirow{4}{*}{128$\times$128}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} $} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} \times 2 $} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 4}} & \multicolumn{1}{c|}{\multirow{4}{*}{256$\times$256}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{2}{*}{Stage 5}} & \multicolumn{1}{c|}{\multirow{2}{*}{512$\times$512}} & \multicolumn{3}{Sc|}{$\text{deconv}$,  4$\times$4,  32,  $\text{stride }$2} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\text{conv}$,  3$\times$3,  32} \\ \hline
+	\end{tabular}
+\end{table}
 	
 
 \begin{algorithm}[h]
