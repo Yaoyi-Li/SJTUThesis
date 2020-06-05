@@ -303,9 +303,72 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 \subsection{神经网络实现细节}
 
 在该网络模型的训练中，我们依然延续了基线网络模型的训练设定。损失函数采用了公式（\ref{eq5:loss}）中的alpha预测损失，仅在trimap图标注的位置区域对预测结果和真实标注计算平均L1损失。对于不透明度编码器，我们使用了在ImageNet数据集\cite{russakovsky2015imagenet}上预训练的ResNet-34网络\cite{he2016deep}的前11个模块。而对于图像外观编码器，我们只选择了步长为2的卷积层进行堆叠，以抽取尽可能低级的图像特征。
+
 网络模型使用Adobe Image Matting数据集\cite{xu2017deep}的前景图片和MS COCO数据集中的背景图片进行训练\cite{lin2014microsoft}。在基本数据增广部分延续了第\ref{sec5:aug}节中描述的数据增广方式，在基本增广部分之外还引入了有效的随即插值（Random Interpolation，RI）增广方式，我们将在第\ref{sec5:RI}节中对该数据增广方式及其有效性进行详细讨论。在训练时同时使用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}对训练过程进行归一化操作。采用Adam优化器\cite{kingma2014adam}实现网络参数优化。同时参考文献\parencite{he2019bag}，采用FP16半精度方式进行网络的训练以节约显存空间。在学习率方面，采用了学习率预热\cite{goyal2017accurate}及余弦衰减\cite{loshchilov2016sgdr}策略。
 
+在表\ref{tab5:arch}中我们给出了所提出的HOP Matting网络模型的结构细节。我们在表\ref{tab5:arch}中忽略了全局和局部HOP模块中的线性变换层，以使表格保持简洁。全局和局部HOP模块中的线性变换均采用卷积核为$1\times 1$的卷积层，且输入通道数与输出通道数相等。在除Decoder-Stage-5中最后一个卷积层之外，我们对表\ref{tab5:arch}中所描述的所有卷积层均采用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}处理。在算法\ref{alg5:local}中我们提供了一种可以用于实现局部HOP模块的PyTorch\cite{paszke2017automatic}风格伪代码。在该伪代码中，我们同样地省略了线性变换操作。
 
+\begin{table}[t]
+	\bicaption{所提出的HOP Matting网络的结构细节}{Detailed structure of the proposed HOP Matting network}
+	\centering
+	\label{tab5:arch}
+	\begin{tabular}{|Sc|Sc|Sc|Sc|Sc|Sc|Sc|}
+		\hline
+		\multirow{15}{*}{Encoder} & \multicolumn{3}{c|}{Opacity Encoder} & \multicolumn{3}{c|}{Appearance Encoder} \\ \cline{2-7} 
+		& Stage  & Output Size &  & Stage  & Output Size &  \\ \cline{2-7} 
+		& \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & $\text{conv}$, 3$\times$3, 32, stride 2 & \multirow{2}{*}{Stage 1} & \multirow{2}{*}{256$\times$256} & \multirow{2}{*}{$\text{conv}$, 3$\times$3, 16} \\ 
+		% 		\cline{4-4}
+		&  &  & $\text{conv}$, 3$\times$3, 32 &  &  &  \\ \cline{2-7} 
+		& \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & $\text{conv}$, 3$\times$3, 64, stride 2 & \multirow{3}{*}{Stage 2} & \multirow{3}{*}{128$\times$128} & \multirow{3}{*}{$\text{conv}$, 3$\times$3, 32} \\
+		% 		\cline{4-4}
+		&  &  & $\begin{bmatrix} \text{conv},& 3\times3,& 64 \\ \text{conv},&3\times3,& 64 \end{bmatrix}\times 3$ &  &  &  \\ \cline{2-7}
+		& Stage 3 & 64$\times$64 & $\begin{bmatrix}\text{conv},&3\times3,&128 \\ \text{conv},&3\times3,&128 \end{bmatrix}\times 4$ & Stage 3 & 64$\times$64 &$\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
+		& Stage 4 & 32$\times$32 & $\begin{bmatrix} \text{conv},&3\times3,& 256 \\ \text{conv},&3\times3,& 256\end{bmatrix}\times 4$ & Stage 4 & 32$\times$32 & $\text{conv}$, 3$\times$3, 64 \\ \cline{2-7} 
+		& Stage 5 & 16$\times$16 & $\begin{bmatrix} \text{conv},&3\times3,& 512\\ \text{conv},&3\times3,& 512 \end{bmatrix}\times 2$ &  &  &  \\ \hline\hline
+		\multirow{25}{*}{Decoder} & \multicolumn{2}{c|}{Stage } & \multicolumn{1}{c|}{Output Size} & \multicolumn{3}{c|}{} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 1}} & \multicolumn{1}{c|}{\multirow{4}{*}{32$\times$32}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&256\\ \text{conv},&3\times3,&256\end{bmatrix}$}\\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{global HOP}\\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 2}} & \multicolumn{1}{c|}{\multirow{4}{*}{64$\times$64}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&128\\ \text{conv},&3\times3,&128\end{bmatrix}$} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&128\\ \text{conv},&3\times3,&128\end{bmatrix} \times 2$} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 3}} & \multicolumn{1}{c|}{\multirow{4}{*}{128$\times$128}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} $} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&64 \\ \text{conv},&3\times3,&64\end{bmatrix} \times 2 $} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{4}{*}{Stage 4}} & \multicolumn{1}{c|}{\multirow{4}{*}{256$\times$256}} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{deconv},&4\times4,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\begin{bmatrix} \text{conv},&3\times3,&32\\ \text{conv},&3\times3,&32\end{bmatrix} $} \\
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{c|}{local HOP} \\ \cline{2-7} 
+		& \multicolumn{2}{c|}{\multirow{2}{*}{Stage 5}} & \multicolumn{1}{c|}{\multirow{2}{*}{512$\times$512}} & \multicolumn{3}{Sc|}{$\text{deconv}$,  4$\times$4,  32,  $\text{stride }$2} \\ 
+		% 		\cline{6-7} 
+		& \multicolumn{2}{c|}{} & \multicolumn{1}{c|}{} & \multicolumn{3}{Sc|}{$\text{conv}$,  3$\times$3,  32} \\ \hline
+	\end{tabular}
+\end{table}
+	
+
+\begin{algorithm}[h]
+	\SetKwInput{KwIn}{输入}
+	\SetKwInput{KwOut}{输出}
+	\caption{局部HOP模块的PyTorch风格伪代码}
+	\label{alg5:local}
+	\KwIn{外观特征张量 $F: N\times C\times H\times W$；不透明度特征张量 $A: N\times C'\times H\times W$；局部相关性窗口大小 $k$。 }
+	\KwOut{传播后的alpha特征张量 $A': N\times C'\times H\times W$。}
+	$R\gets \mathrm{ReflectPadding}(F, \lfloor k/2\rfloor)$ \;
+	$R\gets \mathrm{Unfold}(R, k)$; \qquad\qquad\qquad\qquad\# $R: [N, Ck^2, HW]$\\
+	$R\gets \mathrm{Reshape}(R, [N,C,k^2,H,W])$\;
+	$F\gets \mathrm{Repeat}(F, [1,1,k^2,1,1])$; \qquad\quad\# $F:[N, C, k^2, H, W]$\\
+	\nonl \# \textit{计算相关性} $C$ \\
+	$C\gets \mathrm{ReduceSum}(F\circ R,  \mathrm{dim}=1)$; \quad\# $C: [N,1,k^2,H,W]$\\
+	$S\gets \mathrm{SoftMax}(C, \mathrm{dim}=2)$; \qquad\quad\:\:\:\,\, \# $S:[N,1,k^2,H,W]$\\
+	\nonl \# \textit{传播}\\
+	$A\gets \mathrm{ReflectPadding}(A, \lfloor k/2\rfloor)$ \;
+	$A\gets \mathrm{Unfold}(A, k)$; \qquad\qquad\qquad\qquad\# $A: [N, C'k^2, HW]$\\
+	$A\gets \mathrm{Reshape}(A, [N,C',k^2,H,W])$\;
+	$A'\gets \mathrm{ReduceSum}(S\circ A, \mathrm{dim}=2)$; \quad \# $A': [N,C',H,W]$
+\end{algorithm}
 
 
 \section{实验结果}

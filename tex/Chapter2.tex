@@ -51,23 +51,23 @@
 \end{equation}
 在这里，$\delta_{ij}$表示中间态相似性矩阵$\Delta$中第$ij$个元素。
 
-不同于PCAN算法\cite{nie2014clustering}，我们基于图拉普拉斯对该目标函数公式在其约束条件下进行变形，
+不同于PCAN算法\cite{nie2014clustering}在$\delta_{ij}$上增加稀疏约束后直接进行优化求解，我们首先基于图拉普拉斯矩阵对该目标函数公式进行变形，
 \begin{equation}
 	\mathop{\mathrm{min}}\; tr(X^TL_\Delta X).
 	\label{eq2:Delta}
 \end{equation}
 
-由于在通常情况下图拉普拉斯为半正定矩阵，因此一个直接又看似可行的思路是将拉普拉斯矩阵分解为两个相同矩阵的乘积。在下文中我们将论述该思路不适用于我们的计算框架。
+由于在通常情况下图拉普拉斯矩阵为半正定矩阵，因此一个直观又看似可行的思路是将拉普拉斯矩阵分解为两个相同矩阵的乘积。在下文中我们将论述该思路并不适用于我们的计算框架。
 
-我们采用$U\in \mathbb{R}^{n\times s}$ 表示一个列正交矩阵，以满足$U^TU = I$，则我们可以假设
+我们采用$U\in \mathbb{R}^{n\times s}$ 表示一个列正交矩阵，即满足$U^TU = I$。我们假设目标矩阵$L_\Delta$可以表示为
 \begin{equation}
 	L_\Delta = UU^T.
 \end{equation}
-在对原优化问题进行约束松弛的情况下，我们最终需要求解问题为：
+则在该假设约束下，最终需要求解问题为：
 \begin{equation}
 	% \begin{split}
 		U = \mathop{\mathrm{arg\;min}}_{U^TU=I}\; tr(X^TUU^TX) 
-		\Rightarrow U = \mathop{\mathrm{arg\;min}}_{U^TU=I} \;tr(U^TXX^TU)
+		\Rightarrow U = \mathop{\mathrm{arg\;min}}_{U^TU=I} \;tr(U^TXX^TU).
 	% \end{split}
 	\label{eq2:simpEigmap}
 \end{equation}
