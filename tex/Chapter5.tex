@@ -209,9 +209,7 @@ w(\mathcal{U}, \mathcal{K}, x',y') = \begin{cases}
 					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/HOP-local.pdf}}
 	\bisubcaptionbox{局部自注意力\label{fig5:blockb}}%
 					{local self-attention}
-					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/SA-local.pdf}}  
-					                
-	\centering
+					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/SA-local.pdf}}	
 	\bisubcaptionbox{全局HOP模块\label{fig5:blockc}}%
 					{global HOP block}
 					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/HOP-global.pdf}}
@@ -255,25 +253,29 @@ g_{(i,j)} = &W_{out}(\sum_{(x,y)\in\mathcal{N}((i,j), s)}a_{(i,j),(x,y)}f^O_{(x,
 在先前的一些工作中，自注意力机制中的位置编码总能带来一定的收益\cite{vaswani2017attention,dai2019transformer,ramachandran2019stand}。在本节中我们将对所提出的方法中加入的位置编码进行描述。我们采用两种不同的位置编码方式：全局HOP模块的尺度不敏感位置编码（scale-insensitive positional encoding）和局部HOP块的局部相对位置编码（local relative position encoding）。图\ref{fig5:PE}对不同的位置编码方法进行了展示。
 
 \begin{figure}[t]
-	\subfloat{
+	\begin{subfigure}{0.45\textwidth}
+	{
 		\centering
-		\includegraphics[width=.40\linewidth]{chap5/pos-scale.pdf}\\
+		\includegraphics[width=.9\textwidth]{chap5/pos-scale.pdf}\\
 		\centering SI-PE
 	}	
-	\subfloat{
+	\begin{subfigure}{0.45\textwidth}
+	{
 		\centering
-		\includegraphics[width=.40\linewidth]{chap5/pos-relate.pdf}\\
+		\includegraphics[width=.9\textwidth]{chap5/pos-relate.pdf}\\
 		\centering R-PE
 	}	
 
-	\subfloat{
+	\begin{subfigure}{0.45\textwidth}
+		{
 		\centering
-		\includegraphics[width=.40\linewidth]{chap5/pos-abs.pdf}\\
+		\includegraphics[width=.9\textwidth]{chap5/pos-abs.pdf}\\
 		\centering A-PE
 	}	
-	\subfloat{
+	\begin{subfigure}{0.45\textwidth}
+	{
 		\centering
-		\includegraphics[width=.40\linewidth]{chap5/pos-local.pdf}\\
+		\includegraphics[width=.9\textwidth]{chap5/pos-local.pdf}\\
 		\centering LR-PE
 	}
 	% \includegraphics[width = 1\columnwidth]{chap5/pos_enc.pdf}
