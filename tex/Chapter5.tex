@@ -206,18 +206,18 @@ w(\mathcal{U}, \mathcal{K}, x',y') = \begin{cases}
 	\centering
 	\bisubcaptionbox{局部HOP模块\label{fig5:blocka}}%
 					{local HOP block}
-					[0.45\textwidth]{\includegraphics[height=.65\textwidth]{chap5/HOP-local.pdf}}
+					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/HOP-local.pdf}}
 	\bisubcaptionbox{局部自注意力\label{fig5:blockb}}%
 					{local self-attention}
-					[0.45\textwidth]{\includegraphics[height=.65\textwidth]{chap5/SA-local.pdf}}  
+					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/SA-local.pdf}}  
 					                
 	\centering
 	\bisubcaptionbox{全局HOP模块\label{fig5:blockc}}%
 					{global HOP block}
-					[0.45\textwidth]{\includegraphics[height=.65\textwidth]{chap5/HOP-global.pdf}}
+					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/HOP-global.pdf}}
 	\bisubcaptionbox{全局自注意力\label{fig5:blockd}}%
 					{global self-attention}
-					[0.45\textwidth]{\includegraphics[height=.65\textwidth]{chap5/SA-global.pdf}}
+					[0.24\textwidth]{\includegraphics[height=.3\textwidth]{chap5/SA-global.pdf}}
 	\bicaption{局部HOP模块、局部自注意力、全局HOP模块和全局自注意力的细节结构示意图，在两个局部模块示意图上为便于表示，仅展示了一个查询数据点}{The diagrams of detailed structure of local HOP block, local self-attention block, global HOP block and global self-attention block. For these two local blocks, we only show one query data point in the diagrams for the ease of presentation}
 	\label{fig5:block}
 \end{figure}
@@ -255,28 +255,28 @@ g_{(i,j)} = &W_{out}(\sum_{(x,y)\in\mathcal{N}((i,j), s)}a_{(i,j),(x,y)}f^O_{(x,
 在先前的一些工作中，自注意力机制中的位置编码总能带来一定的收益\cite{vaswani2017attention,dai2019transformer,ramachandran2019stand}。在本节中我们将对所提出的方法中加入的位置编码进行描述。我们采用两种不同的位置编码方式：全局HOP模块的尺度不敏感位置编码（scale-insensitive positional encoding）和局部HOP块的局部相对位置编码（local relative position encoding）。图\ref{fig5:PE}对不同的位置编码方法进行了展示。
 
 \begin{figure}[t]
-	% \subfloat{
-	% 	\centering
-	% 	\includegraphics[width=.40\linewidth]{chap5/pos-scale.pdf}\\
-	% 	\centering SI-PE
-	% }	
-	% \subfloat{
-	% 	\centering
-	% 	\includegraphics[width=.40\linewidth]{chap5/pos-relate.pdf}\\
-	% 	\centering R-PE
-	% }	
+	\subfloat{
+		\centering
+		\includegraphics[width=.40\linewidth]{chap5/pos-scale.pdf}\\
+		\centering SI-PE
+	}	
+	\subfloat{
+		\centering
+		\includegraphics[width=.40\linewidth]{chap5/pos-relate.pdf}\\
+		\centering R-PE
+	}	
 
-	% \subfloat{
-	% 	\centering
-	% 	\includegraphics[width=.40\linewidth]{chap5/pos-abs.pdf}\\
-	% 	\centering A-PE
-	% }	
-	% \subfloat{
-	% 	\centering
-	% 	\includegraphics[width=.40\linewidth]{chap5/pos-local.pdf}\\
-	% 	\centering LR-PE
-	% }
-	\includegraphics[width = 1\columnwidth]{chap5/pos_enc.pdf}
+	\subfloat{
+		\centering
+		\includegraphics[width=.40\linewidth]{chap5/pos-abs.pdf}\\
+		\centering A-PE
+	}	
+	\subfloat{
+		\centering
+		\includegraphics[width=.40\linewidth]{chap5/pos-local.pdf}\\
+		\centering LR-PE
+	}
+	% \includegraphics[width = 1\columnwidth]{chap5/pos_enc.pdf}
 	\bicaption{不同的位置编码示意图。蓝色方框表示查询点的位置。每个特征点上的有序数对表示（行偏移，列偏移）。SI-PE：尺度不敏感位置编码；R-PE：相对位置编码；A-PE：绝对位置编码；LR-PE：局部相对位置编码}{The illustration of different positional encoding methods. The blue rectangle indicates the position of query. The ordered pair in each feature point is (row offset, column offset). SI-PE: scale-insensitive positional encoding; R-PE: relative positional encoding; A-PE: absolute positional encoding; LR-PE: local relative positional encoding}
 	\label{fig5:PE}
 \end{figure}
@@ -308,7 +308,7 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 
 在表\ref{tab5:arch}中我们给出了所提出的HOP Matting网络模型的结构细节。我们在表\ref{tab5:arch}中忽略了全局和局部HOP模块中的线性变换层，以使表格保持简洁。全局和局部HOP模块中的线性变换均采用卷积核为$1\times 1$的卷积层，且输入通道数与输出通道数相等。在除Decoder-Stage-5中最后一个卷积层之外，我们对表\ref{tab5:arch}中所描述的所有卷积层均采用了批归一化\cite{ioffe2015batch}和谱归一化\cite{miyato2018spectral}处理。在算法\ref{alg5:local}中我们提供了一种可以用于实现局部HOP模块的PyTorch\cite{paszke2017automatic}风格伪代码。在该伪代码中，我们同样地省略了线性变换操作。
 
-\begin{table}
+\begin{table}[p]
 	\bicaption{所提出的HOP Matting网络的结构细节}{Detailed structure of the proposed HOP Matting network}
 	\centering
 	\label{tab5:arch}
@@ -352,6 +352,8 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 	
 
 \begin{algorithm}[h]
+	\let\oldnl\nl% Store \nl in \oldnl
+	\newcommand{\nonl}{\renewcommand{\nl}{\let\nl\oldnl}}% Remove line
 	\SetKwInput{KwIn}{输入}
 	\SetKwInput{KwOut}{输出}
 	\caption{局部HOP模块的PyTorch风格伪代码}
@@ -362,7 +364,7 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 	$R\gets \mathrm{Unfold}(R, k)$; \qquad\qquad\qquad\qquad\# $R: [N, Ck^2, HW]$\\
 	$R\gets \mathrm{Reshape}(R, [N,C,k^2,H,W])$\;
 	$F\gets \mathrm{Repeat}(F, [1,1,k^2,1,1])$; \qquad\quad\# $F:[N, C, k^2, H, W]$\\
-	\nonl \# \textit{计算相关性} $C$ \\
+	\nonl \# \textit{计算相关性}$C$ \\
 	$C\gets \mathrm{ReduceSum}(F\circ R,  \mathrm{dim}=1)$; \quad\# $C: [N,1,k^2,H,W]$\\
 	$S\gets \mathrm{SoftMax}(C, \mathrm{dim}=2)$; \qquad\quad\:\:\:\,\, \# $S:[N,1,k^2,H,W]$\\
 	\nonl \# \textit{传播}\\
@@ -498,10 +500,10 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 \bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark.}
 \footnotesize
 \centering
-\begin{tabular}{@{\;\;}l|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}|@{\;\;}c@{\;\;}c@{\;\;}c@{\;\;}}
+\begin{tabular}{@{\;}l|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}}
 	\toprule
 	%		& \multicolumn{4}{c}{Average Rank}\\
-	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c@{\;\;}|@{\;\;}}{SAD}& \multicolumn{4}{c@{\;\;}|@{\;\;}}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
+	\multirow{2}{*}{Average Rank} & \multicolumn{4}{c@{\;}|@{\;}}{SAD}& \multicolumn{4}{c@{\;}|@{\;}}{MSE}& \multicolumn{4}{c}{Gradient Error}\\
 	& Overall&S&L&U& Overall&S&L&U& Overall&S&L&U\\
 	\midrule
 	%mse

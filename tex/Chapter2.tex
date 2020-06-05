@@ -302,51 +302,52 @@
 	\bicaption{在数据集USPS和MNIST上不同的近邻数量$k$的情况下的算法聚类效果比较}{Clustering results comparison between methods with different neighborhood size $k$ on USPS and MNIST}
 	\label{fig2:Sen2}
 \end{figure} 
+% \begin{table}[t]
+% 	\bicaption{不同图像数据集上的聚类准确率（\%）}
+% 	{Clustering accuracy on different image datasets(\%)}
+% 	% \label{tab2:Acc}
+% 	\small
+% 	\centering
+% 	% \begin{small}
+% 		%\begin{sc}
+% 		\begin{tabular}{llccccccc}
+% 			\toprule
+% 			& &$k$-NN\cite{niyogi2004locality} &Cons-$k$NN\cite{premachandran2013consensus} &DN\cite{pavan2007dominant} &ClustRF-Bi\cite{zhu2014constructing} &PCAN-$k$Means\cite{nie2014clustering} &PCAN\cite{nie2014clustering}& AdaAM
+% 			\\
+% 			\midrule
+% 			\multirow{2}{*}{UMIST} 
+% 			& Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\
+% 			& Max& 65.39& 69.22& 66.96& 74.44& 56.52&& \textbf{75.65}\\
+% 			\midrule
+% 			\multirow{2}{*}{COIL20} 
+% 			& Avg & 71.89& 75.53& 71.95& \textbf{76.50}& 72.28& \multirow{2}{*}{81.74}& 74.72\\
+% 			& Max& 81.18& 84.31& 82.01& 85.07& 83.75&& \textbf{87.29}\\
+% 			\midrule
+% 			\multirow{2}{*}{USPS}  
+% 			& Avg & 68.25& 68.21& 68.08& 58.74& 64.04& \multirow{2}{*}{64.20}  & \textbf{69.36}\\
+% 			& Max& 68.35& 68.34& 68.31& 65.90& 67.95&& \textbf{69.61}\\
+% 			\midrule
+% 			\multirow{2}{*}{MNIST} 
+% 			& Avg & 48.13& 47.88& 49.72& 51.93& 58.93& \multirow{2}{*}{59.83}  & \textbf{60.84}\\
+% 			& Max& 48.27& 48.00& 49.76& 52.03& 58.98&& \textbf{61.34}\\
+% 			\midrule
+% 			\multirow{2}{*}{ExYaleB} 
+% 			& Avg& 24.17& 25.63& 24.21& 23.10& 25.74& \multirow{2}{*}{25.89} & \textbf{54.36}\\
+% 			& Max& 26.76& 28.75& 27.42& 26.43& 27.63&& \textbf{57.87}\\
+% 			\bottomrule
+% 		\end{tabular}
+% 		%\end{sc}
+% 	% \end{small}
+% \end{table}
 \begin{table}[t]
-	\bicaption{不同图像数据集上的聚类准确率（\%）}
-	{Clustering accuracy on different image datasets(\%)}
-	% \label{tab2:Acc}
-	\small
-	\centering
-	% \begin{small}
-		%\begin{sc}
-		\begin{tabular}{llccccccc}
-			\toprule
-			& &$k$-NN\cite{niyogi2004locality} &Cons-$k$NN\cite{premachandran2013consensus} &DN\cite{pavan2007dominant} &ClustRF-Bi\cite{zhu2014constructing} &PCAN-$k$Means\cite{nie2014clustering} &PCAN\cite{nie2014clustering}& AdaAM
-			\\
-			\midrule
-			\multirow{2}{*}{UMIST} 
-			& Avg & 58.16& 60.27& 59.15& 64.63& 53.79& \multirow{2}{*}{55.30}   & \textbf{66.06}\\
-			& Max& 65.39& 69.22& 66.96& 74.44& 56.52&& \textbf{75.65}\\
-			\midrule
-			\multirow{2}{*}{COIL20} 
-			& Avg & 71.89& 75.53& 71.95& \textbf{76.50}& 72.28& \multirow{2}{*}{81.74}& 74.72\\
-			& Max& 81.18& 84.31& 82.01& 85.07& 83.75&& \textbf{87.29}\\
-			\midrule
-			\multirow{2}{*}{USPS}  
-			& Avg & 68.25& 68.21& 68.08& 58.74& 64.04& \multirow{2}{*}{64.20}  & \textbf{69.36}\\
-			& Max& 68.35& 68.34& 68.31& 65.90& 67.95&& \textbf{69.61}\\
-			\midrule
-			\multirow{2}{*}{MNIST} 
-			& Avg & 48.13& 47.88& 49.72& 51.93& 58.93& \multirow{2}{*}{59.83}  & \textbf{60.84}\\
-			& Max& 48.27& 48.00& 49.76& 52.03& 58.98&& \textbf{61.34}\\
-			\midrule
-			\multirow{2}{*}{ExYaleB} 
-			& Avg& 24.17& 25.63& 24.21& 23.10& 25.74& \multirow{2}{*}{25.89} & \textbf{54.36}\\
-			& Max& 26.76& 28.75& 27.42& 26.43& 27.63&& \textbf{57.87}\\
-			\bottomrule
-		\end{tabular}
-		%\end{sc}
-	% \end{small}
-\end{table}
-\begin{table}[t]
+	\setlength{\tabcolsep}{8pt}
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
 	{Clustering accuracy on different image datasets(\%)}
 	\label{tab2:Acc}
 	\centering
 	% \begin{small}
 		%\begin{sc}
-		\begin{tabular}{llccccc}
+		\begin{tabular}{lcccccc}
 			\toprule
 			& &UMIST&COIL20&USPS &MNIST& ExYaleB
 			\\

@@ -184,9 +184,10 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 \end{itemize}
 
 \begin{table}[t]
+	\setlength{\tabcolsep}{16pt}
 	\bicaption{在MAT-2793数据测试集上的数值结果}{The quantitative results on the MAT-2793 testing set}
 	\centering
-	\begin{tabular}{l@{\qquad}cccc}  
+	\begin{tabular}{lcccc}  
 		\toprule
 		Methods & MSE & SAD & Grad  &Conn\\
 		\midrule
@@ -231,11 +232,12 @@ He等人在文献\parencite{he2010guided}中提出了引导滤波器，引导滤
 在训练数据生成及增广方面，我们首先对每个前景物体进行水平翻转并进行11个不同角度的旋转，以生成22个不同的前景图，然后对每张前景图随机选择背景图像进行合成。为生成弱标注的分割蒙版，我们首先将真实的alpha这遮罩图上大于$0.5$的alpha值认为是前景，得到一个初始分割蒙版。然后我们在区间$5\times5$ 到 $30\times30$之间随机采样两个核的尺寸，采用随机核同时对分割蒙版进行形态学的膨胀与腐蚀。如果生成的分割蒙版中前景部分的区域面积比例不足alpha遮罩中前景部分面积的一半，则该训练样本被抛弃。我们将合成图、相应的alpha遮罩图以及分割蒙版图的短边都缩放至600像素。为进一步增广训练数据，我们对训练图像进行随即剪裁，并将剪裁结果缩放至$512\times512$。同时，在训练阶段我们在区间$ [-40, 40] $内对图像的色度进行随机扰动。由于我们认为在泛化度较高的图像抠图问题中图像的前景及背景具有一定的可交换性，即我们可以在训练阶段对前景及背景的标注进行互换。因此，我们依概率$0.5$对输入分割蒙版的标签进行了随机反转，并采用$1-\alpha$作为真实标注值。在测试阶段，我们采用尺寸为$600\times600$的中心剪裁并将剪裁结果缩放到$512\times512$。
 
 \begin{table}[t]
+	\setlength{\tabcolsep}{16pt}
 	\bicaption{在Composition-1k测试集上采用弱标注输入的定量测试结果}{The quantitative results on the Composition-1k testing set with weakly annotations}
 	%    \small
 	\centering
 	%     \begin{tabular}{lp{3em}<{\centering}p{3em}<{\centering}p{6em}<{\centering}p{6em}<{\centering}}  
-	\begin{tabular}{l@{\qquad}cccc}  
+	\begin{tabular}{lcccc}  
 		\toprule
 		Methods & MSE & SAD & Grad &Conn\\
 		\midrule
@@ -261,6 +263,7 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 
 \begin{table}[t]
 	%	\small
+	\setlength{\tabcolsep}{8pt}
 	\centering
 	\bicaption{在MAT-2793数据测试集上消融实验的定量结果}{The quantitative results of ablation study on the MAT-2793 testing set}
 	%     \begin{tabular}{lp{3em}<{\centering}p{3em}<{\centering}p{6em}<{\centering}p{6em}<{\centering}} 
@@ -287,6 +290,7 @@ Composition-1k测试集\cite{xu2017deep}包含有50个不同的前景图生成�
 此外，在表\ref{tab6:ablation}中我们同样将训练中的Gabor损失替换为梯度损失（Grad）或感知损失（Percep）进行效果对比，以显示Gabor损失在该问题中的有效性。
 
 \begin{table}[t]
+	\setlength{\tabcolsep}{8pt}
 	\bicaption{在CPU及移动设备上的速度评估结果}{The results of speed evaluation on CPU and mobile devices}
 	\centering
 	%	\begin{savenotes}
