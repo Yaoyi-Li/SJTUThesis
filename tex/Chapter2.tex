@@ -4,9 +4,9 @@
 数据在数据空间中的空间分布学习一直是一个困难的问题。经验上，数据往往分布在高维空间的一个低维流形上，而不是完全随机分布。这导致了不同标签的数据之间可能有较近的欧氏距离。这种分布特性会对基于传统欧氏距离度量的分类或聚类算法的效果产生影响。一个较好的选择是构建一个能够保持数据对之间局部近邻结构的低维映射。
 
 事实证明，度量学习相对于最近邻方法和其他依赖于距离的算法具有巨大优势。在早期的度量学习工作中，文献\parencite{xing2002distance}提出了利用辅助信息的度量学习的框架。这个学习框架的目的在于，通过学习一个距离度量矩阵缩小相似数据之间的距离并同时拉大不相似数据之间的距离。文献\parencite{weinberger2005distance}在支持向量机中将度量学习应用于基于铰链损失的凸优化分类问题。
-文献\parencite{davis2007information}提出了基于信息论观点的距离度量学习。他们的工作将度量学习问题表述为在距离函数约束下两个多元高斯分布之间的微分相对熵最小化。
+文献\parencite{davis2007information}提出了基于信息论观点的距离度量学习。他们的工作将度量学习问题表述为在距离函数约束下两个多元高斯分布之间的微分相对熵最小化。后续有大量的扩展度量学习的工作\cite{liu2015low,qian2015fine}以及全面的概述总结文献\cite{yang2006distance,kulis2012metric}被发表。
 
-另一方面，谱聚类方法是一类在基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}. 后续有大量的扩展度量学习的工作\cite{liu2015low,qian2015fine}以及全面的概述总结文献\cite{yang2006distance,kulis2012metric}被发表。
+另一方面，谱聚类方法是一类基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}。
 
 上述提到的谱聚类算法有三点不足之处。第一，这些谱聚类算法只提供了训练数据的嵌入映射，对样本外数据（out-of-sample）的计算比较困难。第二，这些算法的复杂度依赖于数据点数量，相对比较耗时，可扩展性不强。第三，谱聚类算法的稳定性高度依赖于相似性图（affinity graph）的鲁棒性。
 为缓解上述谱聚类中存在的问题，大量重要的研究进展被提出\cite{bengio2004out,niyogi2004locality,fowlkes2004spectral,yan2009fast,chen2011large,pavan2007dominant,premachandran2013consensus,zhu2014constructing,nie2014clustering}。局部保持投影（Locality Preserving Projections， LPP）\cite{niyogi2004locality}引入了一种由拉普拉斯特征映射得到的线性投影方法。他们的工作提供了一种嵌入映射的线性近似，该线性近似可以减少计算复杂度并可以简单的实现样本外数据的扩展。线性嵌入提供了一种度量学习角度下的谱聚类方法。文献\parencite{nie2014clustering}提出了自适应近邻投影聚类（Projected Clustering with Adaptive Neighbors，PCAN）算法，该算法将点对之间的相似性作为一个额外的待求解变量并且通过对图拉普拉斯（graph Laplacian）矩阵的秩设置惩罚项以限制相似性矩阵的连通区数量。基于这个框架，PCAN算法交替地更新相似性矩阵和投影。经验上，流形嵌入方法的效果依赖于相似性矩阵的鲁棒性。图\ref{fig2:affMat}给出了MNIST数据集\cite{lecun1998gradient}的子集在理想情况下及不同近邻数量下的热力核相似性矩阵。从图中可看出广泛使用的$k$-NN（$k$ nearest neighborhood）热力核中存在大量的噪声。虽然一些相似性学习的方法已经被提出，选择合适的相似性矩阵的问题依然有待解决。
@@ -29,7 +29,7 @@
   	\label{fig2:affMat}
 \end{figure}
 
-本章所提出的方法的目标在于，针对谱聚类的线性近似，在最小的时间消耗下，提取更具有自适应性的相似性信息。这类信息将会更多的考虑局部性保持（locality preserving）这个优化目标，而不仅仅是图像间的距离。受到可扩展谱聚类和数据相似性学习方向上的研究成果\cite{chen2011large,nie2014clustering}的启发，本章提出了一个新颖的自适应相似性矩阵（Adaptive Affinity Matrix，AdaAM）方法。该方法的相似性矩阵相对稠密并可以同时捕捉到全局及局部信息。特别地，AdaAM将相似性矩阵分解成两个相同的低秩矩阵的乘积。作为文献\parencite{ng2002spectral}中描述的理想情况，如果我们假设同一个类内的点对相似性极为相似，则相似性矩阵可能会形成一个低秩矩阵。本算法采用与谱聚类方法相似的优化方法对分解后的矩阵进行优化求解。优化得到的相似性图作为最终结果前的中间态相似性矩阵。通过合并基于热力核获得的$k$-NN相似性图和中间态相似性矩阵，AdaAM采用朴素的谱聚类求解方法计算出一个最终的自适应相似性矩阵。我们将LPP方法作用于此特定的相似性矩阵上进行数据投影，以获得一个用于聚类的距离度量。
+本章所提出的方法的目标在于，针对谱聚类的线性近似，在最小的时间消耗下，提取更具有自适应性的相似性信息。这类信息将会更多的考虑局部性保持（locality preserving）这个优化目标，而不仅仅是图像间的距离。受到可扩展谱聚类和数据相似性学习方向上的研究成果\cite{chen2011large,nie2014clustering}的启发，本章提出了一个新颖的自适应相似性矩阵（Adaptive Affinity Matrix，AdaAM）方法。该方法的相似性矩阵相对稠密并可以同时捕捉到全局及局部信息。特别地，AdaAM将相似性矩阵分解成两个相同的低秩矩阵的乘积。作为文献\parencite{ng2002spectral}中描述的理想情况，如果我们假设同一个类内的点对特征极为相似，则相似性矩阵可能会形成一个低秩矩阵。本算法采用与谱聚类方法相似的优化方法对分解后的矩阵进行优化求解。优化得到的相似性图作为最终结果前的中间态相似性矩阵。通过合并基于热力核获得的$k$-NN相似性图和中间态相似性矩阵，AdaAM采用朴素的谱聚类求解方法计算出一个最终的自适应相似性矩阵。我们将LPP方法作用于此特定的相似性矩阵上进行数据投影，以获得一个用于聚类的距离度量。
 
 在本章中，我们将通过在图像数据集上的聚类实验展示所提出方法的有效性和高效性。第 \ref{sec2:Exp}节通过对本章提出的算法和基于$k$-NN的拉普拉斯特征映\cite{belkin2001laplacian}以及其他最先进方法进行对比展现了AdaAM方法在具有挑战性的数据集上的聚类效果具有明显优势。
 
@@ -37,7 +37,7 @@
 \section{自适应相似性矩阵}
 在本节中，我们首先对本节采用的数学符号进行说明，其次介绍中间态相似性矩阵的计算方法，然后描述最终自适应相似性矩阵的获取方式，最后对算法流程中的稀疏化策略进行介绍。
 \subsection{符号说明}
-在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（centering matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将假设数据矩阵$X$为零均值列归一化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
+在本章中，我们以大写英文或希腊字母代表矩阵，小写字母代表向量。所有元素全部为$1$的向量用$\bf{1}$表示。$H$表示中心化矩阵（centering matrix），其定义为：$H = I-\frac{1}{n}\bf{1}\bf{1}^T$。原始数据矩阵以$X \in \mathbb{R}^{n\times d}$表示，其中$n$为数据点的数量，$d$为数据维数。本章中将特别地假设数据矩阵$X$为零均值列归一化矩阵，即$X = HX$。符号$x_i$表示数据矩阵$X$中的第$i$个数据点向量。我们用$A$表示线性投影，相应的距离度量矩阵表示为$M = A^TA$。因此，在该度量矩阵下的距离定义为$dis_m(x_i, x_j) = (x_i - x_j)^TM(x_i - x_j)$。我们将$k$-NN热力核矩阵表示为$W \in \mathbb{R}^{n \times n}$：
 \begin{equation}
 	w_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|x_i-x_j\|_{2}}{t}), \; &x_i\in\mathcal{N}_k(x_j)\;\mathrm{or}\; x_j\in\mathcal{N}_k(x_i);\\
 		0, &\mathrm{otherwise.}\end{cases}          
@@ -59,7 +59,7 @@
 
 由于在通常情况下图拉普拉斯矩阵为半正定矩阵，因此一个直观又看似可行的思路是将拉普拉斯矩阵分解为两个相同矩阵的乘积。在下文中我们将论述该思路并不适用于我们的计算框架。
 
-我们采用$U\in \mathbb{R}^{n\times s}$ 表示一个列正交矩阵，即满足$U^TU = I$。我们假设目标矩阵$L_\Delta$可以表示为
+我们采用$U\in \mathbb{R}^{n\times s}$ 表示一个列正交矩阵，满足$U^TU = I$。我们假设目标矩阵$L_\Delta$可以表示为
 \begin{equation}
 	L_\Delta = UU^T.
 \end{equation}
@@ -123,12 +123,12 @@
 \begin{equation}
 	\begin{split}
 		(XX^T)p = \lambda p
-		\Rightarrow {\bf1}XX^Tp = \lambda {\bf1}p
+		\Rightarrow {\bf1}^TXX^Tp = \lambda {\bf1}^Tp
 	\end{split}
 	\label{eq2:Solu}
 \end{equation}
 
-由数据矩阵$X$为零均值列归一化矩阵，可以得知$\lambda {\bf1}p = {\bf1}XX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}p = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
+由数据矩阵$X$为零均值列归一化矩阵，可以得知$\lambda {\bf1}^Tp = {\bf1}^TXX^Tp = 0$。因而，对于大于$0$的最大特征值，其对应地特征向量$p$总满足${\bf1}^Tp = 0$。将令公式（\ref{eq2:XLX}）中第二部分取得最小值的解$P$写为 $P=(p_1,p_2,...,p_t)$，可以得到
 \begin{equation}
 	%\begin{split}
 	{\bf1}^T P = {\bf0} \Rightarrow {\bf1}^T PP^T = {\bf0} \Rightarrow d_{\Delta ii} = 0. %\quad(i=1,...,n)
@@ -140,7 +140,7 @@
 \end{equation}
 \end{proof}
 
-由命题\ref{thm2}可知，优化目标函数（\ref{eq2:XLX}）可以进一步化简为
+由命题\ref{thm2}及其证明可知，优化目标函数（\ref{eq2:XLX}）可以进一步化简为
 \begin{equation}
 	P=\mathop{\mathrm{arg\;max}}_{P^TP=I} \;tr(P^TXX^TP).
 	\label{eq2:PXXP}
@@ -157,7 +157,7 @@
 	a = \mathop{\mathrm{arg\;min}}_{a^Ta=1}\; tr(a^TX^T(L+L_\Delta)Xa),
 	\label{eq2:AXLXA}
 \end{equation}
-此处，$a$ 为矩阵$A$的一维情况，且$L+L_\Delta$是$k$-NN热力核与中间态相似性矩阵的拉普拉斯矩阵的组合。投影向量$a$可通过求解特征分解问题的最小特征值得到：
+此处，$a$ 为矩阵$A$的一维情况，且$L+L_\Delta$是$k$-NN热力核$W$与中间态相似性矩阵$\Delta$的拉普拉斯矩阵的组合。投影向量$a$可通过求解特征分解问题的最小特征值得到：
 \begin{equation}
 	X^T(L-\Delta)Xa = \lambda a
 \end{equation}
@@ -342,7 +342,7 @@
 \begin{table}[t]
 	\setlength{\tabcolsep}{8pt}
 	\bicaption{不同图像数据集上的聚类准确率（\%）}
-	{Clustering accuracy on different image datasets(\%)}
+	{Clustering accuracy on different image datasets (\%)}
 	\label{tab2:Acc}
 	\centering
 	% \begin{small}
@@ -387,7 +387,7 @@
 \subsection{参数选择与实验设置}
 由于在无监督学习任务中不存在验证数据集，所以为了实现更一般化的参数选择情况，我们对实验中的所有算法采用了相同的参数选择标准。我们将每个数据实例的近邻数量设置为$k = \mathrm{Round}(\mathrm{log}_2\frac{n}{c})$，其中$n$为数据实例数量，$c$为类别数量，$Round(x)=\lfloor x+\frac{1}{2}\rfloor$。我们参考文献\parencite{ng2002spectral}的结论，将投影的维度设置为与类别数目相同，即距离度量矩阵的秩与类别数相同。所提出的算法中的其他参数在所有实验中均固定不变。
 
-我们将10次独立重复的$k$-means聚类表示为1轮聚类，并在每轮所有结果中选择类内和最小的结果作为该轮$k$-means的聚类结果。在进行聚类性能评估中，我们对每种算法分别应用100轮$k$-means聚类用于（参见表\ref{tab2:Acc}）。在近邻数量$k$的敏感性实验中，我们应用10轮$k$-means聚类（参见图\ref{fig2:Sen}，图\ref{fig2:Sen2}和图\ref{fig2:Sen3}），而在运行时间测试实验中，我们仅进行一轮$k$-means聚类（参见图\ref{fig2:Time}）。
+我们将10次独立重复的$k$-means聚类表示为1轮聚类，并在每轮所有结果中选择类内和最小的结果作为该轮$k$-means的聚类结果。在进行聚类性能评估中，我们对每种算法分别应用100轮$k$-means聚类（参见表\ref{tab2:Acc}）。在近邻数量$k$的敏感性实验中，我们应用10轮$k$-means聚类（参见图\ref{fig2:Sen}、图\ref{fig2:Sen2}和图\ref{fig2:Sen3}），而在运行时间测试实验中，我们仅进行一轮$k$-means聚类（参见图\ref{fig2:Time}）。
 
 
 \begin{figure}[t]
@@ -421,6 +421,6 @@
 在图\ref{fig2:Time}中，我们通过半对数图描绘了六种算法在不同数据量的MNIST子集上的运行时间，以此说明AdaAM方法的高效性。 从图中可以看出，我们的方法在实际使用中是一种时间代价较低的算法。相比于PCAN-$k$Means，ClustRF-Bi和DN方法，AdaAM算法的时间消耗要低得多。需要注意的是，$k$-NN作为一个基线算法，本身并不需要进行相似性矩阵学习，因此其所需的运行时间仅包括$k$-NN热力核相似性矩阵构建、LPP线性投影矩阵计算及$k$-means聚类这三种所有对照算法共享的基本操作，所以其计算效率必然最高。我们同时还展示了AdaAM的运行时间大约为Cons-$k$NN的两倍，但在整体性能方面AdaAM相比于其他算法依然具有明显的优势。
 
 \section{本章小结}
-在本章中，我们提出了一种用于无监督度量学习的创新性的的相似性学习方法，称为自适应相似性矩阵矩阵（Adaptive Affinity Matrix，AdaAM）。在我们所提出的新的相似性学习模型中，相似性矩阵是从与谱聚类相同的计算框架中学习获得的。 更具体地说，我们表明相似性学习可以简化为奇异值分解问题。获得学习到的相似性矩阵后，可以借助于类似LPP这样基于相似性图的现成的算法来学习距离度量。我们所采用的低秩近似的优化方法可以在相似性矩阵学习的过程中进一步提高学习效率。
+在本章中，我们提出了一种用于无监督度量学习的具有创新性的相似性学习方法，称为自适应相似性矩阵（Adaptive Affinity Matrix，AdaAM）。在我们所提出的新的相似性学习模型中，相似性矩阵从与谱聚类相同的计算框架中学习获得的。 更具体地说，我们表明相似性学习可以简化为奇异值分解问题。获得学习到的相似性矩阵后，可以借助于类似LPP这样基于相似性图的现成的算法来学习距离度量。我们所采用的低秩近似的优化方法可以在相似性矩阵学习的过程中进一步提高学习效率。
 我们在UMIST、COIL20、USPS、MNIST及ExYaleB五个被广泛使用的图像数据集上对AdaAM及其他对照算法的进行了大量聚类实验。
 实验结果证明了所提出的方法AdaAM的性能优越性、稳定性与高效性。

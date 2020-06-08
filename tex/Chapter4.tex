@@ -4,12 +4,12 @@
 如前文所述，约束传播方法多数为针对单模态情况而设计的。近年来，有大量的工作对多模态融合进行了深入的研究\cite{lahat2015multimodal,poria2017ensemble,yu2017deep,poria2017review,liu2018weakly,kiela2018efficient}。在无监督或半监督的多模态任务中，学习的核心阻碍是训练数据不足而难以学习不同模态的权重。
 模态权重表示了每种模态的重要性，因此，一些工作主张如果我们可以获得关于模态的先验知识，则可以为噪声较大的模态分配较小的权重\cite{kumar2011co,liu2013multi}。
 
-在前文中我们所提出的MFL算法将模态级的融合学习推广到了多模态约束传播问题中。但是，通常情况下从模态的鲁棒性推导得出模态权重是更加合理。Sohn等人提出了一种深度学习方法以最小化两种模态之间的信息差异\cite{sohn2014improved}，这可以视为通过鲁棒性学习模态融合的特殊情况。同时在鲁棒相似性矩阵学习方面也取得了一些进展\cite{pavan2007dominant,premachandran2013consensus,zhu2014constructing}。这些方法
+在前文中我们所提出的MFL算法将模态级的融合学习推广到了多模态约束传播问题中。但是，通常情况下从模态的鲁棒性推导得出模态权重是更加合理。Sohn等人提出了一种深度学习方法以最小化两种模态之间的信息差异\cite{sohn2014improved}，这可以视为通过鲁棒性学习模态融合的特殊情况。同时在鲁棒相似性矩阵学习方面也存在一些进展\cite{pavan2007dominant,premachandran2013consensus,zhu2014constructing}。这些方法
 提供了不同的标准来衡量每个模态信息是否有噪声，而我们可以利用这些方法来生成模态的一些先验知识。
 
-在本文中，我们首先提出并解决了相容条件概率分布重构（Compatible Conditional Distributions Reconstruction，CCDR）这个基础问题。基于CCDR，我们设计了一种新的多模态约束传播相似性学习方法，被命名为实例级多模态约束传播（Instance Level Multi-Modal Constraint Propagation，ILMCP）。
+在本文中，我们首先提出了相容条件概率分布重构（Compatible Conditional Distributions Reconstruction，CCDR）这个基础问题，并给出了一个解决方案。基于CCDR，我们设计了一种新的多模态约束传播相似性学习方法，被命名为实例级多模态约束传播（Instance Level Multi-Modal Constraint Propagation，ILMCP）。
 ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传播生成出统一的相似性图。所提出的方法将关注点集中在多模态约束传播中的转移概率推理上。
-此外，区别于先前的工作，我们在本章所提出的方法建立在数据实例的邻域鲁棒性上，而不是每个模态整体的稳健性。为此，我们在算法中对一对相容条件概率分布进行了重构，即给定特定数据实例条件下的模态概率以及给定某个模态条件下的特定数据实例的概率。随后，我们从上述分布中得出统一的转移概率，以生成一个相似性矩阵。除此之外，我们引入了一种代价敏感（cost-sensitive）的方法来平衡传播过程中的正约束和负约束数量问题。在数学符号表示上我们将延续上一章中的设定。
+此外，区别于先前的工作，我们在本章所提出的方法建立在数据实例的邻域鲁棒性上，而不是每个模态整体的鲁棒性。为此，我们在算法中对成对的相容条件概率分布进行了重构，即给定特定数据实例条件下的模态概率以及给定某个模态条件下的特定数据实例的概率。随后，我们从上述分布中得出统一的转移概率，以生成一个相似性矩阵。除此之外，我们引入了一种代价敏感（cost-sensitive）的方法来平衡传播过程中的正约束和负约束数量问题。在数学符号表示上我们将延续上一章中的设定。
 
 \section{相容条件概率分布重构}
 在本节中，我们提出在特定假设下条件概率相容的必要和充分条件，并提出用于相容条件概率分布重构（Compatible Conditional Distributions Reconstruction，CCDR）的方法。
@@ -26,31 +26,31 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 
 \begin{theorem}
     \label{thm4}
-    对于条件概率分布 $P(Y|X)$ 和 $P(X|Y)$，定义商矩阵$Q$，其中${q}_{i,j} = \frac{P(x_i|y_j)}{P(y_j|x_i)}$。$P(Y|X)$ 和 $P(X|Y)$为相容条件概率分布当且仅当商矩阵$Q$为秩$1$矩阵且$\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$。
+    对于条件概率分布 $P(Y|X)$ 和 $P(X|Y)$，定义商矩阵$Q$，其中${q}_{ij} = \frac{P(x_i|y_j)}{P(y_j|x_i)}$。$P(Y|X)$ 和 $P(X|Y)$为相容条件概率分布当且仅当商矩阵$Q$为秩$1$矩阵且$\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$。
 \end{theorem}
 \begin{proof}
     假设$P(Y|X)$ 和 $P(X|Y)$为相容条件概率分布。则必然能找到相关联的边缘概率分布$P(X), P(Y)$，以及联合概率分布$P(X, Y)$。因此可以得到：
     \begin{equation}
-    {q}_{i,j} = \frac{P(x_i|y_j)}{P(y_j|x_i)} = \frac{P(x_i)}{P(y_j)}.
+    {q}_{ij} = \frac{P(x_i|y_j)}{P(y_j|x_i)} = \frac{P(x_i)}{P(y_j)}.
     \label{eq4:q}
     \end{equation}
     给定商矩阵$Q$的第$s$行，则能够通过求$s$行与$\frac{P(x_t)}{P(x_s)}$的乘积确定商矩阵$Q$的第$t$行元素。这导致了$Q$为一个秩$1$矩阵。且通过公式（\ref{eq4:q}）可以得到
     \begin{equation}
-    \sum_j\frac{1}{\sum_i {q}_{i,j}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1.
+    \sum_j\frac{1}{\sum_i {q}_{ij}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1.
     \end{equation}
 
-    相反地，假设$Q$为一个秩$1$矩阵成立且。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{i,j} ={ m}_i{n}_j$ 带入 $\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
-    从而可以通过两个正向量$m$和$n$构建两个离散边缘概率分布：
+    相反地，假设$Q$为一个秩$1$矩阵成立且$\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{ij} ={ m}_i{n}_j$ 带入 $\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
+    从而可以通过两个正向量$m$和$n$构造两个离散边缘概率分布：
     \begin{equation}
     P(x_i) = {m}_i, \quad P(y_j) = \frac{1}{{n}_j}.
     \end{equation}
 
     接下来，我们将证明存在能够满足 $P(X, Y) = P(Y|X)P(X) = P(X|Y)P(Y)$的联合概率分布$P(X, Y)$。
-    由于$P(Y|X)$ 和 $P(X)$ 分别唯一个条件概率分布和一个边缘概率分布，因此，也可以将两者的乘积视为一个概率分布。相似地，乘积 $P(X|Y)P(Y)$ 也可以构造为一个概率分布。故，存在性证明的核心在于证明 $P(y_j|x_i)P(x_i) = P(x_i|y_j)P(y_j)$ 对于所有的 $i$ 和$j$恒成立。
-    基于 ${q}_{i,j} = {m}_i{n}_j$可知
+    由于$P(Y|X)$ 和 $P(X)$ 分别为一个条件概率分布和一个边缘概率分布，因此，也可以将两者的乘积视为一个联合概率分布。相似地，乘积 $P(X|Y)P(Y)$ 也可以构造为一个联合概率分布。故，存在性证明的核心在于证明 $P(y_j|x_i)P(x_i) = P(x_i|y_j)P(y_j)$ 对于所有的 $i$ 和$j$恒成立。
+    基于 ${q}_{ij} = {m}_i{n}_j$可知
     \begin{equation}
     \begin{split}
-    &\frac{P(x_i|y_j)}{P(y_j|x_i)} = {q}_{i,j} = {m}_i{n}_j\\
+    &\frac{P(x_i|y_j)}{P(y_j|x_i)} = {q}_{ij} = {m}_i{n}_j\\
     \Rightarrow &\frac{P(x_i|y_j)}{{n}_j} = P(y_j|x_i) {m}_i\\
     \Rightarrow &P(x_i|y_j)P(y_j) = P(y_j|x_i)P(x_i), 
     \end{split}
@@ -60,14 +60,14 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 
 基于定理\ref{thm4}我们可以设计出通过两个不相容条件概率分布重建出近似的相容条件概率分布的方法。这里需要注意的是，我们将通过概率$P^\dagger (x_i|y_j)$ 和 $P^\dagger (y_j|x_i)$中的上标$\dagger$ 来表示相应的条件概率分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$是不相容的。
 
-从定理\ref{thm4}中可以注意到如果希望概率分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$是相容的，并能够从中推导出概率$P(x_i), P(y_j)$，则需要商矩阵$Q$为秩$1$矩阵。这里我们将暂时忽略条件$\sum_j\frac{1}{\sum_i {q}_{i,j}} = 1$，该条件可以在求解后通过缩放重新满足。一般情况下，矩阵$Q$不会为秩$1$矩阵。一个可能的解决方案为假设不相容分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$在观测中受噪声干扰，其真实分布为相容条件概率分布，并且含有噪声的商矩阵$Q$接近秩$1$矩阵。
+从定理\ref{thm4}中可以注意到如果希望概率分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$是相容的，并能够从中推导出概率$P(x_i), P(y_j)$，则需要商矩阵$Q$为秩$1$矩阵。这里我们将暂时忽略条件$\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$，该条件可以在求解后通过缩放重新满足。一般情况下，矩阵$Q$不会为秩$1$矩阵。一个可行的解决方案为假设不相容分布$P^\dagger (X|Y)$ 和  $P^\dagger (Y|X)$在观测中受噪声干扰，其真实分布为相容条件概率分布，并且含有噪声的商矩阵$Q$接近秩$1$矩阵。
 
 在下文中，我们假设$P^\dagger(X|Y)$ 和 $P^\dagger(Y|X)$ 分别受到高斯噪声$ \mathcal{N}(0, \alpha^2) $ 和  $ \mathcal{N}(0, \beta^2) $的干扰。因此，我们通过对矩阵$Q$进行奇异值分解得到其秩为$1$的近似矩阵$\hat{{Q}}$。目标相容概率分布 $P(X|Y)$ 和  $P(Y|X)$可以通过求解在近似商矩阵$\hat{{Q}}$约束下的极大似然估计求得。最大化对数似然的优化问题可写为：
 \begin{equation}
 \begin{split}
 \mathop{\mathrm{min}}_{P(x_i|y_j), P(y_j|x_i)} & \quad \frac{1}{2 \alpha^2} \sum_{i,j}(P(x_i|y_j)-P^\dagger(x_i|y_j))^2 \\
 &+ \frac{1}{2 \beta^2} \sum_{i,j}(P(y_j|x_i)-P^\dagger(y_j|x_i))^2\\
-\mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{i,j}\\
+\mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{ij}\\
 %             &\quad \;\sum_{s}P(x_i|\mathcal{G}_s) = 1\\
 %             &\quad \;\sum_{s}P(G_s|x_i) = 1
 \end{split}
@@ -79,8 +79,8 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 \section{实例级多模态约束传播}
 在本节中我们将对所提出的基于相容条件概率分布重构的实例级多模态约束传播（ILMCP）方法进行介绍，并对部分实现细节进行描述。
 \subsection{模态信息鲁棒性}
-在ILMCP中，我们通过近似Consensus $k$-NNs\cite{premachandran2013consensus}的方法对每个模态的鲁棒性进行近似估计。Consensus $k$-NNs方法通过收集多轮$k$-NN近邻的公式信息提供一个可供进行近邻选择的判别标准，该方法可以被看作是二阶相似性（Second-order Proximity）\cite{tang2015line,wang2016structural}的一种近似。如果数据点对$x_i$ 和 $x_j$同时出现在许多其他数据点的$k$-NN近邻中，则该点对相似的可能性更高。反之，如果两个数据点$x_i$和$x_j$从未同时出现在其他数据实例的近邻中，则即使在该点对上观测到高相似性也有比较大的概率为观测噪声。
-在算法\ref{alg4:consknn}中我们给出了根据Consensus $k$-NNs构建共识矩阵$C$的算法细节。$C$中的元素可以被用于估计任意两个数据点间的相似性的鲁棒程度。此外，通过在Consensus $k$-NNs中设置阈值$\tau$，可以${c}_{i,j}\le\tau$的任意点对$x_i$和$x_j$互相从对方的近邻集合中移除。
+在ILMCP中，我们通过近似Consensus $k$-NNs\cite{premachandran2013consensus}的方法对每个模态的鲁棒性进行近似估计。Consensus $k$-NNs方法通过收集多轮$k$-NN近邻的共识信息提供一个可供进行近邻选择的判别标准，该方法可以被看作是二阶相似性（Second-order Proximity）\cite{tang2015line,wang2016structural}的一种近似。如果数据点对$x_i$ 和 $x_j$同时出现在许多其他数据点的$k$-NN近邻中，则该点对相似的可能性更高。反之，如果两个数据点$x_i$和$x_j$从未同时出现在其他数据实例的近邻中，则即使在该点对上观测到高相似性也有比较大的概率为观测噪声。
+在算法\ref{alg4:consknn}中我们给出了根据Consensus $k$-NNs构建共识矩阵$C$的算法细节。$C$中的元素可以被用于估计任意两个数据点间的相似性的鲁棒程度。此外，通过在Consensus $k$-NNs中设置阈值$\tau$，可以将${c}_{ij}\le\tau$的任意点对$x_i$和$x_j$互相从对方的近邻集合中移除。
 \begin{algorithm}[tb]
     %		\small
             %	\renewcommand{\algorithmicrequire}{\mathbf{Input:}}
@@ -97,26 +97,26 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
             }
 \end{algorithm}
 
-在我们的方法中，共识矩阵的构造与文献\parencite{premachandran2013consensus}中提出的原始算法不同。我们利用共识矩阵从现有的相似性矩阵中对噪声进行剪枝，而不是重建新的近邻集合：
+在我们的方法中，共识矩阵的构造与文献\parencite{premachandran2013consensus}中提出的原始算法基本相同。相似地，我们利用共识矩阵从现有的相似性矩阵中对噪声进行剪枝：
 \begin{equation}
-{w}^{cons}_{i,j} = 
+{w}^{cons}_{ij} = 
 \begin{cases}
-0,\quad\qquad\qquad&\text{if }{c}_{i,j}<\tau;\\ {w}^{dense}_{i,j},&\text{otherwise,}
-\end{cases},
+0,\quad\qquad\qquad&\text{if }{c}_{ij}<\tau;\\ {w}^{dense}_{ij},&\text{otherwise,}
+\end{cases}
 \label{eq4:cons}
 \end{equation}
-这其中，${W}^{dense}$为稠密的$k$NN热力核相似性矩阵，即近邻数量$k$取值较大，我们在实现中令$k = \mathrm{Round}( \frac{\#sample}{\#cluster})$。 ${W}^{cons}$为经过共识矩阵剪枝后的相似性矩阵。由于公式（\ref{eq4:cons}）为针对相似性矩阵的一般性公式，不表示某个特定模态，所以我们忽略了矩阵的第三个下标以保持公式的简洁。由于通过$k$-NN近邻构建的矩阵${W}^{dense}$仅是相对稠密的，所以我们的算法实现比原始的Consensus $k$-NNs方法更加高效，在下文中我们将对这一点进行进一步说明。
+这其中，${W}^{dense}$为稠密的$k$-NN热力核相似性矩阵，即近邻数量$k$取值较大，我们在实现中令$k = \mathrm{Round}( \frac{\#sample}{\#cluster})$。 ${W}^{cons}$为经过共识矩阵剪枝后的相似性矩阵。由于公式（\ref{eq4:cons}）为针对相似性矩阵的一般性公式，不表示某个特定模态，所以我们忽略了矩阵的第三个下标以保持公式的简洁。由于通过$k$-NN近邻构建的矩阵${W}^{dense}$仅是相对稠密的，所以此处的算法实现相对是比较高效，在下文中我们将对这一点进行进一步说明。
 
 对于每个模态图$\mathcal{G}_s$，根据公式（\ref{eq4:cons}）计算共识相似性矩阵${W}^{cons}_s$。我们对矩阵${W}_s^{dense}$ 和 ${W}_s^{cons}$分别进行行归一化，使得矩阵中的每行可以作为一个概率分布。然后，通过KL散度（Kullback-Leibler divergence）对数据实例在每个模态中的相似性的不一致性（incoherence）进行定义：
 \begin{equation}
-inc_s(i) = \sum_j {w}^{dense}_{i,j,s}\;\text{ln}\frac{{w}^{dense}_{i,j,s}}{{w}^{cons}_{i,j,s}}, 
+inc_s(i) = \sum_j {w}^{dense}_{ij,s}\;\text{ln}\frac{{w}^{dense}_{ij,s}}{{w}^{cons}_{ij,s}}, 
 \label{eq4:incohere}
 \end{equation}
-式中${W}^{dense}_{i,j,s}$为数据点对 $x_i$ 和 $x_j$在图$\mathcal{G}_s$上的$k$-NN相似性，${w}^{cons}_{i,j,s}$为相对应的共识相似性取值。
+式中${w}^{dense}_{ij,s}$为数据点对 $x_i$ 和 $x_j$在图$\mathcal{G}_s$上的$k$-NN相似性，${w}^{cons}_{ij,s}$为相对应的共识相似性取值。
 
 实例级不一致性函数$inc_s(i)$是用于估计图$\mathcal{G}_s$上数据点$x_i$和其近邻间相似性值的鲁棒程度的一个测度。不一致性越小，则说明在数据实例上所观测到的近邻关系越稳定。此外，有两个实现中的细节需要关注。一方面相似性矩阵${W}^{dense}_s$为相对稠密的矩阵。另一方面，我们通过在矩阵 ${W}_s^{dense}$ 和 ${W}_s^{cons}$上叠加一个极小值（例如$10^{-8}$）以解决在离散概率中存在的零值问题。
 
-更进一步地，根据上一章所提出的MFL方法，我们同时定义模态级一致性$ {c}_{mod} = [c_{mod}(\mathcal{G}_1), c_{mod}(\mathcal{G}_2),...] $来描述全局信息：
+更进一步地，根据上一章所提出的MFL方法，我们同时定义模态级一致性$ {c}_{mod} = [c_{mod}(\mathcal{G}_1), c_{mod}(\mathcal{G}_2),...]^T $来描述全局信息：
 \begin{equation}
 \begin{split}
 {c}_{mod} = \;&\mathop{\mathrm{argmin}}_{{c}_{mod}}\; \frac{1}{2}\|{S}{c}_{mod} - {z}  \|_2^2, \\
@@ -143,7 +143,7 @@ P^\dagger (\mathcal{G}_s|x_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(
 \label{eq4:Pglu}.
 \end{equation}
 
-公式（\ref{eq4:cohere}）中的定义可以令人联想到t-SNE\cite{maaten2008visualizing}方法中对联合概率的定义形式。而公式（\ref{eq4:Pglu}）则基于假设：实例$x_i$在不同模态信息下的不一致性能够反映出不同模态的可信度。具有高可信度的模态可能具有更鲁棒的信息，以及更少的噪声。这里需要注意的是，所计算出的可信度只对应于特定的数据实例$x_i$，因此这属于实例级的可信度。基于该假设，我们需要对概率测度$ P(\mathcal{G}_s|x_i) $进行设计。该概率测度应与不一致性成反比，而相应的最简的构造形式为$ 1/inc_s(i) $。从公式（\ref{eq4:Pglu}）中可以发现，在给定模态$s$的情况下，较小的不一致性即隐含了图$\mathcal{G}_s$具有较大的条件概率。在特定情况下，可能出现$ inc_s(i) =0 $的情况，所以我们采用$ inc_s(i) +1 $替代$ inc_s(i)$。因此 $ P(\mathcal{G}_s|x_i) $ 应当正比于 $ (inc_i+1)^{-1} $，而概率公式中的分母项则用于归一化。公式（\ref{eq4:Pglu}）为满足该条件的概率测度的最简形式。相应的条件概率$P^\dagger(x_i|\mathcal{G}_s)$可以采用与公式（\ref{eq3:Pulg}）相同的方式进行计算。
+公式（\ref{eq4:cohere}）中的定义可以令人联想到t-SNE\cite{maaten2008visualizing}方法中对联合概率的定义形式。而公式（\ref{eq4:Pglu}）则基于假设：实例$x_i$在不同模态信息下的不一致性能够反映出不同模态的可信度。具有高可信度的模态可能具有更鲁棒的信息，以及更少的噪声。这里需要注意的是，所计算出的可信度只对应于特定的数据实例$x_i$，因此这属于实例级的可信度。基于该假设，我们需要对概率测度$ P^\dagger(\mathcal{G}_s|x_i) $进行设计。该概率测度应与不一致性成反比，而相应的最简的构造形式为$ 1/inc_s(i) $。从公式（\ref{eq4:Pglu}）中可以发现，在给定模态$s$的情况下，较小的不一致性即隐含了图$\mathcal{G}_s$具有较大的条件概率。在特定情况下，可能出现$ inc_s(i) =0 $的情况，所以我们采用$ inc_s(i) +1 $替代$ inc_s(i)$。因此 $ P^\dagger(\mathcal{G}_s|x_i) $ 应当正比于 $ (inc_i+1)^{-1} $，而概率公式中的分母项则用于归一化。公式（\ref{eq4:Pglu}）为满足该条件的概率测度的最简形式。相应的条件概率$P^\dagger(x_i|\mathcal{G}_s)$可以采用与公式（\ref{eq3:Pulg}）相同的方式进行计算。
 
 此处令上文所述的商矩阵中$q_{i,s} = \frac{P^\dagger(x_i|\mathcal{G}_s)}{P^\dagger(\mathcal{G}_s|x_i)}$，通过对矩阵$Q$进行秩$1$近似得到近似矩阵$\hat{Q}$并求解优化问题（\ref{eq4:Opt}），能够得到两个相容条件概率分布的闭式解：
 \begin{equation}
@@ -164,7 +164,7 @@ P^\dagger (\mathcal{G}_s|x_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(
 我们可以进一步根据公式（\ref{eq3:mmcp_trans}）获得统一的归一化相似性矩阵$\bar{W}$，
 \begin{equation}
 \begin{split}
-\bar{w}_{i,j} &= P(x_i,x_j) \\ &= P(x_i)P(x_i\rightarrow x_j)\\
+\bar{w}_{ij} &= P(x_i,x_j) \\ &= P(x_i)P(x_i\rightarrow x_j)\\
 &=P(x_i)\sum_s P(x_j|x_i, \mathcal{G}_s)P(\mathcal{G}_s|x_i), 
 \end{split}
 \label{eq4:uni_aff}
@@ -173,15 +173,15 @@ P^\dagger (\mathcal{G}_s|x_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(
 
 
 \subsection{约束传播中的样本不均衡}
-需要注意到的是，从数据相似性中采样到的成对约束可能会存在严重的数据分布不均衡问题。 正负约束之间的数量不均衡会在传播后被严重加剧。在本节中我们将从不均衡的二分类角度考虑约束传播问题。更具体地说，我们要将传播的相似性分为两类（即must-link和cannot-link），并控制它们之间的比率。
+需要注意到的是，从数据相似性中采样到的成对约束可能会存在严重的数据分布不均衡问题。 正负约束之间的数量不均衡会在传播后被严重加剧。在本节中我们将从不均衡的二分类角度考虑约束传播问题。更具体地说，我们将要传播的相似性分为两类（即must-link和cannot-link），并控制它们之间的比率。
 
 在不均衡学习上问题有大量的方法先后被提出，两种经典策略：重采样和代价敏感学习仍然在当前的研究工作中占据主导地位\cite{he2009learning,huang2016learning}。考虑到约束信息的稀缺性，我们仅将代价敏感策略引入我们的方法中以解决数据不均衡问题。最近的一些工作显示了在不均衡数据中采用代价敏感学习的优势\cite{shi2000normalized,DBLP:journals/corr/KhanBST15}。
 
 ILMCP方法将约束矩阵$Y$分解成两个矩阵的和的形式${Y} = {Y}_++{Y}_-$，其中${Y}_+$由$Y$中的所有正元素构成：
 \begin{equation}
-{y}_{+i,j} = 
+{y}_{+ij} = 
 \begin{cases}
-y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
+y_{ij},\quad\qquad\qquad&\text{if }y_{ij}>0;\\ 0,&\text{otherwise,}
 \end{cases},
 \end{equation}
 相应的${Y}_-$由$Y$中所有的负元素构成。
@@ -194,7 +194,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 \label{eq4:fpif2}
 \end{equation}
 
-通过对公式（\ref{eq4:fpif2}）的正元素部分增加权重参数$\alpha$，可以将该公式近似看作是一个代价敏感问题。基于文献\parencite{elkan2001foundations}中所提出的定理，如果参数$\alpha$被设置为must-link和cannot-link数量的比值，则可以近似解决样本不均衡的问题。事实上，最理想情况是这两种约束在采样得到的约束矩阵$Y$和转移概率矩阵$F$中有相同的数量比例，而不是令生成的转移概率矩阵$F$中两类约束数量近似相同以完全解决不均衡情况。因此，本方法对不均衡情况的加剧（$\alpha=1$）和缓解（$\alpha= \frac{\#\text{cannot-link}}{\#\text{must-link}}$）进行了折衷，最终选取权重参数为
+通过对公式（\ref{eq4:fpif2}）的正元素部分增加权重参数$\alpha$，可以将该公式近似看作是一个代价敏感问题。基于文献\parencite{elkan2001foundations}中所提出的定理，如果参数$\alpha$被设置为must-link和cannot-link数量的比值，则可以近似解决样本不均衡的问题。事实上，最理想情况是这两种约束在采样得到的约束矩阵$Y$和转移概率矩阵$F$中有相同的数量比例，而不是令生成的转移概率矩阵$F$中两类约束数量近似相同，以完全解决不均衡情况。因此，本方法对不均衡情况的加剧（$\alpha=1$）和缓解（$\alpha= \frac{\#\text{cannot-link}}{\#\text{must-link}}$）进行了折衷，最终选取权重参数为
 \begin{equation}
     \alpha = \sqrt{\frac{\#\text{cannot-link}}{\#\text{must-link}}}.
 \end{equation}
@@ -242,14 +242,14 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 \label{sec4:sigmoid}
 正如上一章所提及的，多数先前的工作利用传播结果$F$对原始的相似性矩阵进行调整。这会令最终获得的相似性矩阵依然非常稀疏。在ILMCP中，我们延续使用了MFL中采用的只通过传播结果$F$生成最终相似性矩阵的方法。最终相似性矩阵依然基于整流Sigmoid激活函数$W^*$生成：
 \begin{equation}
-{w}^*_{i,j} = 
+{w}^*_{ij} = 
 \begin{cases}
-\frac{1}{1+\text{exp}(-{F}_{i,j}/\sigma)}, \qquad &\text{if }{F}_{i,j}>0;\\
+\frac{1}{1+\text{exp}(-{F}_{ij}/\sigma)}, \qquad &\text{if }{F}_{ij}>0;\\
 0, &\text{otherwise, }
 \end{cases}
 \label{eq4:sig}
 \end{equation}
-其中$\sigma$为$F$所有元素绝对值的均值。需要注意的是，算法中所用来平衡正负约束数量的代价敏感加权过程是针对该Sigmoid相似性所设计的。至于先前工作中广泛采用的调整方法，由于高度依赖与原始相似性矩阵，数据均衡处理并不能有效改善聚类效果。
+其中$\sigma$为$F$所有元素绝对值的均值。需要注意的是，算法中所用来平衡正负约束数量的代价敏感加权过程是针对该Sigmoid相似性所设计的。至于先前工作中广泛采用的调整方法，由于高度依赖于原始相似性矩阵，数据均衡处理并不能有效改善聚类效果。
 
 最终，我们在矩阵$W^*$上通过谱聚类方法进行聚类\cite{von2007tutorial}，以产生用于评估的结果。算法\ref{alg4:ilmcp}对ILMCP算法的整体流程进行了总结。
 
@@ -347,7 +347,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
  在本节中，我们在两个公开数据集上设计了大量的实验，并将ILMCP与最先进的对照方法进行了比较。不同算法聚类性的比较结果能的表明了我们所提出ILMCP方法的优势。在本节中，我们对比了MFL方法、MMCP\cite{fu2011multi}方法，以及单模态输入的E$^2$CP\cite{lu2010constrained}方法的实验结果。此外，我们依然如上一章所述，采用没有约束传播过程的Normalized Cuts（NCuts）\cite{shi2000normalized}方法作为本节对比中的基线方法。除上述算法外，还有大量特定为2模态情况所设计的多模态约束传播算法，例如上一章中所介绍过的UCP\cite{lu2013unified}方法及MSCP\cite{lu2013exhaustive}也被用于本节中的聚类性能比较。
 
 \subsection{数据集描述}
-在本节中我们延续与前章中MFL方法相同的数据集选择，采用INRIA特征数据\cite{guillaumin2009tagprop}中的Corel 5k和PASCAL VOC'07数据集进行实验，以验证所提出的ILMCP在两个基准数据集上的性能。Corel 5k和PASCAL VOC'07数据集各自包含15种图像描述特征及1种文本描述特征，由于不同的图像描述特征的生成方式及提取到的语义信息等级差距极大，在本实验将该多模态多视图特征数据视为16种不同的独立模态进行处理。在本实验中，两个数据集中的训练集和测试集将分别被合并为一个整体数据集合用于约束聚类问题。在该情况下，Corel 5k数据集包含4,999个数据实例，PASCAL VOC'07数据集包含9,963个数据实例。在表格\ref{tab4:Data}中，我们总结了两个个基准数据集的统计量描述。
+在本节中我们延续与前章中MFL方法相同的数据集选择，采用INRIA特征数据\cite{guillaumin2009tagprop}中的Corel 5k和PASCAL VOC'07数据集进行实验，以验证所提出的ILMCP在两个基准数据集上的性能。Corel 5k和PASCAL VOC'07数据集各自包含15种图像描述特征及1种文本描述特征，由于不同的图像描述特征的生成方式及提取到的语义信息差距极大，在本实验将该多模态多视图特征数据视为16种不同的独立模态进行处理。在本实验中，两个数据集中的训练集和测试集将分别被合并为一个整体数据集合用于约束聚类问题。在该情况下，Corel 5k数据集包含4,999个数据实例，PASCAL VOC'07数据集包含9,963个数据实例。在表格\ref{tab4:Data}中，我们总结了两个基准数据集的统计量描述。
 
 \subsection{实验设置}
 
@@ -508,7 +508,7 @@ y_{i,j},\quad\qquad\qquad&\text{if }y_{i,j}>0;\\ 0,&\text{otherwise,}
 
 3种模态和16种模态情况下不同约束数量对应的聚类结果如图\ref{fig4:3view}及图\ref{fig4:16view}中所示。
 所采样出的用于传播的约束数量是Corel 5k和PASCAL VOC'07数据集中所有约束总数的$0.01\%$至$0.08\%$，间隔为$0.01\%$。我们在3种模态的实验中同样考虑了两种不同版本的MMCP方法。一种是原始的MMCP，其中我们依据文献\parencite{fu2011multi}中提出的3种模态的先验概率，将其设置为0.2、0.05和0.75。由于在实际情况中很难确定每个模态的重要性，所以另一个版本是采用相同权重的MMCP（MMCP-SW），在其中每个模态被分配了相同的先验概率。
-在对E$^2$CP的实验中我们分别对每一个模态独立地进行约束传播，然后通过线性组合将传播后的相似性矩阵进行融合。通过图\ref{fig4:3view}可以看到，在同时利用3种模态地情况下，所提出的ILMCP聚类性能明显超过其他对照算法。在图\ref{fig4:16view}中虽然少部分情况下MFL方法效果略优，但ILMCP的整体稳定性和聚类性能都有明显优势。
+在对E$^2$CP的实验中我们分别对每一个模态独立地进行约束传播，然后通过线性组合将传播后的相似性矩阵进行融合。通过图\ref{fig4:3view}可以看到，在同时利用3种模态的情况下，所提出的ILMCP聚类性能明显超过其他对照算法。在图\ref{fig4:16view}中虽然少部分情况下MFL方法效果略优，但ILMCP的整体稳定性和聚类性能都有明显优势。
 
 表\ref{tab4:modal}和表\ref{tab4:modal2}显示了不同模态数量情况下的更详细的聚类评估结果。当具有8种或16种模态时，通过手工方式确定每种模态的重要性变得几乎无法实现。 因此，在MMCP中我们令每个模态都具有相同的先验图概率$1/8$和$1/16$，即MMCP-SW。从定量结果可以看出，随着模态数量的增加，聚类的任务由于没有监督信息反而变得更加困难。同时ILMCP的优势也更加明显。
 
@@ -549,7 +549,7 @@ ILMCP所包含的相容条件概率分布重构（CCDR）、约束数据均衡�
 \end{table}
 
 \subsection{模态选择}
-由于所提出的方法可以用于衡量每个模态的重要性，我们可以将ILMCP视为模态选择的一个可行的引导信息。在该方法中，可以直接生成每个图的边缘概率$ P(\mathcal{G}_s)$。通过对没个模态对应的图的边缘概率进行排序，即可以剔除具有最小概率的模态。按照上述策略，我们可以对所有模态进行一一消除，并测试每一步后的聚类效果。图\ref{fig4:corel5k_1_10}显示了进行了模态选择后的聚类性能，其中我们根据图的边缘概率从小到大的顺序逐渐删除了16个模态中的15个。当我们开始根据其低边缘概率去除一些噪声较多的模态时，在数据集PASCAL VOC'07上的聚类性能会略有提高，但基本保持稳定，这是由于所提出的算法策略可会赋予噪声高的模态更低的概率，以免受噪声影响整体效果。当我们继续消除更多的模态时，某些包含判别性信息较多的模态将被删除，性能将会开始下降，逐渐失去多模态学习的优势。 图\ref{fig4:corel5k_1_10}中的结果说明了所提出的方法在大多数情况下均能达到预期的结果。
+由于所提出的方法可以用于衡量每个模态的重要性，我们可以将ILMCP视为模态选择的一个可行的引导信息。在该方法中，可以直接生成每个图的边缘概率$ P(\mathcal{G}_s)$。通过对每个模态对应的图的边缘概率进行排序，即可以剔除具有最小概率的模态。按照上述策略，我们可以对所有模态进行一一消除，并测试每一步后的聚类效果。图\ref{fig4:corel5k_1_10}显示了进行了模态选择后的聚类性能，其中我们根据图的边缘概率从小到大的顺序逐渐删除了16个模态中的15个。当我们开始根据其低边缘概率去除一些噪声较多的模态时，在数据集PASCAL VOC'07上的聚类性能会略有提高，但基本保持稳定，这是由于所提出的算法策略可会赋予噪声高的模态更低的概率，以免受噪声影响整体效果。当我们继续消除更多的模态时，某些包含判别性信息较多的模态将被删除，性能将会开始下降，逐渐失去多模态学习的优势。 图\ref{fig4:corel5k_1_10}中的结果说明了所提出的方法在大多数情况下均能达到预期的结果。
 
 \begin{figure}[t]
     \centering
