@@ -202,7 +202,7 @@ w(\mathcal{U}, \mathcal{K}, x',y') = \begin{cases}
 通常情况下，Non-local模块\cite{wang2018non}或Transformer\cite{vaswani2017attention}能够通过其中的自注意力机制（self-attention mechanism）\cite{lin2017structured}进行全局信息传播。但是，如果直接在自然图像抠像方法中采用原始的Non-local模块或图像Transformer，则会存在两个严重的缺陷。一方面，Non-local模块在计算代价很高，因此GCA Matting仅在特征尺寸较小的部分使用了与其相似的GCA机制。尽管为了减少计算量和内存消耗，有一些改进方法被提出\cite{zhu2019asymmetric}，但对图像抠图这种需要在大尺寸特征图上进行不透明度信息传播的问题而言，依然不可行。另一方面，Non-local模块和Transformer都在唯一的输入特征图上构建一个完全图，并且完全图中边的权重是由节点的特征生成。在图像抠图任务中，每个节点的特征是不透明度信息。在某些语义任务（例如视频分类\cite{wang2018non}，语义分割\cite{zhu2019asymmetric}或图像补全\cite{yu2018generative}）中，基于不同特征节点之间的相似性传播语义特征相对而言非常直观且可行，而在自然图像抠图任务中传播过程需要更多的无语义的外观信息，而不是语义信息。
 
 
-\begin{figure}[t]
+\begin{figure}[hp]
 	\centering
 	\bisubcaptionbox{局部HOP模块\label{fig5:blocka}}%
 					{local HOP block}
