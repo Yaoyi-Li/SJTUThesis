@@ -524,6 +524,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 为了评估这些方法的聚类性能，我们在实验中采用准确率（accuracy，ACC）和归一化互信息（normalized mutual information，NMI）作为聚类结果的性能测度。
 由于约束传播方法的性能在某种程度上取决于约束矩阵${Y}$的选择。我们在每个实验中生成多个约束矩阵，并在本节中报告算法在不同约束矩阵上的平均性能。
 我们在$k$-means阶段部署30次聚类，并选择类内和最小的聚类结果作为$k$-means阶段的结果。
+实验中，除RWC中的$\gamma $之外，所有参数都有相同的参数选择标准。在RWC和MFL方法中传播参数$ \eta $如同MMCP和E$^2$CP一样都为$ 0.25 $。我们将$k$-NN近邻数量设置为$ k = \mathrm{Round}(\mathrm{log}_2(\frac{n}{c}))$，其中$ n $是数据实例的数量，$ c $是类别数。谱聚类中的特征嵌入维数为$ c + 1 $。
 
 
 \begin{figure}[t]
@@ -574,8 +575,6 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用16个模态的聚类效果}{Clustering performance of 16 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints}
 	\label{fig3:cn_16}
 \end{figure} 
-
-实验中，除RWC中的$\gamma $之外，所有参数都有相同的参数选择标准。在RWC和MFL方法中传播参数$ \eta $如同MMCP和E$^2$CP一样都为$ 0.25 $。我们将$k$-NN近邻数量设置为$ k = \mathrm{Round}(\mathrm{log}_2(\frac{n}{c}))$，其中$ n $是数据实例的数量，$ c $是类别数。谱聚类中的特征嵌入维数为$ c + 1 $。
 
 与Corel 5k数据集不同，PASCAL VOC'07数据集是为目标检测而提出的多标签数据集。该数据集中的许多数据样本都在真实标签中被标注了多个类别。我们在PASCAL VOC'07数据集上采用了一个标注技巧，而不是多标签聚类方法，以使其评测指标与在Corel 5k上的聚类结果保持一致可比较。
 我们将每个多标签数据样本复制多次以生成与其标签数量一样多的相同样本。然后，为每个副本分配一个标签。因此，带有$ t $个标签的数据样本将变成$ t $个分别仅带有一个标签的不同样本，尽管这些样本都有相同的特征。使用这种多标签增强技巧后，性能测度ACC和NMI将始终小于1。因此，我们将评估结果除以理想化最优结果，以对评估分数进行归一化。
