@@ -449,30 +449,6 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \label{sec3:exp}
 在本节中，我们报告一些实验结果以证明所提出的MFL方法和基线方法RWC的有效性。我们在两个公开可用的数据集上进行了大量的约束聚类实验，展示了所提出的方法在不同的模态数量下的聚类性能及其模态选择能力。
 
-\subsection{数据集描述}
-在我们的实验中，我们采用了INRIA\footnote{\url{http://lear.inrialpes.fr/people/guillaumin/data.php}}发布的两个被广泛使用的多模态特征数据集\cite{guillaumin2009tagprop}：
-\begin{itemize}
-    \item {\textbf{Corel 5k}}。Corel 5k自然图像数据集是一个重要的基准数据集，在许多不同任务上被广泛采用。Corel 5k具有50个类别和4,999张自然图像。数据集中的每张图像都有一组关键字描述，这些关键词选取自一个包含260个单词的关键词词典。
-    \item {\textbf{PASCAL VOC'07}}。PASCAL VOC'07数据集\cite{pascal-voc-2007}包含20个图像类别和9,963张图像。据集中的所有图像均带有一个或多个类别标注。文字描述基于一个包含804个关键词的词典。
-\end{itemize}
-
-INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16中不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
-此外，为多模态半监督学习任务而创建的这些特征数据集也可以被视为多模态多视图数据集，在我们的实验中，我们将每种特征视为一个独立的模态。
-
-\subsection{对照算法介绍}
-我们将所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节种提及的目前先进的方法以及部分基线方法进行了比较。
-以下是我们在实验中所用于对比的算法：
-\begin{itemize}
-    \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
-    \item {\textbf{SW}}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
-    \item {\textbf{MSCP}}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
-    \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
-    \item {\textbf{MCMCP}}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
-    \item {\textbf{E$^2$CP}}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
-    \item {\textbf{NCuts}}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
-\end{itemize}
-
-\subsection{实验设置}
 \begin{table}[t]
 	\bicaption{在Corel 5k数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on Corel 5k.}
 	\label{tab3:modal_corel}
@@ -497,6 +473,30 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 		\bottomrule
 	\end{tabular}
 \end{table}
+\subsection{数据集描述}
+在我们的实验中，我们采用了INRIA\footnote{\url{http://lear.inrialpes.fr/people/guillaumin/data.php}}发布的两个被广泛使用的多模态特征数据集\cite{guillaumin2009tagprop}：
+\begin{itemize}
+    \item {\textbf{Corel 5k}}。Corel 5k自然图像数据集是一个重要的基准数据集，在许多不同任务上被广泛采用。Corel 5k具有50个类别和4,999张自然图像。数据集中的每张图像都有一组关键字描述，这些关键词选取自一个包含260个单词的关键词词典。
+    \item {\textbf{PASCAL VOC'07}}。PASCAL VOC'07数据集\cite{pascal-voc-2007}包含20个图像类别和9,963张图像。据集中的所有图像均带有一个或多个类别标注。文字描述基于一个包含804个关键词的词典。
+\end{itemize}
+
+INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16中不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
+此外，为多模态半监督学习任务而创建的这些特征数据集也可以被视为多模态多视图数据集，在我们的实验中，我们将每种特征视为一个独立的模态。
+
+\subsection{对照算法介绍}
+我们将所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节种提及的目前先进的方法以及部分基线方法进行了比较。
+以下是我们在实验中所用于对比的算法：
+\begin{itemize}
+    \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
+    \item {\textbf{SW}}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
+    \item {\textbf{MSCP}}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
+    \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
+    \item {\textbf{MCMCP}}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
+    \item {\textbf{E$^2$CP}}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
+    \item {\textbf{NCuts}}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
+\end{itemize}
+
+\subsection{实验设置}
 
 \begin{table}[t]
 	\bicaption{在PASCAL VOC'07数据集上采用3个、8个和16个模态的聚类性能}{Clustering performance of 3, 8 and 16 modalities on PASCAL VOC'07.}
