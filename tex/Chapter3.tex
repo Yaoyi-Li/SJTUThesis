@@ -150,11 +150,11 @@ P(x_i|\mathcal{G}_s) = \frac{d_{ii,s}}{v_s}.
 	\centering
 	\bisubcaptionbox{Corel 5k数据集}%
 					{Corel 5k dataset}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel_RWC_nmi.eps}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/corel_RWC_nmi.eps}
                     \label{fig3:rwc_corel}}
 	\bisubcaptionbox{PASCAL VOC'07数据集}%
 					{PASCAL VOC'07 dataset}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_RWC_nmi.eps}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/voc_RWC_nmi.eps}
                     \label{fig3:rwc_voc}}
 	\bicaption{在Corel 5k数据集和PASCAL VOC'07数据集上，超参数$\gamma$在不同的模态数量下对约束聚类效果的影响}{The influence of $ \gamma $ on Corel 5k and PASCAL VOC'07 datasets with different number of  modalities}
 	\label{fig3:rwc}
@@ -525,6 +525,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 为了评估这些方法的聚类性能，我们在实验中采用准确率（accuracy，ACC）和归一化互信息（normalized mutual information，NMI）作为聚类结果的性能测度。
 由于约束传播方法的性能在某种程度上取决于约束矩阵${Y}$的选择。我们在每个实验中生成多个约束矩阵，并在本节中报告算法在不同约束矩阵上的平均性能。
 我们在$k$-means阶段部署30次聚类，并选择类内和最小的聚类结果作为$k$-means阶段的结果。
+
 实验中，除RWC中的$\gamma $之外，所有参数都有相同的参数选择标准。在RWC和MFL方法中传播参数$ \eta $如同MMCP和E$^2$CP一样都为$ 0.25 $。我们将$k$-NN近邻数量设置为$ k = \mathrm{Round}(\mathrm{log}_2(\frac{n}{c}))$，其中$ n $是数据实例的数量，$ c $是类别数。谱聚类中的特征嵌入维数为$ c + 1 $。
 
 
@@ -532,21 +533,21 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\centering
 	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
 					{ACC on  Corel 5k}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_acc.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/corel5k_cn_acc.eps}}
                     \label{fig3:corel5k_cn_acc}
 	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
 					{NMI on  Corel 5k}
-                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_nmi.eps}}
+                    [0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/corel5k_cn_nmi.eps}}
                     \label{fig3:corel5k_cn_nmi}
                     
 	\centering
 	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
 					{ACC on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_acc.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/voc_cn_acc.eps}}
                     \label{fig3:voc_cn_acc}
 	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
 					{NMI on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_nmi.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/voc_cn_nmi.eps}}
                     \label{fig3:voc_cn_nmi}
 	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用3个模态的聚类效果}{Clustering performance of 3 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints}
 	\label{fig3:cn}
@@ -557,21 +558,21 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\centering
 	\bisubcaptionbox{Corel 5k数据集上的ACC结果}%
 					{ACC on  Corel 5k}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_acc.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/corel5k_cn_16_acc.eps}}
                     \label{fig3:corel5k_cn_16_acc}
 	\bisubcaptionbox{Corel 5k数据集上的NMI结果}%
 					{NMI on  Corel 5k}
-                    [0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/corel5k_cn_16_nmi.eps}}
+                    [0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/corel5k_cn_16_nmi.eps}}
                     \label{fig3:corel5k_cn_16_nmi}
                     
 	\centering
 	\bisubcaptionbox{PASCAL VOC'07数据集上的ACC结果}%
 					{ACC on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_acc.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/voc_cn_16_acc.eps}}
                     \label{fig3:voc_cn_16_acc}
 	\bisubcaptionbox{PASCAL VOC'07数据集上的NMI结果}%
 					{NMI on  PASCAL VOC'07}
-					[0.49\textwidth]{\includegraphics[width=0.49\textwidth]{chap3/voc_cn_16_nmi.eps}}
+					[0.495\textwidth]{\includegraphics[width=0.495\textwidth]{chap3/voc_cn_16_nmi.eps}}
                     \label{fig3:voc_cn_16_nmi}
 	\bicaption{在Corel 5k和PASCAL VOC'07数据集上，不同约束数量下采用16个模态的聚类效果}{Clustering performance of 16 modalities on Corel 5k and PASCAL VOC'07 with different numbers of  constraints}
 	\label{fig3:cn_16}
@@ -587,8 +588,8 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 
 \begin{figure}[t]
     \centering
-    \includegraphics[width=0.49\textwidth]{chap3/corel5k_voc_1_16_acc.eps}
-    \includegraphics[width=0.49\textwidth]{chap3/corel5k_voc_1_16_nmi.eps}
+    \includegraphics[width=0.495\textwidth]{chap3/corel5k_voc_1_16_acc.eps}
+    \includegraphics[width=0.495\textwidth]{chap3/corel5k_voc_1_16_nmi.eps}
 	\bicaption{在不同数量模态上的聚类结果}{Clutering results with different number of modalities}
 	\label{fig3:1_16}
 \end{figure} 
@@ -602,13 +603,13 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 
 \begin{figure}[t]
 	\centering
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{chap3/corel5k_1_16_acc_nmi_4.eps}
 		\caption{}
 		\label{fig3:1_16_acc_nmi_4}
 	\end{subfigure}
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{chap3/corel5k_1_16_acc_nmi_5.eps}
 		\caption{}
@@ -616,13 +617,13 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
     \end{subfigure}
     
 	\centering
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{chap3/corel5k_1_16_acc_nmi_6.eps}
 		\caption{}
 		\label{fig3:1_16_acc_nmi_6}
 	\end{subfigure}
-	\begin{subfigure}{0.49\textwidth}
+	\begin{subfigure}{0.495\textwidth}
 		\centering
 		\includegraphics[width=\textwidth]{chap3/corel5k_1_16_acc_nmi_7.eps}
 		\caption{}
