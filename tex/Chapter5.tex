@@ -82,7 +82,7 @@ Gabor损失通过用一系列Gabor滤波器代替了梯度损失中的梯度算�
 
 
 \begin{table}[t]
-	\bicaption{基线网络结构上的数据增广和不同损失函数的消融实验结果。定量实验结果测试于Composition-1k测试集。Aug：数据增广；Rec：alpha预测损失；Comp：合成损失；GradL：梯度损失；Gabor：Gabor损失}{Ablation study on data augmentation and different loss functions with baseline structure. The quantitative results are tested on Composition-1k testing set. Aug: data augmentation; Rec: alpha prediction loss; Comp: compositional loss; GradL: gradient loss; Gabor: Gabor loss.}
+	\bicaption{基线网络结构上的数据增广和不同损失函数的消融实验结果。定量实验结果测试于Composition-1k测试集。Aug：数据增广；Rec：alpha预测损失；Comp：合成损失；GradL：梯度损失；Gabor：Gabor损失}{Ablation study on data augmentation and different loss functions with baseline structure. The quantitative results are tested on Composition-1k testing set. Aug: data augmentation; Rec: alpha prediction loss; Comp: compositional loss; GradL: gradient loss; Gabor: Gabor loss}
 	\centering
 	\setlength{\tabcolsep}{8pt}
 	\begin{tabular}{ccccc|cc}  
@@ -437,7 +437,7 @@ g_{(i,j)} =& W_{out}(\sum_{(x,y)}a_{(i,j),(x,y)}f^O_{(x,y)}) + f^O_{(i,j)},
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{8pt}
-	\bicaption{在Composition-1k测试集上的数值结果。PosE表示HOP模块中的位置编码，TriE表示HOP模块中的trimap编码，RI表示随机插值增广。本章所提出的不同模型变种用斜体表示，最佳数值结果加粗表示}{The quantitative results on Composition-1k testing set. PosE stands for positional encoding, and TriE is for trimap encoding in HOP blocks and RI for random interpolation augmentation. The variants of our approaches are emphasized in italic. Best results are in boldface.}
+	\bicaption{在Composition-1k测试集上的数值结果。PosE表示HOP模块中的位置编码，TriE表示HOP模块中的trimap编码，RI表示随机插值增广。本章所提出的不同模型变种用斜体表示，最佳数值结果加粗表示}{The quantitative results on Composition-1k testing set. PosE stands for positional encoding, and TriE is for trimap encoding in HOP blocks and RI for random interpolation augmentation. The variants of our approaches are emphasized in italic. Best results are in boldface}
 	\centering
 	%    
 	\begin{tabular}{l|cccc}  
@@ -504,7 +504,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 
 \begin{table}[t]
 % \setlength{\tabcolsep}{2pt}
-\bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark.}
+\bicaption{所提出两种模型在alphamatting.com排行榜上的排名得分。S、L和U分别表示排行榜测试集中三种trimap图的类型，即小范围、大范围和用户标注}{Our scores on the alphamatting.com benchmark. S, L and U denote three trimap types, small, large and user, included in the benchmark}
 \footnotesize
 \centering
 \begin{tabular}{@{\;}l|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}|@{\;}c@{\;}|@{\;}c@{\;}c@{\;}c@{\;}}
@@ -538,7 +538,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 
 \begin{table}[t]
 	\setlength{\tabcolsep}{8pt}
-	\bicaption{在Composition-1k测试集上对于不同HOP模块的消融实验。HOP-Local-$k$表示解码器中第$k$个局部HOP模块}{Ablation study on different HOP blocks on the Composition-1k testing set. HOP-Local-$k$ indicates the $k$-th local HOP block in the decoder.}
+	\bicaption{在Composition-1k测试集上对于不同HOP模块的消融实验。HOP-Local-$k$表示解码器中第$k$个局部HOP模块}{Ablation study on different HOP blocks on the Composition-1k testing set. HOP-Local-$k$ indicates the $k$-th local HOP block in the decoder}
 	\centering
 	\begin{tabular}{cccc|ccc}  
 		\toprule
@@ -564,7 +564,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 
 \begin{table}[t]	
 	\setlength{\tabcolsep}{8pt}
-	\bicaption{在Composition-1k测试集上对位置编码、trimap编码和随机插值增广的消融实验}{Ablation study on positional encoding and trimap encoding and random interpolation augmentation on the Composition-1k testing set.}
+	\bicaption{在Composition-1k测试集上对位置编码、trimap编码和随机插值增广的消融实验}{Ablation study on positional encoding and trimap encoding and random interpolation augmentation on the Composition-1k testing set}
 	\centering
 	\begin{tabular}{l|ccc|cccc}  
 		\toprule
@@ -590,7 +590,7 @@ alphamatting.com数据集被用于alphamatting在线评测排行榜，其中包�
 
 \begin{table}[t]	
 	\setlength{\tabcolsep}{15pt}
-	\bicaption{在Composition-1k测试集上，局部HOP模块中不同的邻域窗口大小对应的数值评估结果}{The quantitative results of different neighborhood window sizes in local HOP block on the Composition-1k testing set. }
+	\bicaption{在Composition-1k测试集上，局部HOP模块中不同的邻域窗口大小对应的数值评估结果}{The quantitative results of different neighborhood window sizes in local HOP block on the Composition-1k testing set }
 	\centering
 	\small
 	\begin{tabular}{c|cccc}  

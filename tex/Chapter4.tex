@@ -66,8 +66,8 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
 \begin{equation}
 \begin{split}
 \mathop{\mathrm{min}}_{P(x_i|y_j), P(y_j|x_i)} & \quad \frac{1}{2 \alpha^2} \sum_{i,j}(P(x_i|y_j)-P^\dagger(x_i|y_j))^2 \\
-&+ \frac{1}{2 \beta^2} \sum_{i,j}(P(y_j|x_i)-P^\dagger(y_j|x_i))^2\\
-\mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{ij}\\
+&+ \frac{1}{2 \beta^2} \sum_{i,j}(P(y_j|x_i)-P^\dagger(y_j|x_i))^2,\\
+\mathrm{s.t.}\quad \quad \quad&\quad \frac{P(x_i|y_j)}{P(y_j|x_i)} = \hat{{q}}_{ij}.\\
 %             &\quad \;\sum_{s}P(x_i|\mathcal{G}_s) = 1\\
 %             &\quad \;\sum_{s}P(G_s|x_i) = 1
 \end{split}
@@ -289,7 +289,7 @@ y_{ij},\quad\qquad\qquad&\text{if }y_{ij}>0;\\ 0,&\text{otherwise,}
 
 \begin{table}[t]
     %		\small
-    \bicaption{在Corel 5k和PASCAL VOC'07数据集上使用2个模态（\textit{DenseSift} 和 \textit{tags}）情况下的聚类性能}{Clustering performance in the particular case of 2 modalities (\textit{DenseSift} and \textit{tags})  on Corel 5k and PASCAL VOC'07 with 20000 constraints.}
+    \bicaption{在Corel 5k和PASCAL VOC'07数据集上使用2个模态（\textit{DenseSift} 和 \textit{tags}）情况下的聚类性能}{Clustering performance in the particular case of 2 modalities (\textit{DenseSift} and \textit{tags})  on Corel 5k and PASCAL VOC'07 with 20000 constraints}
     \label{tab4:2case}
     \centering
 	\setlength{\tabcolsep}{15pt}
@@ -470,7 +470,7 @@ y_{ij},\quad\qquad\qquad&\text{if }y_{ij}>0;\\ 0,&\text{otherwise,}
 \begin{table}[t]
     %		\small
     \centering
-    \bicaption{E$^2$CP和ILMCP方法在Corel 5k 和 PASCAL VOC'07数据集上的聚类性能表现（ACC和NMI）}{Clustering performance (ACC and NMI) on of E$^2$CP and ILMCP on Corel 5k and PASCAL VOC'07.}
+    \bicaption{E$^2$CP和ILMCP方法在Corel 5k 和 PASCAL VOC'07数据集上的聚类性能表现（ACC和NMI）}{Clustering performance (ACC and NMI) on of E$^2$CP and ILMCP on Corel 5k and PASCAL VOC'07}
     %\begin{sc}
     \setlength{\tabcolsep}{15pt}
     \begin{tabular}{lcccccc}
