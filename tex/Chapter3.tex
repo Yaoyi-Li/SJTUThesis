@@ -223,9 +223,9 @@ s.t.\quad\;& \sum_s \alpha_s = 1;\\ & \; \alpha_s \ge 0.
 \label{eq3:baselineh}
 \end{equation}
 
-假设公式（\ref{eq3:baselinev}）中的权重系数为固定的常数向量，用$ {\alpha}^{old} $表示，而只通过优化问题（\ref{eq3:baselineh}）更新权重系数，即$\alpha$。通过将向量$\alpha$的值赋给$ {\alpha}^{old} $，可以迭代地求解权重系数和约束传播结果$F$。
+假设公式（\ref{eq3:baselinev}）中的权重系数为固定的常数向量，用$ {\alpha}^{old} $表示，而只通过优化问题（\ref{eq3:baselineh}）更新权重系数，即$\alpha$。通过将向量$\alpha$的值赋给$ {\alpha}^{old} $，可以迭代求解权重系数和约束传播结果$F$。
 
-在固定$\alpha$的情况下，先求解公式（\ref{eq3:baselinev}）并将其最优解作为$Y$带入公式（\ref{eq3:baselineh}），可求得$F$为
+在固定$\alpha$的情况下，先求解公式（\ref{eq3:baselinev}）并将其最优解作为$Y$代入公式（\ref{eq3:baselineh}），可求得$F$为
 \begin{equation}
 {F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1}, 
 \label{eq3:bl_F}
@@ -359,7 +359,7 @@ s.t.\quad &\alpha_s \ge 0.
 \end{split}
 \label{eq3:MFL_L}
 \end{equation}
-我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。算法\ref{alg3:MFL}对所提出的方法以及后处理进行了总结。
+我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。算法\ref{alg3:MFL}对所提出的方法以及后处理进行了总结。
 
 图\ref{fig3:cvg}展示了MFL方法的收敛曲线。可以发现，一旦在RWC方法和MFL方法中将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，仅需要考虑更新传播结果$F$和系数$\alpha$。下文将简要论述该迭代算法的收敛性。
 
@@ -387,7 +387,7 @@ w^*_{ij} =
 \end{equation}
 其中，$ w_{ij} $ 为数据实例 $ x_i $ 和$ x_j $之间的$k$-NN相似性。
 
-上述通过调整获得最终解的方法有两个不足之处。一方面，传播结果$ {F} $的信息未被充分利用。另一方面，求得的最终结果高度取决于原始相似性矩阵的质量。在我们的RWC和MFL方法中，我们放弃了原始的相似性矩阵，而采用整流Sigmoid激活函数从从$F$中直接生成统一的相似性矩阵：
+上述通过调整获得最终解的方法有两个不足之处。一方面，传播结果$ {F} $的信息未被充分利用。另一方面，求得的最终结果高度取决于原始相似性矩阵的质量。在我们的RWC和MFL方法中，我们放弃了原始的相似性矩阵，而采用整流Sigmoid激活函数从$F$中直接生成统一的相似性矩阵：
 \begin{equation}
 w^*_{ij} = 
 \begin{cases}
@@ -416,7 +416,7 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 \end{equation}
 
 公式（\ref{eq3:nnls}）是一个在凸约束$ \sum_s \alpha_s = 1 $下的非负最小二乘法（non-negative least square，NNLS）问题的特例。在我们所提出的MFL中可以观察到一些NNLS问题的特性。
-在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的稀疏性能，这一点在文献\parencite{slawski2011sparse}和文献\parencite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态是时我们的方法具有鲁棒表现的主要原因。
+在回归系数上的非负约束具有与显式的稀疏正则化项相似的效果，并且NNLS有与LASSO \cite{tibshirani1996regression}相当的稀疏性能，这一点在文献\parencite{slawski2011sparse}和文献\parencite{slawski2013non}中都有进一步的论证，并且在我们的实验中也能够观察到这种性质。随着我们为所提出的算法提供更多的模态信息，权重系数的稀疏性变得更加明显。当我们在8种不同模态上应用所提出的方法时，我们注意到大约有2或3个模态的权重为零。当我们使用的模态数达到16个时，将有大约一半的零权重。因此，MFL可以用作模态选择器，并且仅在候选列表中保留有帮助的模态。这也是当存在极多不同模态时我们的方法具有鲁棒表现的主要原因。
 
 \begin{table}[tb]
 	\bicaption{在Corel 5k和PASCAL VOC'07数据集上采用2种模态情况下的聚类性能}{Clustering performance of 2 modalities on Corel 5k and PASCAL VOC'07}
@@ -455,7 +455,7 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
     \item {\textbf{PASCAL VOC'07}}。PASCAL VOC'07数据集\cite{pascal-voc-2007}包含20个图像类别和9,963张图像。据集中的所有图像均带有一个或多个类别标注。文字描述基于一个包含804个关键词的词典。
 \end{itemize}
 
-INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16中不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
+INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16种不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
 此外，为多模态半监督学习任务而创建的这些特征数据集也可以被视为多模态多视图数据集，在我们的实验中，我们将每种特征视为一个独立的模态。
 
 \subsection{对照算法介绍}
@@ -485,7 +485,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 	\end{tabular}
 \end{table}
 
-我们将所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节种提及的目前先进的方法以及部分基线方法进行了比较。
+我们将所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节中提及的目前先进的方法以及部分基线方法进行了比较。
 以下是我们在实验中所用于对比的算法：
 \begin{itemize}
     \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
@@ -599,7 +599,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 
 正如在第\ref{sec3:dis}节中所论述的，我们在图\ref{fig3:1_16}中研究了所提出的MFL算法的模态选择能力。在本实验中，通过将每种模态依次增添到MFL方法，以测试在不同数量模态的情况下MFL的聚类性能。选择的顺序为\textit{DenseSift，Lab，tags，Hsv，Gist，RgbV3H1，HsvV3H1，HarrisSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseSiftV3H1，DenseHue，HarrisSift，HarrisHue，HarrisHueV3H1，Rgb}。可以注意到，当\textit{tags}特征被添加到MFL方法中时，聚类性能会显著地提高，然后效果近似达到饱和状态。这是因为文本描述特征本身包含了更多的具有判别性能力的信息，并且在\textit{tags}之后添加的特征只能提供一些冗余的信息。值得注意的是，每个模态都包含一些判别性信息以及噪声信息。如果新的模态无法提供非冗余信息，则额外引入的噪声将导致聚类性能下降。这也可以解释为什么大多数对照算法无法处理极其多种模态。与之相反的是，在MFL中，当不断增加模态数量时，权重的稀疏性将消除冗余的和不具有判别力的模态，从而保持鲁棒性。
 
-为了进一步证明MFL算法可以帮助进行模态选择，仿照图\ref{fig3:1_16}的实验设置，以图\ref{fig3:1_16_more}来展示所提出的MFL在Corel 5k数据集上对于四种不同添加顺序的模态序列的聚类结果。图\ref{fig3:1_16_acc_nmi_4}所展示的模态添加顺序为\textit{tags，HarrisHueV3H1，Gist，DenseSiftV3H1，RgbV3H1，HsvV3H1，LabV3H1，DenseHueV3H1，HarrisSiftH3V1，Hsv，HarrisHue，DenseSift，HarrisSift，Lab，DenseHue，Rgb}。图\ref{fig3:1_16_acc_nmi_5}显示了图\ref{fig3:1_16_acc_nmi_4}中添加顺序的逆序的聚类结果，该序列以\textit{HarrisHueV3H1}和\textit{tags}作为结尾。图\ref{fig3:1_16_acc_nmi_6}的模态顺序为\textit{tags，DenseSift，Gist，LabV3H1，RgbV3H1，HsvV3H1，DenseSiftV3H1，DenseHueV3H1，HarrisSiftV3H1，Hsv，HarrisHue，HarrisHueV3H1，DenseHue，Rgb，HarrisSift，Lab}。图\ref{fig3:1_16_acc_nmi_7}显示了图\ref{fig3:1_16_acc_nmi_6}中添加顺序的逆序的聚类结果，该序列以\textit{DenseSift}和\textit{tags}结尾。可以注意到，在以\textit{tags}起始的图\ref{fig3:1_16_acc_nmi_4}和图\ref{fig3:1_16_acc_nmi_6}中，仅使用一种或两种模态信息，所取得的聚类性能已经非常出色。这是因为\textit{tags}是文本描述信息，比视觉描述更具有判别性。在向序列中添加更多的模态后，由于来自视觉描述特征的附加信息，实验结果得到了$2\%$的性能改进。而在多数实际应用中，文本描述是一种从用户处收集代价较高的特征。我们更进一步地在图\ref{fig3:1_16_acc_nmi_5}和图\ref{fig3:1_16_acc_nmi_7}中展示以\textit{tags}作为结束地模态序列的聚类效果。尽管\textit{tags}能够产生可观的性能改进，但是聚类性能依然受益于持续增加的视觉特征数量。如果没有文本描述，在仅使用15种模态的情况下，所提出的MFL算法在仅用利用一种或两种模态的基础上，大约可提高$10\%$的聚类性能。
+为了进一步证明MFL算法可以帮助进行模态选择，仿照图\ref{fig3:1_16}的实验设置，以图\ref{fig3:1_16_more}来展示所提出的MFL在Corel 5k数据集上对于四种不同添加顺序的模态序列的聚类结果。图\ref{fig3:1_16_acc_nmi_4}所展示的模态添加顺序为\textit{tags，HarrisHueV3H1，Gist，DenseSiftV3H1，RgbV3H1，HsvV3H1，LabV3H1，DenseHueV3H1，HarrisSiftH3V1，Hsv，HarrisHue，DenseSift，HarrisSift，Lab，DenseHue，Rgb}。图\ref{fig3:1_16_acc_nmi_5}显示了图\ref{fig3:1_16_acc_nmi_4}中添加顺序的逆序的聚类结果，该序列以\textit{HarrisHueV3H1}和\textit{tags}作为结尾。图\ref{fig3:1_16_acc_nmi_6}的模态顺序为\textit{tags，DenseSift，Gist，LabV3H1，RgbV3H1，HsvV3H1，DenseSiftV3H1，DenseHueV3H1，HarrisSiftV3H1，Hsv，HarrisHue，HarrisHueV3H1，DenseHue，Rgb，HarrisSift，Lab}。图\ref{fig3:1_16_acc_nmi_7}显示了图\ref{fig3:1_16_acc_nmi_6}中添加顺序的逆序的聚类结果，该序列以\textit{DenseSift}和\textit{tags}结尾。可以注意到，在以\textit{tags}起始的图\ref{fig3:1_16_acc_nmi_4}和图\ref{fig3:1_16_acc_nmi_6}中，仅使用一种或两种模态信息，所取得的聚类性能已经非常出色。这是因为\textit{tags}是文本描述信息，比视觉描述更具有判别性。在向序列中添加更多的模态后，由于来自视觉描述特征的附加信息，实验结果得到了$2\%$的性能改进。而在多数实际应用中，文本描述是一种从用户处收集代价较高的特征。我们更进一步地在图\ref{fig3:1_16_acc_nmi_5}和图\ref{fig3:1_16_acc_nmi_7}中展示以\textit{tags}作为结束的模态序列的聚类效果。尽管\textit{tags}能够产生可观的性能改进，但是聚类性能依然受益于持续增加的视觉特征数量。如果没有文本描述，在仅使用15种模态的情况下，所提出的MFL算法在仅用一种或两种模态的基础上，大约可提高$10\%$的聚类性能。
 
 \begin{figure}[t]
 	\centering

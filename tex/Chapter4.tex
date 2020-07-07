@@ -39,7 +39,7 @@ ILMCP会根据从每个模态上学习到的实例级的鲁棒性，为约束传
     \sum_j\frac{1}{\sum_i {q}_{ij}} = \sum_j\frac{1}{\sum_i \frac{P(x_i)}{P(y_j)}} = \sum_j P(y_j) = 1.
     \end{equation}
 
-    相反地，假设$Q$为一个秩$1$矩阵成立且$\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{ij} ={ m}_i{n}_j$ 带入 $\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
+    相反地，假设$Q$为一个秩$1$矩阵成立且$\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$。则商矩阵$Q$可以被写为两个正向量$m$和$n$的乘积，即$Q = mn^T$。如果假设有$\sum_i  {m}_i = 1$，则能够通过上述分解得到唯一的向量组合$m$和$n$。将${q}_{ij} ={ m}_i{n}_j$ 代入 $\sum_j\frac{1}{\sum_i {q}_{ij}} = 1$中，可以得到$\sum_j\frac{1}{{n}_j} = 1$。
     从而可以通过两个正向量$m$和$n$构造两个离散边缘概率分布：
     \begin{equation}
     P(x_i) = {m}_i, \quad P(y_j) = \frac{1}{{n}_j}.
@@ -159,7 +159,7 @@ P^\dagger (\mathcal{G}_s|x_i) = \frac{c_s(i) c_{mod}(\mathcal{G}_s)}{\sum_i c_s(
 \begin{equation}
     P(x_i) = \frac{\hat{q}_{i,1}}{\sum_i\hat{q}_{i,1}}, \quad\quad P(\mathcal{G}_s) = \frac{\hat{q}_{1,s}}{\sum_s\hat{q}_{1,s}}.
 \end{equation}
-相应的根据$\bar{d}_{ii}=P(x_i)$可以计算出对角权重矩阵$\bar{D}$。
+相应地根据$\bar{d}_{ii}=P(x_i)$可以计算出对角权重矩阵$\bar{D}$。
 
 我们可以进一步根据公式（\ref{eq3:mmcp_trans}）获得统一的归一化相似性矩阵$\bar{W}$，
 \begin{equation}
