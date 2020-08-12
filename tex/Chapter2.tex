@@ -1,9 +1,10 @@
 % !TEX root = ../thesis.tex
 \chapter{基于自适应相似性矩阵的无监督度量学习}
-\section{引言}
-数据在数据空间中的空间分布学习一直是一个困难的问题。经验上，数据往往分布在高维空间的一个低维流形上，而不是完全随机分布。这导致了不同标签的数据之间可能有较近的欧氏距离。这种分布特性会对基于传统欧氏距离度量的分类或聚类算法的效果产生影响。一个较好的选择是构建一个能够保持数据对之间局部近邻结构的低维映射。
+数据在数据空间中的空间分布学习一直是一个困难的问题。经验上，数据往往分布在高维空间的一个低维流形上，而不是完全随机分布。这导致了不同标签的数据之间可能有较近的欧氏距离。这种分布特性会对基于传统欧氏距离度量的分类或聚类算法的效果产生影响。一个较好的选择是构建一个能够保持数据对之间局部近邻结构的低维映射。事实证明，度量学习相对于最近邻方法和其他依赖于距离的算法具有巨大优势。
+本章将在流形假设下对可以用于无监督度量学习的自适应相似性矩阵学习方法进行研究，并通过图像数据集上的聚类实验对所提出方法的性能进行验证。
 
-事实证明，度量学习相对于最近邻方法和其他依赖于距离的算法具有巨大优势。在早期的度量学习工作中，文献\parencite{xing2002distance}提出了利用辅助信息的度量学习的框架。这个学习框架的目的在于，通过学习一个距离度量矩阵缩小相似数据之间的距离并同时拉大不相似数据之间的距离。文献\parencite{weinberger2005distance}在支持向量机中将度量学习应用于基于铰链损失的凸优化分类问题。
+\section{引言}
+在早期的度量学习工作中，文献\parencite{xing2002distance}提出了利用辅助信息的度量学习的框架。这个学习框架的目的在于，通过学习一个距离度量矩阵缩小相似数据之间的距离并同时拉大不相似数据之间的距离。文献\parencite{weinberger2005distance}在支持向量机中将度量学习应用于基于铰链损失的凸优化分类问题。
 文献\parencite{davis2007information}提出了基于信息论观点的距离度量学习。他们的工作将度量学习问题表述为在距离函数约束下两个多元高斯分布之间的微分相对熵最小化。后续有大量的扩展度量学习的工作\cite{liu2015low,qian2015fine}以及全面的概述总结文献\cite{yang2006distance,kulis2012metric}被发表。
 
 另一方面，谱聚类方法是一类基于矩阵特征分解的聚类方法，该类方法在很多具有挑战性的真实世界数据集上表现出了非常优异的性能。在最近几十年间，一系列经典的谱聚类方法被提出，例如：多维标度法（Multidimensional Scaling，MDS）\cite{cox2000multidimensional}，局部线性嵌入（Local Linear Embedding，LLE）\cite{roweis2000nonlinear}，等距特征映射（Isomap）\cite{tenenbaum2000global}，拉普拉斯特征映射（Laplacian Eigenmaps）  \cite{belkin2001laplacian}和变种的谱聚类\cite{ng2002spectral}。
@@ -105,7 +106,7 @@
 
 令$z=(\|x_1\|_2^2, \|x_2\|_2^2, ... , \|x_n\|_2^2)^T$。此处，取拉格朗日乘子为$\lambda$，公式（\ref{eq2:XD}）在一维情况下的优化问题可以表示为
 \begin{equation}
-	\mathop{\mathrm{min}}\; z^Tpp^T\textbf{1}-\lambda (p^Tp-1)
+	\mathop{\mathrm{min}}\; z^Tpp^T\textbf{1}-\lambda (p^Tp-1).
 \end{equation}
 
 最终，最小化优化问题（\ref{eq2:XD}）可以被化简为求解问题
@@ -123,7 +124,7 @@
 \begin{equation}
 	\begin{split}
 		(XX^T)p = \lambda p
-		\Rightarrow {\bf1}^TXX^Tp = \lambda {\bf1}^Tp
+		\Rightarrow {\bf1}^TXX^Tp = \lambda {\bf1}^Tp.
 	\end{split}
 	\label{eq2:Solu}
 \end{equation}
@@ -159,7 +160,7 @@
 \end{equation}
 此处，$a$ 为矩阵$A$的一维情况，且$L+L_\Delta$是$k$-NN热力核$W$与中间态相似性矩阵$\Delta$的拉普拉斯矩阵的组合。投影向量$a$可通过求解特征分解问题的最小特征值得到：
 \begin{equation}
-	X^T(L-\Delta)Xa = \lambda a
+	X^T(L-\Delta)Xa = \lambda a.
 \end{equation}
 
 然后，为在给定$A$的情况下求解公式（\ref{eq2:AXLXA}）中的$L_\Delta$，我们依照对公式（\ref{eq2:XLX}）的变形，将相似性优化问题进行重写并引入线性投影矩阵$A$：
@@ -172,7 +173,7 @@
 \end{equation}
 这里$c=tr(A^TX^TLXA)$，并且我们假设最终自适应相似性矩阵为$\Delta = PP^T$。由于$X$为列零均值的列归一化矩阵，则$XA$同样为列零均值矩阵，特性$D_\Delta = \textbf{0}$依然成立。由此可知，公式（\ref{eq2:AXDXA-PXAAXP}）可化简为
 \begin{equation}
-	P = \mathop{\mathrm{arg\;max}}_{P^TP=I}\; tr(P^TXAA^TX^TP)
+	P = \mathop{\mathrm{arg\;max}}_{P^TP=I}\; tr(P^TXAA^TX^TP).
 	\label{eq2:PXAAXP}
 \end{equation}
 
@@ -210,7 +211,7 @@
 
 受到$k$-NN热力核构造思路的启发，我们对相似性矩阵$\Delta$中的全部元素根据强度大小进行降序排序，只保留其中的前$s$个元素。假设在稀疏化处理后，仅有类内数据点间的相似性被保留下来，不同类间的数据点相似性被删除。在这种情况下，我们考虑到参数$s$的大小应该与聚类的类数成反比，这可以使最终保留下来元素数量近似与图\ref{fig2:affMat}中所示的理想情况下元素数量保持固定比例。参数$s$的计算公式为：
 \begin{equation}
-	s = \lfloor \frac{n^2}{\alpha c}\rfloor
+	s = \lfloor \frac{n^2}{\alpha c}\rfloor,
 \end{equation}
 此处 $\lfloor \cdot\rfloor$为向下取整函数，$n^2$为矩阵$\Delta$中的元素总数量，$c$为聚类的类数，$\alpha$为一个可调的比例系数。
 
@@ -230,7 +231,7 @@
 
 对于计算中间态相似性矩阵中的第一次稀疏化处理，我们设置$\alpha$为$2.5$，对于计算最终自适应相似性矩阵中的第二次稀疏化，我们将$\alpha$设置为$5$。此处的$\alpha$通过参数搜索确定，并且能够在大多数数据集上给出稳定的表现。
 
-我们在算法\ref{alg2:AdaAM}中对我们所提出的AdaAM算法流程进行了总结。我们在算法实现中将降维后的维度$m$设置为与聚类的类数相同。
+我们在算法\ref{alg2:AdaAM}中对前文所提出的AdaAM算法中的核心计算流程进行了总结。我们在算法实现中将降维后的维度$m$设置为与聚类的类数相同。
 
 
 \section{实验结果}
@@ -400,7 +401,7 @@
 \end{figure} 
 在聚类效果评估中，我们通过将获得的聚类标签与数据集的真实标注进行比较，使用准确率（accuracy，Acc）来衡量性能。准确率定义如下：
 \begin{equation}
-	\mathrm{Acc} = \frac{1}{n}\sum^{n}_{i=1}\delta(p_i, map(q_i))
+	\mathrm{Acc} = \frac{1}{n}\sum^{n}_{i=1}\delta(p_i, map(q_i)),
 \end{equation}
 其中$n$为数据实例数量，$p_i$是数据$x_i$的预测标签，$q_i$为真实标签。当$x=y$时$\delta(x, y) = 1$，否则$\delta(x,y) = 0$。$map(q_i)$表示最佳匹配函数，该函数通过在预测出的类之间交换类标签实现，预测标签与真实标签的最佳匹配。
 

@@ -1,24 +1,25 @@
 % !TEX root = ../thesis.tex
 \chapter{基于相似性融合学习的多模态约束传播}
+在前一章中，本文研究了无监督情况下的数据相似性学习方法，本章将研究具有成对约束信息的多模态环境下聚类任务中的相似性学习。多模态是对应于单模态的一个概念，多模态表示对于每个被观察物体，都通过不同方式或不同角度对目标物体进行观察，并产生多类不同的描述信息。而成对约束信息，是半监督约束聚类中的一个重要概念。
+在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，表示两个数据是否有被观测到的必然联系，也称为必然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管其不能提供任何有关类别的明确信息，但可以从用户端通过高效的交互方式进行信息采集。
+本章针对多模态约束聚类这一应用问题，在多模态约束传播的框架下提出了特定的相似性学习方法，以使得在多模态问题环境下可以通过各模态内部相似性及约束信息学习生成统一的相似性矩阵。
+
 \section{引言}
 \label{sec3:intro} 
-在前一章中，我们研究了无监督情况下的数据相似性学习方法，本章将研究具有成对约束信息的多模态环境下聚类任务中的相似性学习。多模态是对应于单模态的一个概念，多模态表示对于每个被观察物体，都通过不同方式或不同角度对目标物体进行观察，并产生多类不同的描述信息。而成对约束信息，是半监督约束聚类中的一个重要概念。
-在约束聚类的任务中，两个对象是否属于同一聚类的信息通常由成对约束表示，表示两个数据是否有被观测到的必然联系，也称为必然连接（must-link）约束和必然不连接（cannot-link）约束。 成对约束是一种特别经济的辅助信息，尽管它不能提供任何有关类别的明确信息，但可以从用户那里通过高效的交互方式进行信息采集。
-
 在过去的十几年的时间里，成对约束已广泛用于约束聚类和度量学习问题中。Wagstaff 等人首先在他们的工作中将成对约束引入聚类问题\cite{wagstaff2000clustering,wagstaff2001constrained}。Xing等人提出了一个具有成对约束的距离度量学习框架\cite{xing2002distance}。度量学习中的一些后续工作也证明了成对约束的作用\cite{weinberger2005distance,davis2007information}。
 
-由于成对约束是一种特殊的弱监督信息，因此一些约束传播方法\cite{lu2008constrained,lu2010constrained,fu2011symmetric}陆续被提出以充分利用成对约束信息。Lu和Carreira-Perpinan在文献\parencite{lu2008constrained}中提出了Affinity Propagation（AP）算法，该算法通过借助高斯过程实现了约束传播。Lu和Ip在文献\parencite{lu2010constrained}中提出了Exhaustive and Efficient Constraint Propagation（E$^2$CP）方法。E$^2$CP算法在标签传播（label propagation）\cite{zhou2004learning}的学习框架下对成对约束信息进行传播，并且作者将约束信息的传播解释为半监督的二分类学习问题。作为能够有效利用辅助信息的一种有力工具，约束传播已经被广泛应用在半监督学习场景中。文献\parencite{jian2016interactive}提出了ACP Cut算法，以将用户所提供的交互式信息的特征传播到整个图像中，以用于个性化地图像分割。文献\parencite{han2016segmentation}提出了一种用于图像分割的高效的选择性约束传播方法，并且仅在图像的一个像素子集上执行约束传播。在实际应用中，由于观察到的真实信息数据的量很少，半监督学习方法经常会面临标注有缺陷的问题。Zhu等人设计了约束传播随机森林（Constraint Propagation Random Forest，COP-RF）算法\cite {zhu2016constrained}，该方法不仅能够应对由于有缺陷的标注数据产生的噪声约束，而且能够执行有效的稀疏化约束传播。文献\parencite{wang2016semi}利用成对约束传播的方法来提升半监督的非负矩阵分解的效果。Wu等人采用约束传播方法在初始化的约束信息中扩展增加更多的有用信息，以用于在视频中进行人脸的聚类和跟踪\cite{wu2017coupled}。
+由于成对约束是一种特殊的弱监督信息，因此一些约束传播方法\cite{lu2008constrained,lu2010constrained,fu2011symmetric}陆续被提出以充分利用成对约束信息。Lu和Carreira-Perpinan在文献\parencite{lu2008constrained}中提出了Affinity Propagation（AP）算法，该算法通过借助高斯过程实现了约束传播。Lu和Ip在文献\parencite{lu2010constrained}中提出了Exhaustive and Efficient Constraint Propagation（E$^2$CP）方法。E$^2$CP算法在标签传播（label propagation）\cite{zhou2004learning}的学习框架下对成对约束信息进行传播，并且作者将约束信息的传播解释为半监督的二分类学习问题。作为能够有效利用辅助信息的一种有力工具，约束传播已经被广泛应用在半监督学习场景中。文献\parencite{jian2016interactive}提出了ACP Cut算法，以将用户所提供的交互式信息的特征传播到整个图像中，以用于个性化的图像分割。文献\parencite{han2016segmentation}提出了一种用于图像分割的高效的选择性约束传播方法，并且仅在图像的一个像素子集上执行约束传播。在实际应用中，由于观察到的真实信息数据的量很少，半监督学习方法经常会面临标注有缺陷的问题。Zhu等人设计了约束传播随机森林（Constraint Propagation Random Forest，COP-RF）算法\cite {zhu2016constrained}，该方法不仅能够应对由于有缺陷的标注数据产生的噪声约束，而且能够执行有效的稀疏化约束传播。文献\parencite{wang2016semi}利用成对约束传播的方法来提升半监督的非负矩阵分解的效果。Wu等人采用约束传播方法在初始化的约束信息中扩展增加更多的有用信息，以用于在视频中进行人脸的聚类和跟踪\cite{wu2017coupled}。
 
-上述提到的约束传播方法全部是针对单模态数据集提出的。事实上，我们经常需要分析具有多模态多视图的数据集，例如文本描述和多种类型的图像特征。近年来，多模态数据的融合学习非常普遍，并且在例如多传感器系统、生物医学研究和环境研究等许多领域中有深入研究。不同模态之间的关联将为数据本身引入一种新形式的多样性。这些存在于不同的模态之间的信息交互的现象带来了新的约束类型，这种约束可以减少相应学习过程中的自由度\cite{lahat2015multimodal}。Yu等人指出，具有视觉和用户点击特征的多模态距离度量学习可以改善检索中的图像排序效果\cite{yu2017deep}。文献\parencite{kahou2016emonets}提出了EmoNets方法用于视频中的情绪识别，该EmoNets可以学习多种专家模型，每种模型仅关注一种模态。Poria等人研究了情感计算（affective computing）中的多模态融合，并制定了一种多模态情感分析框架，以实现在视频内容和其他不同模态信息中提取用户的情绪\cite{poria2017review,poria2017ensemble}。Shen等人提出了一种多模态抑郁字典学习（Multimodal Depressive Dictionary Learning，MDL）\cite{shen2017depression}方法，通过利用社交媒体中的情绪特征、用户资料特征及话题级别特征等不同模态的特征信息，以进行抑郁症检测。此外，高度类似于多模式数据融合的多视图数据融合也被广泛应用于许多实际问题的研究中，例如面部识别\cite{kan2016multi}和动作识别\cite{shao2016kernelized}。
+上述提到的约束传播方法全部是针对单模态数据集提出的。事实上，我们经常需要分析具有多模态多视图的数据集，例如文本描述和多种类型的图像特征。近年来，多模态数据的融合学习非常普遍，并且在例如多传感器系统、生物医学研究和环境研究等许多领域中有深入研究。不同模态之间的关联将为数据本身引入一种新形式的多样性。这些存在于不同的模态之间的信息交互的现象带来了新的约束类型，这种约束可以减少相应学习过程中的自由度\cite{lahat2015multimodal}。Yu等人指出，具有视觉和用户点击特征的多模态距离度量学习可以改善检索中的图像排序效果\cite{yu2017deep}。文献\parencite{kahou2016emonets}提出了EmoNets方法用于视频中的情绪识别，该EmoNets可以学习多种专家模型，每种模型仅关注一种模态。Poria等人研究了情感计算（affective computing）中的多模态融合，并制定了一种多模态情感分析框架，以实现在视频内容和其他不同模态信息中提取用户的情绪\cite{poria2017review,poria2017ensemble}。Shen等人提出了一种多模态抑郁字典学习（Multimodal Depressive Dictionary Learning，MDL）\cite{shen2017depression}方法，通过利用社交媒体中的情绪特征、用户资料特征及话题级别特征等不同模态的特征信息，以进行抑郁症检测。此外，高度类似于多模态数据融合的多视图数据融合也被广泛应用于许多实际问题的研究中，例如面部识别\cite{kan2016multi}和动作识别\cite{shao2016kernelized}。
 
 近几年，一些为解决多模态约束传播问题的方法被先后提出\cite{fu2011multi,fu2012modalities,lu2013unified,lu2013exhaustive}。但是，这种多模态约束传播方法中大多数都是为特殊情况而设计的，即只有两种不同的模态需要处理，例如Unified Constraint Propagation（UCP）\cite{lu2013unified}算法和Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}算法。经验上，我们经常可能会需要能够处理两种以上模态的算法，而上述方法在这种情况下是不适用的。
-尽管文献\parencite{fu2011multi}中提出的Multi-Modal Constraint Propagation（MMCP）方法对模态的数量没有限制，但是MMCP的学习需要有每种模态的先验知识作为数据输入。这意味着研究人员需要手动决定每种模式的重要性。当有数量比较多的模态需要处理时，这样的手动设置方案几乎是不可行的。但是，MMCP依然为多模态约束传播提供了一个通用的学习框架。文献\parencite{fu2012modalities}中提出的Multi-modal Constraint Propagation（MCMCP）方法在约束传播中引入了共识正则器，以迫使不同模态上的约束传播结果保持一致。
+尽管文献\parencite{fu2011multi}中提出的Multi-Modal Constraint Propagation（MMCP）方法对模态的数量没有限制，但是MMCP的学习需要有每种模态的先验知识作为数据输入。这意味着研究人员需要手动决定每种模态的重要性。当有数量比较多的模态需要处理时，这样的手动设置方案几乎是不可行的。但是，MMCP依然为多模态约束传播提供了一个通用的学习框架。文献\parencite{fu2012modalities}中提出的Multi-modal Constraint Propagation（MCMCP）方法在约束传播中引入了共识正则器，以迫使不同模态上的约束传播结果保持一致。
 
 多模态学习中普遍存在的一个挑战是如何实现模态融合并有效利用多种数据模态所提供的额外信息。在本章中，我们将注意力集中在利用数据所提供的少量监督信息进行相似性矩阵的融合学习上。在多模态的标签传播问题中，监督信息是每个对象的标签，需要通过融合不同模态的相似性矩阵，以估计标签扩散的结果。然而在约束传播和标签传播之间有着一定的差异。在多模态约束传播问题中，监督信息和传播得到的结果都是相似性信息，这使得从这些不同模态的成对约束中融合出一个好的相似性矩阵变得更加直观且合理。 因此，可以考虑在融合学习中充分利用多模态数据集中的成对约束，同时实现约束的传播和相似性矩阵融合的学习。
 
 在本章中，我们提出了一种新的用于约束传播的多模态融合学习方法（Multi-modal Fusion Learning，MFL）。MFL继承了MMCP方法所提出的多模态约束传播学习框架。我们首先将一种被广泛应用于多模态聚类和标签传播问题中的多模态融合方法引入到约束传播学习框架中，在本章中，该算法被视为基线方法。由于是通过从拉普拉斯正则化（Laplacian regularization）中学到的松弛后的权重系数构建此基线方法，因此该方法被称为松弛权重组合（Relaxed Weight Combination，RWC）。
 实验结果表明，RWC方法所学习的融合结果可能会深陷入一些判别性较差的模态而忽视高判别性的模态。
-受RWC方法的进一步启发，本章提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模式融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。所提出的MFL同时还可以作为模态选择器，NFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
+受RWC方法的进一步启发，本章提出的MFL方法在约束传播的过程中同时从约束传播和拉普拉斯正则化这两个优化目标中学习多模态融合。从数据中观察到的成对约束可以提供少量的证据以判断一个模态的信息是否有高判别性。同时，拉普拉斯正则化可以确保具有更一致的相似性矩阵的模态将受到足够多的重视。所提出的MFL同时还可以作为模态选择器，MFL能够自动消除没有帮助的模态，并维护一个相对稀疏的候选模态列表。
 
 \section{约束传播背景知识}
 在本节中我们首先将针对多模态约束传播对所用到的数学符号在前一章的基础上进行补充说明，然后简要回顾典型的单模态约束传播算法E$^2$CP\cite{lu2010constrained}和多模态约束传播算法MMCP\cite{fu2011multi}。
@@ -34,7 +35,7 @@ w_{ij} = \begin{cases} \mathrm{exp}(-\frac{\|x_{i,s}-x_{j,s}\|_{2}}{t}), \; &x_{
 0,&\mathrm{otherwise,}\end{cases}   
 \label{eq3:GaussKer}                              
 \end{equation}
-其中$\mathcal{N}_k(x_{i,s})$为数据$x_{i,s}$在根据第$s$模态信息得到的$k$个最近邻的集合。
+其中$\mathcal{N}_k(x_{i,s})$为数据$x_{i,s}$根据第$s$模态信息得到的$k$个最近邻的集合。
 
 模态$s$上的拉普拉斯矩阵$ {L}_s $定义为$ {L}_s={D}_s-{W}_s $，此处对角矩阵
 $ {D}_s \in \mathbb{R}^{n\times n}$ 通过相似性矩阵 $ {W}_s$ 构建且$ d_{ii,s} =\sum_i w_{ij,s}$\cite{chung1997spectral}。归一化图拉普拉斯矩阵 $ \hat{{L}} $定义为
@@ -59,7 +60,7 @@ E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问�
 观测到的约束信息被视为数据点对之间已知的关系二分类标签，其中must-link中元素作为正样本，cannot-link的元素为负样本。
 我们从公式（\ref{eq3:Y}）观察到，在矩阵$Y$中对应于数据$x_i$的第$i$列或第$i$行相似性与半监督问题的问题设置非常相似。其中$ 1 $ 和 $ -1 $为半监督问题中两个不同类的类标签，大量的$0$代表未观测到的需要预测的标签。利用相似性信息，这样的半监督问题可以通过标签传播\cite{zhou2004learning}解决。
 
-该方法进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。如果采用矩阵$F_v$表示竖直方向的传播，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
+该方法进一步定义约束传播的传播结果为矩阵$F$。在矩阵$Y$上的约束传播包含两个部分，即水平方向的传播和竖直方向的传播。如果采用矩阵$F_v$表示竖直方向的传播结果，则优化$F_v$的目标函数与文献\parencite{zhou2004learning}中的结论相似：
 \begin{equation}
 	\mathop{\mathrm{min}}_{{F}_v}\;\frac{1}{2}\eta\;\mathrm{tr}(({F}_v-{Y})^T({F}_v-{Y}))+\frac{1}{2}\mathrm{tr}({F}_v^T\hat{{L}}{F}_v), 
 \end{equation}
@@ -76,7 +77,7 @@ E$^2$CP算法通过将标签扩散引入相似性矩阵来解决约束传播问�
 
 如果将竖直方向传播的结果$F_v$作为水平方向传播中的初始化约束矩阵$Y$，即可实现两个方向的交替传播。则约束传播的结果矩阵$F$为
 \begin{equation}
-{F} = \eta^2(\eta{I}+\hat{{L}})^{-1}{Y}(\eta{I}+\hat{{L}})^{-1}
+{F} = \eta^2(\eta{I}+\hat{{L}})^{-1}{Y}(\eta{I}+\hat{{L}})^{-1}.
 \label{eq3:e2cp}
 \end{equation}
 
@@ -110,7 +111,7 @@ P(x_i|\mathcal{G}_s) = \frac{d_{ii,s}}{v_s}.
 \bar{{W}} = \sum_s P(\mathcal{G}_s)\bar{{W}}_s, 
 \label{eq3:unifiedW}
 \end{equation}
-以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{ii} = P(x_i) =\sum_i \bar{w}_{ij}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$
+以及相应的统一的对角权重矩阵$ \bar{{D}}$（其中$ \bar{d}_{ii} = P(x_i) =\sum_i \bar{w}_{ij}$）和拉普拉斯矩阵$ \bar{{L}} = \bar{{D}}-\bar{{W}}$。
 
 在该设定下的竖直方向传播的优化问题为
 \begin{equation}
@@ -198,7 +199,7 @@ L({\alpha})=\sum_s(\alpha_s)^\gamma{f}^T {\bar{{L}}}_s{f} - \lambda ( \sum_s \al
         \end{split}
     \end{equation}
 
-    根据公式（\ref{eq3:labelpro_L}）的约束条件$ \forall s \in \{1,\dots,m\}, \;\sum_s \alpha_s = 1$可知$ \exists s \in \{1,\dots,m\}, \;\alpha_s>0$，与假设产生矛盾，所以可知假设不成立，即有$\forall s \in \{1,\dots,m\}, \; \mu_s=0 $
+    根据公式（\ref{eq3:labelpro_L}）的约束条件$ \forall s \in \{1,\dots,m\}, \;\sum_s \alpha_s = 1$可知$ \exists s \in \{1,\dots,m\}, \;\alpha_s>0$，与假设产生矛盾，所以可知假设不成立，即有$\forall s \in \{1,\dots,m\}, \; \mu_s=0 $。
 \end{proof}
 
 将公式（\ref{eq3:labelpro_L_der}）代入约束条件 $ \sum_s \alpha_s=1 $ 可以得到
@@ -337,7 +338,7 @@ MFL方法的求解可以分解为两个子问题，并能够通过交替迭代�
 {F} = \eta^2(\eta\bar{{D}}+\bar{{L}})^{-1}\bar{{D}} {Y}\bar{{D}}(\eta\bar{{D}}+\bar{{L}})^{-1},
 \label{eq3:MFL_F}
 \end{equation}
-在其中$  \bar{{D}} = \sum_s \alpha_s  \bar{{D}}_s $ and $  \bar{{L}} = \sum_s \alpha_s \bar{{L}}_s $
+在其中$  \bar{{D}} = \sum_s \alpha_s  \bar{{D}}_s $ and $  \bar{{L}} = \sum_s \alpha_s \bar{{L}}_s $。
 
     \textbf{固定$F$求解$\alpha$}：
 
@@ -359,7 +360,7 @@ s.t.\quad &\alpha_s \ge 0.
 \end{split}
 \label{eq3:MFL_L}
 \end{equation}
-我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。算法\ref{alg3:MFL}对所提出的方法以及后处理进行了总结。
+我们采用了投影梯度法（gradient projection method）对公式（\ref{eq3:MFL_L}）中的子问题进行近似求解，然后更新乘子$ \lambda $ 和惩罚系数 $ \mu $，并重复迭代该过程\cite{nocedal2006numerical,conn1992lancelot}。算法\ref{alg3:MFL}对所提出的方法、其中的增广拉格朗日方法迭代求解步骤以及后处理进行了总结。
 
 图\ref{fig3:cvg}展示了MFL方法的收敛曲线。可以发现，一旦在RWC方法和MFL方法中将权重系数分解为$ {\alpha}^{old} $ 和 $ {\alpha} $两部分，$ {\alpha}^{old} $可以被看作为常数向量。然后，我们学习MMCP算法的做法，将水平方向约束传播目标函数（公式（\ref{eq3:baselineh}）和公式（\ref{eq3:MFL}））中的约束矩阵$Y$代换为竖直方向约束传播所求得的最优解。通过代换，仅需要考虑更新传播结果$F$和系数$\alpha$。下文将简要论述该迭代算法的收敛性。
 
@@ -488,7 +489,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
 我们将所提出的MFL和RWC算法和一些在第\ref{sec3:intro}节中提及的目前先进的方法以及部分基线方法进行了比较。
 以下是我们在实验中所用于对比的算法：
 \begin{itemize}
-    \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模式设置了同等的重要性。
+    \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模态设置了同等的重要性。
     \item {\textbf{SW}}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
     \item {\textbf{MSCP}}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
     \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
