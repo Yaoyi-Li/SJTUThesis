@@ -10,7 +10,7 @@
 
 由于成对约束是一种特殊的弱监督信息，因此一些约束传播方法\cite{lu2008constrained,lu2010constrained,fu2011symmetric}陆续被提出以充分利用成对约束信息。Lu和Carreira-Perpinan在文献\parencite{lu2008constrained}中提出了Affinity Propagation（AP）算法，该算法通过借助高斯过程实现了约束传播。Lu和Ip在文献\parencite{lu2010constrained}中提出了Exhaustive and Efficient Constraint Propagation（E$^2$CP）方法。E$^2$CP算法在标签传播（label propagation）\cite{zhou2004learning}的学习框架下对成对约束信息进行传播，并且作者将约束信息的传播解释为半监督的二分类学习问题。作为能够有效利用辅助信息的一种有力工具，约束传播已经被广泛应用在半监督学习场景中。文献\parencite{jian2016interactive}提出了ACP Cut算法，以将用户所提供的交互式信息的特征传播到整个图像中，以用于个性化的图像分割。文献\parencite{han2016segmentation}提出了一种用于图像分割的高效的选择性约束传播方法，并且仅在图像的一个像素子集上执行约束传播。在实际应用中，由于观察到的真实信息数据的量很少，半监督学习方法经常会面临标注有缺陷的问题。Zhu等人设计了约束传播随机森林（Constraint Propagation Random Forest，COP-RF）算法\cite {zhu2016constrained}，该方法不仅能够应对由于有缺陷的标注数据产生的噪声约束，而且能够执行有效的稀疏化约束传播。文献\parencite{wang2016semi}利用成对约束传播的方法来提升半监督的非负矩阵分解的效果。Wu等人采用约束传播方法在初始化的约束信息中扩展增加更多的有用信息，以用于在视频中进行人脸的聚类和跟踪\cite{wu2017coupled}。
 
-上述提到的约束传播方法全部是针对单模态数据集提出的。事实上，我们经常需要分析具有多模态多视图的数据集，例如文本描述和多种类型的图像特征。近年来，多模态数据的融合学习非常普遍，并且在例如多传感器系统、生物医学研究和环境研究等许多领域中有深入研究。不同模态之间的关联将为数据本身引入一种新形式的多样性。这些存在于不同的模态之间的信息交互的现象带来了新的约束类型，这种约束可以减少相应学习过程中的自由度\cite{lahat2015multimodal}。Yu等人指出，具有视觉和用户点击特征的多模态距离度量学习可以改善检索中的图像排序效果\cite{yu2017deep}。文献\parencite{kahou2016emonets}提出了EmoNets方法用于视频中的情绪识别，该EmoNets可以学习多种专家模型，每种模型仅关注一种模态。Poria等人研究了情感计算（affective computing）中的多模态融合，并制定了一种多模态情感分析框架，以实现在视频内容和其他不同模态信息中提取用户的情绪\cite{poria2017review,poria2017ensemble}。Shen等人提出了一种多模态抑郁字典学习（Multimodal Depressive Dictionary Learning，MDL）\cite{shen2017depression}方法，通过利用社交媒体中的情绪特征、用户资料特征及话题级别特征等不同模态的特征信息，以进行抑郁症检测。此外，高度类似于多模态数据融合的多视图数据融合也被广泛应用于许多实际问题的研究中，例如面部识别\cite{kan2016multi}和动作识别\cite{shao2016kernelized}。
+上述提到的约束传播方法全部是针对单模态数据集提出的。事实上，我们经常需要分析具有多视角多模态的数据集，例如文本描述和多种类型的图像特征。近年来，多模态数据的融合学习非常普遍，并且在例如多传感器系统、生物医学研究和环境研究等许多领域中有深入研究。不同模态之间的关联将为数据本身引入一种新形式的多样性。这些存在于不同的模态之间的信息交互的现象带来了新的约束类型，这种约束可以减少相应学习过程中的自由度\cite{lahat2015multimodal}。Yu等人指出，具有视觉和用户点击特征的多模态距离度量学习可以改善检索中的图像排序效果\cite{yu2017deep}。文献\parencite{kahou2016emonets}提出了EmoNets方法用于视频中的情绪识别，该EmoNets可以学习多种专家模型，每种模型仅关注一种模态。Poria等人研究了情感计算（affective computing）中的多模态融合，并制定了一种多模态情感分析框架，以实现在视频内容和其他不同模态信息中提取用户的情绪\cite{poria2017review,poria2017ensemble}。Shen等人提出了一种多模态抑郁字典学习（Multimodal Depressive Dictionary Learning，MDL）\cite{shen2017depression}方法，通过利用社交媒体中的情绪特征、用户资料特征及话题级别特征等不同模态的特征信息，以进行抑郁症检测。此外，高度类似于多模态数据融合的多视角数据融合也被广泛应用于许多实际问题的研究中，例如面部识别\cite{kan2016multi}和动作识别\cite{shao2016kernelized}。
 
 近几年，一些为解决多模态约束传播问题的方法被先后提出\cite{fu2011multi,fu2012modalities,lu2013unified,lu2013exhaustive}。但是，这种多模态约束传播方法中大多数都是为特殊情况而设计的，即只有两种不同的模态需要处理，例如Unified Constraint Propagation（UCP）\cite{lu2013unified}算法和Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}算法。经验上，我们经常可能会需要能够处理两种以上模态的算法，而上述方法在这种情况下是不适用的。
 尽管文献\parencite{fu2011multi}中提出的Multi-Modal Constraint Propagation（MMCP）方法对模态的数量没有限制，但是MMCP的学习需要有每种模态的先验知识作为数据输入。这意味着研究人员需要手动决定每种模态的重要性。当有数量比较多的模态需要处理时，这样的手动设置方案几乎是不可行的。但是，MMCP依然为多模态约束传播提供了一个通用的学习框架。文献\parencite{fu2012modalities}中提出的Multi-modal Constraint Propagation（MCMCP）方法在约束传播中引入了共识正则器，以迫使不同模态上的约束传播结果保持一致。
@@ -448,16 +448,16 @@ s.t.\quad& \sum_s \alpha_s = 1;\\ &\; \alpha_s \ge 0.
 
 \section{实验结果}
 \label{sec3:exp}
-在本节中，我们报告一些实验结果以证明所提出的MFL方法和基线方法RWC的有效性。我们在两个公开可用的数据集上进行了大量的约束聚类实验，展示了所提出的方法在不同的模态数量下的聚类性能及其模态选择能力。
+在本节中，我们报告一些实验结果以证明所提出的MFL方法和基线方法RWC的有效性。我们在两个公开可用的多视角多模态数据集上进行了大量的约束聚类实验，展示了所提出的方法在不同的模态数量下的聚类性能及其模态选择能力。
 \subsection{数据集描述}
-在我们的实验中，我们采用了INRIA\footnote{\url{http://lear.inrialpes.fr/people/guillaumin/data.php}}发布的两个被广泛使用的多模态特征数据集\cite{guillaumin2009tagprop}：
+在我们的实验中，我们采用了INRIA\footnote{\url{http://lear.inrialpes.fr/people/guillaumin/data.php}}发布的两个被广泛使用的多视角多模态特征数据集\cite{guillaumin2009tagprop}：
 \begin{itemize}
     \item {\textbf{Corel 5k}}。Corel 5k自然图像数据集是一个重要的基准数据集，在许多不同任务上被广泛采用。Corel 5k具有50个类别和4,999张自然图像。数据集中的每张图像都有一组关键字描述，这些关键词选取自一个包含260个单词的关键词词典。
     \item {\textbf{PASCAL VOC'07}}。PASCAL VOC'07数据集\cite{pascal-voc-2007}包含20个图像类别和9,963张图像。据集中的所有图像均带有一个或多个类别标注。文字描述基于一个包含804个关键词的词典。
 \end{itemize}
 
 INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数据集中的图像进行了相同标准的特征抽取，分别生成了一个多模态特征数据集。对于每一个数据集，INRIA特征中包含了16种不同的特征，其中包含了15种视觉特征（1种Gist特征，6种颜色直方图特征和8种词袋特征）：\textit{DenseSift，DenseSiftV3H1，HarrisSift，HarrisSiftV3H1，DenseHue，DenseHueV3H1，HarrisHue，HarrisHueV3H1，Rgb，RgbV3H1，Lab，LabV3H1，Hsv，HsvV3H1，Gist}。以及1种关键词表述特征：\textit{tag}。
-此外，为多模态半监督学习任务而创建的这些特征数据集也可以被视为多模态多视图数据集，在我们的实验中，我们将每种特征视为一个独立的模态。
+此外，为多模态半监督学习任务而创建的这些特征数据集可以被视为多视角多模态数据集，其中包含了文本与图像两种不同的模态，在图像下包含了不同视角的15种图像特征。由于在我们的实验中，一方面仅将提取后的特征作为实验输入，忽略了特征的实际模态来源，另一方面我们仅利用了通过数据特征所计算出的相似性矩阵，而未直接对特征本身进行利用，这导致在实验中不同模态与视角的数据特征在使用上不存在明显区别，可以等价对待。因此为便于表示，我们在本章与第四章中将实验数据中每种特征都假设为一个独立的模态，共计16种不同模态。
 
 \subsection{对照算法介绍}
 
@@ -492,7 +492,7 @@ INRIA特征数据集\cite{guillaumin2009tagprop}对Corel 5k和PASCAL VOC'07数�
     \item {\textbf{MMCP}}。正如在第\ref{sec3:intro}节中所提到的那样，由于在半监督聚类问题的设置中，很难手动确定每个模态的重要性。在我们的实验中，我们为MMCP\cite{fu2011multi}中的每个模态设置了同等的重要性。
     \item {\textbf{SW}}。SW（same weight）是本文提出的另一个基线方法，表示所有模态具有的权重相同。在SW中，我们删除了MFL中的权重学习步骤，并强制每个模态具有相同的权重。在我们的实验中，SW方法与MMCP算法相似。它们之间的唯一区别在于，SW采用了整流Sigmoid激活函数来生成最终的相似性矩阵，而MMCP采用了公式（\ref{eq3:refine}）中调整完善的方法。
     \item {\textbf{MSCP}}。Multi-Source Constraint Propagation（MSCP）\cite{lu2013exhaustive}方法专注于两种模态上的约束传播。在本节中，我们将在两种模态的情况下将我们的方法与MSCP进行比较。
-    \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了视图内和视图间的约束传播，这种方法同样是针对两种模态的情况所设计的。
+    \item {\textbf{UCP}}。Unified Constraint Propagation（UCP）\cite{lu2013unified}方法同时进行了模态内和模态间的约束传播，这种方法同样是针对两种特征的情况所设计的。
     \item {\textbf{MCMCP}}。Modalities Consensus for Multi-modal Constraint Propagation（MCMCP）\cite{fu2012modalities}方法通过迭代法求解约束传播问题。在每一行迭代中，MCMCP方法会在每一个模态上分别进行一次传播，这使得整个算法非常耗时。
     \item {\textbf{E$^2$CP}}。E$^2$CP\cite{lu2010constrained}方法是一个单模态约束传播方法，但我们依然将该方法引入我们的实验中作为一个基线方法。在我们的实验中，我们在每个模态上单独使用E$^2$CP，然后将算法在每个模态上生成的经传播调整完善后的相似性矩阵求平均，以此作为多模态的E$^2$CP方法结果。
     \item {\textbf{NCuts}}。在实验中，我们报告了没有传播过程而仅采用Normalized Cuts（NCuts）\cite{shi2000normalized}的聚类结果作为参考。在对NCuts算法进行实验时，我们用相同的权重对各模态的相似性矩阵取平均值。
